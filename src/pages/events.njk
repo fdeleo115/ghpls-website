@@ -20,7 +20,12 @@ permalink: /events/
     </div>
     <div class="schedule-list">
       {%- for event in collections.events %}
-      <div class="schedule-item">
+      <div class="schedule-item {% if event.data.photo %}schedule-item--has-photo{% endif %}">
+        {% if event.data.photo %}
+        <div class="schedule-photo">
+          <img src="{{ event.data.photo }}" alt="{{ event.data.title }}" style="object-position: {{ event.data.photoPosition or 'center' }};">
+        </div>
+        {% endif %}
         <div class="schedule-date">
           <div class="month">{{ event.data.date | monthShort }}</div>
           <div class="day">{{ event.data.date | dayNum }}</div>
@@ -50,13 +55,22 @@ permalink: /events/
       {%- for event in collections.pastEvents %}
       <div class="past-event-card">
         {% if event.data.photo %}
-        <img src="{{ event.data.photo }}" alt="{{ event.data.title }}" class="past-event-img">
+        <img src="{{ event.data.photo }}" alt="{{ event.data.title }}" class="past-event-img" style="object-position: {{ event.data.photoPosition or 'center' }};">
         {% endif %}
         <div class="past-event-info">
           <div class="past-event-date">{{ event.data.date | dateFormat }}</div>
           <h4>{{ event.data.title }}</h4>
           <p>{{ event.data.description }}</p>
         </div>
+        {% if event.data.extraPhotos %}
+        <div class="past-event-extras">
+          {%- for extra in event.data.extraPhotos %}
+          <div class="extra-photo" onclick="openLightbox('{{ extra.image }}', '{{ extra.caption or event.data.title }}')">
+            <img src="{{ extra.image }}" alt="{{ extra.caption or event.data.title }}" loading="lazy">
+          </div>
+          {%- endfor %}
+        </div>
+        {% endif %}
       </div>
       {%- endfor %}
       {%- if collections.pastEvents.length == 0 %}
@@ -65,3 +79,22 @@ permalink: /events/
     </div>
   </div>
 </section>
+
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-caption" class="lightbox-caption"></div>
+</div>
+<script>
+function openLightbox(src, caption) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-caption').textContent = caption;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>

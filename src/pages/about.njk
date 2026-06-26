@@ -55,7 +55,7 @@ permalink: /about/
       {%- for member in collections.team %}
       <div class="exec-card">
         {% if member.data.photo %}
-        <img src="{{ member.data.photo }}" alt="{{ member.data.name }}" class="avatar-img">
+        <img src="{{ member.data.photo }}" alt="{{ member.data.name }}" class="avatar-img" style="object-position: {{ member.data.photoPosition or 'center' }};">
         {% else %}
         <div class="avatar">{{ member.data.name[0] }}</div>
         {% endif %}

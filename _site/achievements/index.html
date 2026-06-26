@@ -7,6 +7,7 @@
   <link rel="icon" href="/assets/logo.jpg" type="image/jpeg">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
 
@@ -44,44 +45,56 @@
 <section>
   <div class="container">
     <div class="wins-grid">
-      <div class="win-card">
-        <div class="competition">HSFK Cup</div>
-        <div class="year">2026</div>
-        <div class="achievement">
-          <span class="badge">Finalists</span>
-          <span class="names">Kate Hilton &amp; Ava Gonsalves</span>
-        </div>
-        <div class="achievement">
-          <span class="badge">Semi-Finalists</span>
-          <span class="names">Francesco Deleo &amp; Christabell Zalwango</span>
-        </div>
-        <div class="achievement">
-          <span class="badge">Best Skeleton Arguments</span>
-          <span class="names">Francesco Deleo &amp; Christabell Zalwango</span>
-        </div>
-      </div>
-      <div class="win-card">
-        <div class="competition">Centre Block Cup</div>
-        <div class="year">2026</div>
-        <div class="achievement">
-          <span class="badge">Finalists</span>
-          <span class="names">Francesco Deleo &amp; Christabell Zalwango</span>
+      <div class="win-card ">
+        
+        <div class="win-card-content">
+          <div class="competition">HSFK Cup</div>
+          <div class="year">2026</div>
+          <div class="achievement">
+            <span class="badge">Finalists</span>
+            <span class="names">Kate Hilton &amp; Ava Gonsalves</span>
+          </div>
+          <div class="achievement">
+            <span class="badge">Semi-Finalists</span>
+            <span class="names">Francesco Deleo &amp; Christabell Zalwango</span>
+          </div>
+          <div class="achievement">
+            <span class="badge">Best Skeleton Arguments</span>
+            <span class="names">Francesco Deleo &amp; Christabell Zalwango</span>
+          </div>
         </div>
       </div>
-      <div class="win-card">
-        <div class="competition">Gryphons Cup</div>
-        <div class="year">2026</div>
-        <div class="achievement">
-          <span class="badge">Semi-Finalists</span>
-          <span class="names">Kate Hilton &amp; Ava Gonsalves</span>
+      <div class="win-card ">
+        
+        <div class="win-card-content">
+          <div class="competition">Centre Block Cup</div>
+          <div class="year">2026</div>
+          <div class="achievement">
+            <span class="badge">Finalists</span>
+            <span class="names">Francesco Deleo &amp; Christabell Zalwango</span>
+          </div>
         </div>
       </div>
-      <div class="win-card">
-        <div class="competition">U of T Cup</div>
-        <div class="year">2026</div>
-        <div class="achievement">
-          <span class="badge">Oral Advocate Award</span>
-          <span class="names">Ashon Vas</span>
+      <div class="win-card ">
+        
+        <div class="win-card-content">
+          <div class="competition">Gryphons Cup</div>
+          <div class="year">2026</div>
+          <div class="achievement">
+            <span class="badge">Semi-Finalists</span>
+            <span class="names">Kate Hilton &amp; Ava Gonsalves</span>
+          </div>
+        </div>
+      </div>
+      <div class="win-card ">
+        
+        <div class="win-card-content">
+          <div class="competition">U of T Cup</div>
+          <div class="year">2026</div>
+          <div class="achievement">
+            <span class="badge">Oral Advocate Award</span>
+            <span class="names">Ashon Vas</span>
+          </div>
         </div>
       </div>
     </div>
@@ -136,5 +149,16 @@ document.querySelectorAll('nav a').forEach(a => {
 });
 </script>
 
+<script>
+  if (window.netlifyIdentity) {
+    window.netlifyIdentity.on("init", function(user) {
+      if (!user) {
+        window.netlifyIdentity.on("login", function() {
+          document.location.href = "/admin/";
+        });
+      }
+    });
+  }
+</script>
 </body>
 </html>

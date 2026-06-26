@@ -16,15 +16,22 @@ permalink: /achievements/
   <div class="container">
     <div class="wins-grid">
       {%- for item in collections.achievements %}
-      <div class="win-card">
-        <div class="competition">{{ item.data.competition }}</div>
-        <div class="year">{{ item.data.year }}</div>
-        {%- for result in item.data.results %}
-        <div class="achievement">
-          <span class="badge">{{ result.award }}</span>
-          <span class="names">{{ result.recipients }}</span>
+      <div class="win-card {% if item.data.photo %}win-card--has-photo{% endif %}">
+        {% if item.data.photo %}
+        <div class="win-card-photo">
+          <img src="{{ item.data.photo }}" alt="{{ item.data.competition }}" style="object-fit: {{ item.data.photoSize or 'cover' }}; object-position: {{ item.data.photoPosition or 'center' }};">
         </div>
-        {%- endfor %}
+        {% endif %}
+        <div class="win-card-content">
+          <div class="competition">{{ item.data.competition }}</div>
+          <div class="year">{{ item.data.year }}</div>
+          {%- for result in item.data.results %}
+          <div class="achievement">
+            <span class="badge">{{ result.award }}</span>
+            <span class="names">{{ result.recipients }}</span>
+          </div>
+          {%- endfor %}
+        </div>
       </div>
       {%- endfor %}
     </div>

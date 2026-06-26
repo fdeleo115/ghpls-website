@@ -7,6 +7,7 @@
   <link rel="icon" href="/assets/logo.jpg" type="image/jpeg">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
 
@@ -48,7 +49,8 @@
       <div class="line"></div>
     </div>
     <div class="schedule-list">
-      <div class="schedule-item">
+      <div class="schedule-item ">
+        
         <div class="schedule-date">
           <div class="month">SEP</div>
           <div class="day">14</div>
@@ -60,7 +62,8 @@
           <div class="location">UofGH Campus</div>
         </div>
       </div>
-      <div class="schedule-item">
+      <div class="schedule-item ">
+        
         <div class="schedule-date">
           <div class="month">OCT</div>
           <div class="day">19</div>
@@ -90,10 +93,30 @@
           <h4>The GH Cup 2026</h4>
           <p>Our annual moot court competition brought together competitors and judges from across Ontario.</p>
         </div>
+        
       </div>
     </div>
   </div>
 </section>
+
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-caption" class="lightbox-caption"></div>
+</div>
+<script>
+function openLightbox(src, caption) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-caption').textContent = caption;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>
 
 </main>
 
@@ -143,5 +166,16 @@ document.querySelectorAll('nav a').forEach(a => {
 });
 </script>
 
+<script>
+  if (window.netlifyIdentity) {
+    window.netlifyIdentity.on("init", function(user) {
+      if (!user) {
+        window.netlifyIdentity.on("login", function() {
+          document.location.href = "/admin/";
+        });
+      }
+    });
+  }
+</script>
 </body>
 </html>

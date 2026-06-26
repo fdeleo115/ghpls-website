@@ -323,6 +323,32 @@ section { padding: 100px 0; }
 .contact-form textarea { min-height: 140px; resize: vertical; }
 .contact-form .btn { width: 100%; text-align: center; }
 
+/* WIN CARD WITH PHOTO */
+.win-card--has-photo { padding: 0; overflow: hidden; }
+.win-card-photo { width: 100%; height: 200px; overflow: hidden; }
+.win-card-photo img { width: 100%; height: 100%; object-fit: cover; }
+.win-card--has-photo .win-card-content { padding: 24px 32px 32px; }
+
+/* SCHEDULE ITEM WITH PHOTO */
+.schedule-item--has-photo { flex-wrap: wrap; }
+.schedule-photo { width: 100%; height: 180px; border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+.schedule-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+/* PAST EVENT EXTRA PHOTOS */
+.past-event-extras {
+  display: flex; gap: 8px; padding: 0 24px 24px; flex-wrap: wrap;
+}
+.extra-photo {
+  width: 80px; height: 80px; border-radius: 8px; overflow: hidden; cursor: pointer;
+}
+.extra-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+.extra-photo:hover img { transform: scale(1.1); }
+
+/* PHOTO GALLERY SIZES */
+.photo-wide { grid-column: span 2; }
+.photo-tall { grid-row: span 2; }
+.photo-large { grid-column: span 2; grid-row: span 2; }
+
 /* EMPTY STATE */
 .empty-state { text-align: center; color: var(--text-light); font-size: 1.05rem; padding: 40px 0; }
 .empty-state a { color: var(--peach); font-weight: 600; }

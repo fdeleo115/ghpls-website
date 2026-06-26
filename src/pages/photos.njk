@@ -16,8 +16,8 @@ permalink: /photos/
   <div class="container">
     <div class="photo-gallery">
       {%- for photo in collections.photos %}
-      <div class="photo-card" onclick="openLightbox('{{ photo.data.image }}', '{{ photo.data.title }}')">
-        <img src="{{ photo.data.image }}" alt="{{ photo.data.title }}" loading="lazy">
+      <div class="photo-card photo-{{ photo.data.size or 'normal' }}" onclick="openLightbox('{{ photo.data.image }}', '{{ photo.data.title }}')">
+        <img src="{{ photo.data.image }}" alt="{{ photo.data.title }}" loading="lazy" style="object-position: {{ photo.data.photoPosition or 'center' }};">
         <div class="photo-overlay">
           <h4>{{ photo.data.title }}</h4>
           {% if photo.data.date %}<span>{{ photo.data.date | dateFormat }}</span>{% endif %}

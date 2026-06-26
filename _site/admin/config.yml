@@ -23,6 +23,26 @@ collections:
         fields:
           - { label: "Award", name: "award", widget: "string", hint: "e.g. Finalists, Semi-Finalists, Best Oral Advocate" }
           - { label: "Recipients", name: "recipients", widget: "string", hint: "e.g. Kate Hilton & Ava Gonsalves" }
+      - { label: "Photo", name: "photo", widget: "image", required: false, hint: "Upload a photo from this competition" }
+      - label: "Photo Position"
+        name: "photoPosition"
+        widget: "select"
+        required: false
+        hint: "Choose which part of the photo to focus on"
+        options:
+          - { label: "Center (default)", value: "center" }
+          - { label: "Top", value: "top" }
+          - { label: "Bottom", value: "bottom" }
+          - { label: "Left", value: "left" }
+          - { label: "Right", value: "right" }
+      - label: "Photo Size"
+        name: "photoSize"
+        widget: "select"
+        required: false
+        hint: "How the photo fills its space"
+        options:
+          - { label: "Fill area (crop to fit)", value: "cover" }
+          - { label: "Show entire photo (may have gaps)", value: "contain" }
 
   - name: "events"
     label: "Upcoming Events"
@@ -37,6 +57,18 @@ collections:
       - { label: "Time", name: "time", widget: "string", hint: "e.g. 5:00 PM - 7:00 PM", required: false }
       - { label: "Location", name: "location", widget: "string", required: false }
       - { label: "Description", name: "description", widget: "text" }
+      - { label: "Photo", name: "photo", widget: "image", required: false, hint: "Upload a photo for this event" }
+      - label: "Photo Position"
+        name: "photoPosition"
+        widget: "select"
+        required: false
+        hint: "Choose which part of the photo to focus on"
+        options:
+          - { label: "Center (default)", value: "center" }
+          - { label: "Top", value: "top" }
+          - { label: "Bottom", value: "bottom" }
+          - { label: "Left", value: "left" }
+          - { label: "Right", value: "right" }
 
   - name: "past-events"
     label: "Past Events"
@@ -50,6 +82,25 @@ collections:
       - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
       - { label: "Description", name: "description", widget: "text" }
       - { label: "Photo", name: "photo", widget: "image", required: false, hint: "Upload a photo from this event" }
+      - label: "Photo Position"
+        name: "photoPosition"
+        widget: "select"
+        required: false
+        hint: "Choose which part of the photo to focus on"
+        options:
+          - { label: "Center (default)", value: "center" }
+          - { label: "Top", value: "top" }
+          - { label: "Bottom", value: "bottom" }
+          - { label: "Left", value: "left" }
+          - { label: "Right", value: "right" }
+      - label: "Extra Photos"
+        name: "extraPhotos"
+        widget: "list"
+        required: false
+        hint: "Add more photos from this event"
+        fields:
+          - { label: "Photo", name: "image", widget: "image" }
+          - { label: "Caption", name: "caption", widget: "string", required: false }
 
   - name: "photos"
     label: "Photo Gallery"
@@ -64,6 +115,27 @@ collections:
       - { label: "Photo", name: "image", widget: "image" }
       - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, required: false }
       - { label: "Category", name: "category", widget: "select", options: ["Competition", "Event", "Social", "Other"], required: false }
+      - label: "Photo Position"
+        name: "photoPosition"
+        widget: "select"
+        required: false
+        hint: "Choose which part of the photo to focus on in the gallery grid"
+        options:
+          - { label: "Center (default)", value: "center" }
+          - { label: "Top", value: "top" }
+          - { label: "Bottom", value: "bottom" }
+          - { label: "Left", value: "left" }
+          - { label: "Right", value: "right" }
+      - label: "Photo Size in Gallery"
+        name: "size"
+        widget: "select"
+        required: false
+        hint: "How big this photo appears in the gallery"
+        options:
+          - { label: "Normal", value: "normal" }
+          - { label: "Wide (spans 2 columns)", value: "wide" }
+          - { label: "Tall (spans 2 rows)", value: "tall" }
+          - { label: "Large (spans 2x2)", value: "large" }
 
   - name: "team"
     label: "Executive Team"
@@ -76,7 +148,16 @@ collections:
       - { label: "Name", name: "name", widget: "string" }
       - { label: "Role / Title", name: "role", widget: "string", hint: "e.g. President, Vice President" }
       - { label: "Display Order", name: "order", widget: "number", value_type: "int", hint: "1 = shown first, 2 = second, etc." }
-      - { label: "Photo", name: "photo", widget: "image", required: false, hint: "Upload a headshot (optional)" }
+      - { label: "Photo", name: "photo", widget: "image", required: false, hint: "Upload a headshot" }
+      - label: "Photo Position"
+        name: "photoPosition"
+        widget: "select"
+        required: false
+        hint: "If the face is cut off, try Top or Center"
+        options:
+          - { label: "Center (default)", value: "center" }
+          - { label: "Top (good for headshots)", value: "top" }
+          - { label: "Bottom", value: "bottom" }
 
   - name: "pages"
     label: "Page Content"
