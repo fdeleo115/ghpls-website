@@ -1,0 +1,10 @@
+# Cloudflare Worker config. The site is built by Eleventy into _site/ and
+# served as static assets; the Worker script (worker.js) only runs for the
+# GitHub-login routes (/api/auth, /api/callback).
+name = "ghpls-website"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+[assets]
+directory = "./_site"
+binding = "ASSETS"

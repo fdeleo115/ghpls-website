@@ -6,6 +6,7 @@
     "build": "npx @11ty/eleventy"
   },
   "devDependencies": {
-    "@11ty/eleventy": "^2.0.1"
+    "@11ty/eleventy": "^2.0.1",
+    "wrangler": "^3.99.0"
   }
 }
