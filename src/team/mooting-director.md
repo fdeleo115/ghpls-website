@@ -1,6 +1,6 @@
 ---
-name: TBD
-role: Director of Mooting
-order: 3
+name: Kate Hilton
+role: President
+order: 1
 photo: ""
 ---
