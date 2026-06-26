@@ -1,0 +1,52 @@
+---
+layout: base.njk
+pageTitle: Photos
+activePage: photos
+permalink: /photos/
+---
+
+<section class="page-header">
+  <div class="container">
+    <h1>Photos</h1>
+    <p>Highlights from our events, competitions, and community.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="photo-gallery">
+      {%- for photo in collections.photos %}
+      <div class="photo-card" onclick="openLightbox('{{ photo.data.image }}', '{{ photo.data.title }}')">
+        <img src="{{ photo.data.image }}" alt="{{ photo.data.title }}" loading="lazy">
+        <div class="photo-overlay">
+          <h4>{{ photo.data.title }}</h4>
+          {% if photo.data.date %}<span>{{ photo.data.date | dateFormat }}</span>{% endif %}
+        </div>
+      </div>
+      {%- endfor %}
+      {%- if collections.photos.length == 0 %}
+      <p class="empty-state">Photos will appear here as they're added. Check back soon!</p>
+      {%- endif %}
+    </div>
+  </div>
+</section>
+
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-caption" class="lightbox-caption"></div>
+</div>
+
+<script>
+function openLightbox(src, caption) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-caption').textContent = caption;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>

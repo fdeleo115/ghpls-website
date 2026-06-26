@@ -1,0 +1,67 @@
+---
+layout: base.njk
+pageTitle: Events
+activePage: events
+permalink: /events/
+---
+
+<section class="page-header">
+  <div class="container">
+    <h1>Events</h1>
+    <p>Stay up to date with our upcoming events and workshops.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-header">
+      <h2>Upcoming Events</h2>
+      <div class="line"></div>
+    </div>
+    <div class="schedule-list">
+      {%- for event in collections.events %}
+      <div class="schedule-item">
+        <div class="schedule-date">
+          <div class="month">{{ event.data.date | monthShort }}</div>
+          <div class="day">{{ event.data.date | dayNum }}</div>
+        </div>
+        <div class="schedule-info">
+          <h4>{{ event.data.title }}</h4>
+          <p>{{ event.data.description }}</p>
+          {% if event.data.time %}<div class="time">{{ event.data.time }}</div>{% endif %}
+          {% if event.data.location %}<div class="location">{{ event.data.location }}</div>{% endif %}
+        </div>
+      </div>
+      {%- endfor %}
+      {%- if collections.events.length == 0 %}
+      <p class="empty-state">No upcoming events scheduled. Follow us on <a href="{{ site.instagram }}">Instagram</a> for announcements.</p>
+      {%- endif %}
+    </div>
+  </div>
+</section>
+
+<section class="bg-cream">
+  <div class="container">
+    <div class="section-header">
+      <h2>Past Events</h2>
+      <div class="line"></div>
+    </div>
+    <div class="past-events-grid">
+      {%- for event in collections.pastEvents %}
+      <div class="past-event-card">
+        {% if event.data.photo %}
+        <img src="{{ event.data.photo }}" alt="{{ event.data.title }}" class="past-event-img">
+        {% endif %}
+        <div class="past-event-info">
+          <div class="past-event-date">{{ event.data.date | dateFormat }}</div>
+          <h4>{{ event.data.title }}</h4>
+          <p>{{ event.data.description }}</p>
+        </div>
+      </div>
+      {%- endfor %}
+      {%- if collections.pastEvents.length == 0 %}
+      <p class="empty-state">Past events will appear here as they're added.</p>
+      {%- endif %}
+    </div>
+  </div>
+</section>

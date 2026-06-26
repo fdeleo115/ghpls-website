@@ -1,0 +1,32 @@
+---
+layout: base.njk
+pageTitle: Achievements
+activePage: achievements
+permalink: /achievements/
+---
+
+<section class="page-header">
+  <div class="container">
+    <h1>Competition Achievements</h1>
+    <p>Our members have represented Guelph-Humber with distinction at moot competitions across the country.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="wins-grid">
+      {%- for item in collections.achievements %}
+      <div class="win-card">
+        <div class="competition">{{ item.data.competition }}</div>
+        <div class="year">{{ item.data.year }}</div>
+        {%- for result in item.data.results %}
+        <div class="achievement">
+          <span class="badge">{{ result.award }}</span>
+          <span class="names">{{ result.recipients }}</span>
+        </div>
+        {%- endfor %}
+      </div>
+      {%- endfor %}
+    </div>
+  </div>
+</section>

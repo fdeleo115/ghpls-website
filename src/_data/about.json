@@ -1,0 +1,24 @@
+{
+  "mission": "The Guelph-Humber Pre-Law Society is dedicated to fostering interest in law and the legal profession among students at the University of Guelph-Humber. We provide opportunities for students to develop advocacy skills, explore legal careers, and build a community of like-minded peers.",
+  "advocacy": "We prepare and send teams to competitive moot competitions across Canada, developing oral and written advocacy skills.",
+  "community": "We connect students with shared interests in law, justice, and public policy through events, panels, and networking opportunities.",
+  "education": "We host workshops, guest lectures, and study sessions to help students understand the path to law school and legal careers.",
+  "faq": [
+    {
+      "question": "What is mooting?",
+      "answer": "Mooting is a simulated court proceeding where participants argue a legal case before a panel of judges. It develops skills in legal research, written advocacy, and oral presentation. Think of it as a debate, but structured around a legal dispute with formal court procedures."
+    },
+    {
+      "question": "Do I need to be in a law-related program to join?",
+      "answer": "Not at all. The Pre-Law Society welcomes students from all programs at the University of Guelph-Humber. Whether you're considering law school or simply interested in legal advocacy, there's a place for you here."
+    },
+    {
+      "question": "How do I join the mooting team?",
+      "answer": "Tryouts are typically held early in the fall semester. No prior mooting experience is required. We provide training and mentorship to help you develop your skills. Follow our Instagram or reach out through the contact form to stay informed about tryout dates."
+    },
+    {
+      "question": "Are there membership fees?",
+      "answer": "Please contact us directly for current information about membership. We strive to keep involvement accessible to all students."
+    }
+  ]
+}

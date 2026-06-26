@@ -1,0 +1,124 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "assets/uploads"
+public_folder: "/assets/uploads"
+
+collections:
+  - name: "achievements"
+    label: "Achievements"
+    label_singular: "Achievement"
+    description: "Add or edit competition results here."
+    folder: "src/achievements"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Competition Name", name: "competition", widget: "string", hint: "e.g. HSFK Cup, Centre Block Cup" }
+      - { label: "Year", name: "year", widget: "number", value_type: "int" }
+      - label: "Results"
+        name: "results"
+        widget: "list"
+        hint: "Add each award won at this competition"
+        fields:
+          - { label: "Award", name: "award", widget: "string", hint: "e.g. Finalists, Semi-Finalists, Best Oral Advocate" }
+          - { label: "Recipients", name: "recipients", widget: "string", hint: "e.g. Kate Hilton & Ava Gonsalves" }
+
+  - name: "events"
+    label: "Upcoming Events"
+    label_singular: "Event"
+    description: "Add upcoming events here. Move them to Past Events once they're done."
+    folder: "src/events"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Event Name", name: "title", widget: "string" }
+      - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
+      - { label: "Time", name: "time", widget: "string", hint: "e.g. 5:00 PM - 7:00 PM", required: false }
+      - { label: "Location", name: "location", widget: "string", required: false }
+      - { label: "Description", name: "description", widget: "text" }
+
+  - name: "past-events"
+    label: "Past Events"
+    label_singular: "Past Event"
+    description: "Record of past events. You can add photos from the event."
+    folder: "src/past-events"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Event Name", name: "title", widget: "string" }
+      - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "Photo", name: "photo", widget: "image", required: false, hint: "Upload a photo from this event" }
+
+  - name: "photos"
+    label: "Photo Gallery"
+    label_singular: "Photo"
+    description: "Upload photos to the gallery. They show up on the Photos page."
+    folder: "src/photos"
+    create: true
+    slug: "{{slug}}"
+    extension: "md"
+    fields:
+      - { label: "Title / Caption", name: "title", widget: "string", hint: "A short caption for the photo" }
+      - { label: "Photo", name: "image", widget: "image" }
+      - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, required: false }
+      - { label: "Category", name: "category", widget: "select", options: ["Competition", "Event", "Social", "Other"], required: false }
+
+  - name: "team"
+    label: "Executive Team"
+    label_singular: "Team Member"
+    description: "Add or update exec team members. They appear on the About page."
+    folder: "src/team"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Name", name: "name", widget: "string" }
+      - { label: "Role / Title", name: "role", widget: "string", hint: "e.g. President, Vice President" }
+      - { label: "Display Order", name: "order", widget: "number", value_type: "int", hint: "1 = shown first, 2 = second, etc." }
+      - { label: "Photo", name: "photo", widget: "image", required: false, hint: "Upload a headshot (optional)" }
+
+  - name: "pages"
+    label: "Page Content"
+    description: "Edit the text content on each page."
+    files:
+      - label: "Site Settings"
+        name: "site-settings"
+        file: "src/_data/site.json"
+        fields:
+          - { label: "Site Title", name: "title", widget: "string" }
+          - { label: "Short Title (nav bar)", name: "shortTitle", widget: "string" }
+          - { label: "Site Description", name: "description", widget: "text", hint: "Shows on the homepage and footer" }
+          - { label: "Instagram URL", name: "instagram", widget: "string" }
+          - { label: "LinkedIn URL", name: "linkedin", widget: "string" }
+          - { label: "Contact Email", name: "email", widget: "string", required: false }
+
+      - label: "About Page"
+        name: "about-page"
+        file: "src/_data/about.json"
+        fields:
+          - { label: "Mission Statement", name: "mission", widget: "text", hint: "The main mission paragraph at the top of the About page" }
+          - { label: "Advocacy & Mooting Description", name: "advocacy", widget: "text" }
+          - { label: "Community Description", name: "community", widget: "text" }
+          - { label: "Education Description", name: "education", widget: "text" }
+          - label: "FAQ"
+            name: "faq"
+            widget: "list"
+            hint: "Add, edit, or reorder frequently asked questions"
+            fields:
+              - { label: "Question", name: "question", widget: "string" }
+              - { label: "Answer", name: "answer", widget: "text" }
+
+      - label: "GH Cup Page"
+        name: "ghcup-page"
+        file: "src/_data/ghcup.json"
+        fields:
+          - { label: "Year", name: "year", widget: "string" }
+          - { label: "Headline", name: "headline", widget: "string", hint: "e.g. The GH Cup 2026" }
+          - { label: "Short Description", name: "description", widget: "text", hint: "The intro paragraph in the banner" }
+          - { label: "About Section", name: "about", widget: "text", hint: "The longer description below. Use a blank line between paragraphs." }
+          - label: "How It Works Steps"
+            name: "howItWorks"
+            widget: "list"
+            field: { label: "Step", name: "step", widget: "string" }
+          - { label: "Banner Photo", name: "photo", widget: "image", required: false, hint: "Optional photo for the GH Cup banner" }

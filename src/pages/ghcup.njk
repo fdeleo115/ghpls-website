@@ -1,0 +1,74 @@
+---
+layout: base.njk
+pageTitle: The GH Cup
+activePage: ghcup
+permalink: /ghcup/
+---
+
+<section class="page-header">
+  <div class="container">
+    <h1>The GH Cup</h1>
+    <p>Our flagship annual moot court competition.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="ghcup-hero">
+      {% if ghcup.photo %}
+      <img src="{{ ghcup.photo }}" alt="The GH Cup" style="max-width:200px; border-radius:50%; margin-bottom:24px;">
+      {% endif %}
+      <h3>{{ ghcup.headline }}</h3>
+      <p>{{ ghcup.description }}</p>
+      <a href="/contact/" class="btn btn-primary">Stay Updated</a>
+    </div>
+    <div class="ghcup-features">
+      <div class="ghcup-feature">
+        <h4>Compete</h4>
+        <p>Test your advocacy skills against teams from universities across the province in a structured moot format.</p>
+      </div>
+      <div class="ghcup-feature">
+        <h4>Judge</h4>
+        <p>Law students, lawyers, and legal professionals are invited to volunteer as judges and provide feedback.</p>
+      </div>
+      <div class="ghcup-feature">
+        <h4>Network</h4>
+        <p>Connect with peers, mentors, and legal professionals in a competitive yet collaborative environment.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bg-cream">
+  <div class="container">
+    <div class="section-header">
+      <h2>What is The GH Cup?</h2>
+      <div class="line"></div>
+    </div>
+    <div class="content-block">
+      <p>{{ ghcup.about | replace("\n\n", "</p><p>") | safe }}</p>
+      <h3>How It Works</h3>
+      <ul>
+        {%- for step in ghcup.howItWorks %}
+        <li>{{ step }}</li>
+        {%- endfor %}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-header">
+      <h2>Sponsors & Partners</h2>
+      <p>We're grateful for the support that makes The GH Cup possible.</p>
+      <div class="line"></div>
+    </div>
+    <div class="sponsors-row">
+      <div class="sponsor-slot">Sponsor Logo</div>
+      <div class="sponsor-slot">Sponsor Logo</div>
+      <div class="sponsor-slot">Sponsor Logo</div>
+    </div>
+    <p style="text-align:center; margin-top:32px; color:var(--text-light);">Interested in sponsoring? <a href="/contact/" style="color:var(--peach); font-weight:600;">Get in touch</a></p>
+  </div>
+</section>

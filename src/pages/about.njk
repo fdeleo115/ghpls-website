@@ -1,0 +1,85 @@
+---
+layout: base.njk
+pageTitle: About
+activePage: about
+permalink: /about/
+---
+
+<section class="page-header">
+  <div class="container">
+    <h1>About Us</h1>
+    <p>Learn about the Guelph-Humber Pre-Law Society and our mission.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="content-block">
+      <h2>Our Mission</h2>
+      <p>{{ about.mission }}</p>
+    </div>
+    <div class="mission-grid">
+      <div class="mission-card">
+        <div class="icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3>Advocacy & Mooting</h3>
+        <p>{{ about.advocacy }}</p>
+      </div>
+      <div class="mission-card">
+        <div class="icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Community</h3>
+        <p>{{ about.community }}</p>
+      </div>
+      <div class="mission-card">
+        <div class="icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <h3>Education</h3>
+        <p>{{ about.education }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bg-cream">
+  <div class="container">
+    <div class="section-header">
+      <h2>Executive Team</h2>
+      <p>Meet the team behind the Guelph-Humber Pre-Law Society.</p>
+      <div class="line"></div>
+    </div>
+    <div class="exec-grid">
+      {%- for member in collections.team %}
+      <div class="exec-card">
+        {% if member.data.photo %}
+        <img src="{{ member.data.photo }}" alt="{{ member.data.name }}" class="avatar-img">
+        {% else %}
+        <div class="avatar">{{ member.data.name[0] }}</div>
+        {% endif %}
+        <h4>{{ member.data.name }}</h4>
+        <div class="role">{{ member.data.role }}</div>
+      </div>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-header">
+      <h2>Frequently Asked Questions</h2>
+      <div class="line"></div>
+    </div>
+    <div class="faq-list">
+      {%- for item in about.faq %}
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">{{ item.question }}</button>
+        <div class="faq-answer"><p>{{ item.answer }}</p></div>
+      </div>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
