@@ -70,6 +70,36 @@ collections:
           - { label: "Left", value: "left" }
           - { label: "Right", value: "right" }
 
+  - name: "ghcup-winners"
+    label: "GH Cup Previous Winners"
+    label_singular: "GH Cup Year"
+    description: "Add winners for each year of The GH Cup."
+    folder: "src/ghcup-winners"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Year", name: "year", widget: "number", value_type: "int" }
+      - { label: "Theme / Title", name: "theme", widget: "string", hint: "e.g. The GH Cup 2026" }
+      - { label: "Case Title", name: "caseTitle", widget: "string", required: false, hint: "The case used for this year's competition" }
+      - label: "Awards"
+        name: "awards"
+        widget: "list"
+        hint: "Add each award (Winner, Runner-Up, Best Oral Advocate, Best Written, etc.)"
+        fields:
+          - { label: "Award Title", name: "title", widget: "string", hint: "e.g. Winner, Runner-Up, Best Oral Advocate" }
+          - { label: "Recipients", name: "recipients", widget: "string" }
+      - { label: "Photo", name: "photo", widget: "image", required: false, hint: "Upload a photo from this year's GH Cup" }
+      - label: "Photo Position"
+        name: "photoPosition"
+        widget: "select"
+        required: false
+        options:
+          - { label: "Center (default)", value: "center" }
+          - { label: "Top", value: "top" }
+          - { label: "Bottom", value: "bottom" }
+          - { label: "Left", value: "left" }
+          - { label: "Right", value: "right" }
+
   - name: "past-events"
     label: "Past Events"
     label_singular: "Past Event"

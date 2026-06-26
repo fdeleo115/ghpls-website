@@ -60,6 +60,43 @@ permalink: /ghcup/
 <section>
   <div class="container">
     <div class="section-header">
+      <h2>Previous Winners</h2>
+      <p>Celebrating the champions of past GH Cup competitions.</p>
+      <div class="line"></div>
+    </div>
+    <div class="winners-timeline">
+      {%- for winner in collections.ghcupWinners %}
+      <div class="winner-card">
+        {% if winner.data.photo %}
+        <div class="winner-photo">
+          <img src="{{ winner.data.photo }}" alt="{{ winner.data.year }} GH Cup" style="object-position: {{ winner.data.photoPosition or 'center' }};">
+        </div>
+        {% endif %}
+        <div class="winner-info">
+          <div class="winner-year">{{ winner.data.year }}</div>
+          <h3>{{ winner.data.theme }}</h3>
+          {%- for award in winner.data.awards %}
+          <div class="winner-award">
+            <span class="badge">{{ award.title }}</span>
+            <span class="names">{{ award.recipients }}</span>
+          </div>
+          {%- endfor %}
+          {% if winner.data.caseTitle %}
+          <div class="winner-case">Case: <em>{{ winner.data.caseTitle }}</em></div>
+          {% endif %}
+        </div>
+      </div>
+      {%- endfor %}
+      {%- if collections.ghcupWinners.length == 0 %}
+      <p class="empty-state">Previous winners will appear here as they're added.</p>
+      {%- endif %}
+    </div>
+  </div>
+</section>
+
+<section class="bg-cream">
+  <div class="container">
+    <div class="section-header">
       <h2>Sponsors & Partners</h2>
       <p>We're grateful for the support that makes The GH Cup possible.</p>
       <div class="line"></div>

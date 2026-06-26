@@ -27,6 +27,12 @@ module.exports = function (eleventyConfig) {
     });
   });
 
+  eleventyConfig.addCollection("ghcupWinners", function (collectionApi) {
+    return collectionApi.getFilteredByGlob("src/ghcup-winners/*.md").sort((a, b) => {
+      return (b.data.year || 0) - (a.data.year || 0);
+    });
+  });
+
   eleventyConfig.addCollection("team", function (collectionApi) {
     return collectionApi.getFilteredByGlob("src/team/*.md").sort((a, b) => {
       return (a.data.order || 99) - (b.data.order || 99);

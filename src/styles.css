@@ -344,6 +344,31 @@ section { padding: 100px 0; }
 .extra-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
 .extra-photo:hover img { transform: scale(1.1); }
 
+/* GH CUP WINNERS */
+.winners-timeline { max-width: 900px; margin: 0 auto; }
+.winner-card {
+  display: flex; gap: 32px; background: var(--white); border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 32px;
+  transition: transform 0.3s;
+}
+.winner-card:hover { transform: translateY(-4px); }
+.winner-photo { width: 280px; flex-shrink: 0; }
+.winner-photo img { width: 100%; height: 100%; object-fit: cover; }
+.winner-info { padding: 32px 32px 32px 0; flex: 1; }
+.winner-year {
+  font-size: 0.85rem; color: var(--peach); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+}
+.winner-info h3 { font-size: 1.4rem; margin-bottom: 16px; }
+.winner-award { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.winner-case { margin-top: 16px; color: var(--text-light); font-size: 0.9rem; }
+
+@media (max-width: 968px) {
+  .winner-card { flex-direction: column; }
+  .winner-photo { width: 100%; height: 200px; }
+  .winner-info { padding: 24px; }
+}
+
 /* PHOTO GALLERY SIZES */
 .photo-wide { grid-column: span 2; }
 .photo-tall { grid-row: span 2; }
