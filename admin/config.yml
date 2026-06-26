@@ -12,7 +12,9 @@ collections:
     description: "Add or edit competition results here."
     folder: "src/achievements"
     create: true
-    slug: "{{slug}}"
+    identifier_field: "competition"
+    slug: "{{competition}}-{{year}}"
+    extension: "md"
     fields:
       - { label: "Competition Name", name: "competition", widget: "string", hint: "e.g. HSFK Cup, Centre Block Cup" }
       - { label: "Year", name: "year", widget: "number", value_type: "int" }
