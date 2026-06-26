@@ -23,7 +23,7 @@ permalink: /events/
       <div class="schedule-item {% if event.data.photo %}schedule-item--has-photo{% endif %}">
         {% if event.data.photo %}
         <div class="schedule-photo">
-          <img src="{{ event.data.photo }}" alt="{{ event.data.title }}" style="object-position: {{ event.data.photoPosition or 'center' }};">
+          <img src="{{ event.data.photo }}" alt="{{ event.data.title }}" style="object-fit: {{ event.data.photoSize or 'cover' }}; object-position: {{ event.data.photoPosition or 'center' }};">
         </div>
         {% endif %}
         <div class="schedule-date">
@@ -55,7 +55,7 @@ permalink: /events/
       {%- for event in collections.pastEvents %}
       <div class="past-event-card">
         {% if event.data.photo %}
-        <img src="{{ event.data.photo }}" alt="{{ event.data.title }}" class="past-event-img" style="object-position: {{ event.data.photoPosition or 'center' }};">
+        <img src="{{ event.data.photo }}" alt="{{ event.data.title }}" class="past-event-img" style="object-fit: {{ event.data.photoSize or 'cover' }}; object-position: {{ event.data.photoPosition or 'center' }};">
         {% endif %}
         <div class="past-event-info">
           <div class="past-event-date">{{ event.data.date | dateFormat }}</div>

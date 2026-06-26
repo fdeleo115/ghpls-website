@@ -69,7 +69,7 @@ permalink: /ghcup/
       <div class="winner-card">
         {% if winner.data.photo %}
         <div class="winner-photo">
-          <img src="{{ winner.data.photo }}" alt="{{ winner.data.year }} GH Cup" style="object-position: {{ winner.data.photoPosition or 'center' }};">
+          <img src="{{ winner.data.photo }}" alt="{{ winner.data.year }} GH Cup" style="object-fit: {{ winner.data.photoSize or 'cover' }}; object-position: {{ winner.data.photoPosition or 'center' }};">
         </div>
         {% endif %}
         <div class="winner-info">
