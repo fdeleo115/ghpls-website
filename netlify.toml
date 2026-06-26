@@ -4,3 +4,53 @@
 
 [build.environment]
   NODE_VERSION = "18"
+
+# ---------------------------------------------------------------------------
+# SECURITY HEADERS (OWASP Secure Headers Project)
+# These are sent by Netlify's CDN on every response. They are the primary,
+# *real* security control for a static site — there is no server of ours to
+# attack, so we harden the browser's handling of our pages instead.
+# Reference: https://owasp.org/www-project-secure-headers/
+# ---------------------------------------------------------------------------
+
+# Public site: strict policy applied to everything...
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Stops other sites from embedding ours in an <iframe> (clickjacking defence).
+    X-Frame-Options = "DENY"
+    # Stops browsers from MIME-sniffing a response away from its declared type.
+    X-Content-Type-Options = "nosniff"
+    # Don't leak the full URL (which may contain context) to other origins.
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # Disable powerful browser features the site never uses.
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+    # Force HTTPS for 2 years, including subdomains (HSTS).
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    # Cross-origin isolation hardening.
+    X-DNS-Prefetch-Control = "off"
+    # Content Security Policy: whitelist exactly the external origins we load.
+    #   - Google Fonts (stylesheet + font files)
+    #   - Netlify Identity widget (login modal on the public site)
+    #   - 'unsafe-inline' is required because the templates use a handful of
+    #     small inline <script> blocks (FAQ toggle, photo lightbox, identity
+    #     redirect) and inline style="object-position:…" attributes. Moving to
+    #     nonces would add real complexity for a brochure site; this CSP still
+    #     blocks all unexpected third-party origins, which is the main win.
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://identity.netlify.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://identity.netlify.com; frame-src 'self' https://identity.netlify.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+
+# ...except the CMS admin panel, which legitimately needs to load Decap CMS
+# from a CDN, spin up web workers (blob:), and talk to GitHub/Netlify APIs.
+# Netlify MERGES header rules, so we must *explicitly* re-declare a looser CSP
+# here to override the strict one above — otherwise the editor your execs use
+# would break. This route is already gated by Netlify Identity login + Git
+# Gateway, so the looser policy is an acceptable, scoped trade-off.
+# The origins below are exactly what Decap CMS requires, nothing more.
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://identity.netlify.com; style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://unpkg.com; img-src 'self' data: blob: https:; connect-src 'self' https://unpkg.com https://api.netlify.com https://api.github.com https://*.githubusercontent.com https://identity.netlify.com; frame-src 'self' https://identity.netlify.com; worker-src 'self' blob:; child-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'"

@@ -29,12 +29,21 @@ permalink: /contact/
           </a>
         </div>
       </div>
+      <!--
+        Spam/abuse defences on this form:
+        1. netlify-honeypot "bot-field" — hidden field; bots fill it, humans don't.
+        2. Input limits + type/pattern validation below — caps payload size and
+           rejects malformed values in the browser (defence-in-depth; Netlify
+           also validates server-side and you can turn on reCAPTCHA — see README).
+        Note: the form is processed by Netlify Forms, not by any code of ours,
+        so there is no injection surface in our app to sanitize.
+      -->
       <form class="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
         <input type="hidden" name="form-name" value="contact">
-        <p class="hidden" style="display:none"><input name="bot-field"></p>
-        <input type="text" name="name" placeholder="Your Name" required>
-        <input type="email" name="email" placeholder="Your Email" required>
-        <select name="subject">
+        <p class="hidden" style="display:none"><label>Don't fill this out: <input name="bot-field"></label></p>
+        <input type="text" name="name" placeholder="Your Name" required minlength="2" maxlength="100" autocomplete="name">
+        <input type="email" name="email" placeholder="Your Email" required maxlength="254" autocomplete="email">
+        <select name="subject" required>
           <option value="" disabled selected>What is this about?</option>
           <option>Joining the Society</option>
           <option>The GH Cup - Competitor Inquiry</option>
@@ -42,7 +51,7 @@ permalink: /contact/
           <option>Sponsorship</option>
           <option>General Question</option>
         </select>
-        <textarea name="message" placeholder="Your Message" required></textarea>
+        <textarea name="message" placeholder="Your Message" required minlength="10" maxlength="2000"></textarea>
         <button type="submit" class="btn btn-primary">Send Message</button>
       </form>
     </div>

@@ -1,0 +1,17 @@
+# Dependencies — reinstalled from package.json, never committed
+node_modules/
+
+# Build output — Netlify regenerates this on every deploy
+_site/
+
+# Environment / secrets — never commit these
+.env
+.env.*
+*.local
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

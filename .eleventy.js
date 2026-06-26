@@ -2,6 +2,7 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy("assets");
   eleventyConfig.addPassthroughCopy("admin");
   eleventyConfig.addPassthroughCopy("src/styles.css");
+  eleventyConfig.addPassthroughCopy("src/robots.txt");
 
   eleventyConfig.addCollection("achievements", function (collectionApi) {
     return collectionApi.getFilteredByGlob("src/achievements/*.md").sort((a, b) => {

@@ -1,0 +1,35 @@
+# robots.txt — crawler guidance for the GHPLS website
+#
+# IMPORTANT, honest note: robots.txt is a *request*, not a wall. Well-behaved
+# search engines (Google, Bing) obey it. Malicious scrapers and most AI
+# crawlers ignore it. Truly blocking bad bots requires server-side rules — on
+# Netlify that means enabling bot protection in the dashboard, not this file.
+# This file does the realistic, useful things: keep the admin panel out of
+# search results and opt out of the major AI training crawlers.
+
+# Allow normal search engines to index the public pages.
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /assets/uploads/
+
+# Opt out of common AI / LLM training scrapers (they honour these tokens).
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+Sitemap: https://guelphhumberprelawsociety.netlify.app/sitemap.xml
