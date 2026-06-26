@@ -21,10 +21,18 @@ Cup**. Hard requirements that shaped every decision:
 ## 2. Current state — LIVE and working
 
 - **Stack:** Eleventy (11ty) static site generator + Decap CMS (`/admin/`) +
-  Netlify Identity (Git Gateway backend).
-- **Hosted:** Netlify at `https://guelphhumberprelawsociety.netlify.app`.
+  **GitHub login via Cloudflare Pages Functions** (`functions/api/`).
+- **Hosted:** **Cloudflare Pages** (migrated off Netlify June 2026 after the
+  Netlify free credits ran out). Old Netlify URL is retired.
 - **Repo:** `https://github.com/fdeleo115/ghpls-website` (branch `main`).
-  Every push auto-deploys. CMS edits commit straight to `main`.
+  Every push auto-deploys via Cloudflare. CMS edits commit straight to `main`.
+- **CMS login:** editors sign in with their **GitHub account** (must be a
+  repo collaborator). Requires a GitHub OAuth App whose client id/secret are
+  set as Cloudflare Pages env vars `GITHUB_OAUTH_CLIENT_ID` /
+  `GITHUB_OAUTH_CLIENT_SECRET`. `admin/config.yml` `backend.base_url` must
+  match the live Pages domain.
+- **NOTE:** `netlify.toml` is now unused (kept only for reference). Security
+  headers live in `_headers`; build settings live in the Cloudflare dashboard.
 - **Admin works:** Francesco is invited via Netlify Identity (invite-only).
   Execs have already uploaded real photos/content through `/admin/` (e.g. Kate
   Hilton listed as President, Francesco as VP of Moot Training, an Ireland trip

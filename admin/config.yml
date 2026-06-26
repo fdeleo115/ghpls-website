@@ -1,6 +1,11 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: fdeleo115/ghpls-website
   branch: main
+  # GitHub login is handled by this site's own Cloudflare Pages Functions
+  # (functions/api/auth.js + functions/api/callback.js). No third-party server.
+  base_url: https://ghpls-website.pages.dev
+  auth_endpoint: api/auth
 
 media_folder: "assets/uploads"
 public_folder: "/assets/uploads"

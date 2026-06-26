@@ -1,0 +1,21 @@
+# Cloudflare Pages security headers (replaces the old netlify.toml header rules).
+# Cloudflare reads this file from the published site root (_site/_headers).
+
+# Public site: strict policy everywhere...
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-DNS-Prefetch-Control: off
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
+
+# ...except the CMS admin panel, which needs Decap from a CDN, web workers
+# (blob:), and the GitHub API. This route is gated by GitHub login.
+/admin/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://unpkg.com; img-src 'self' data: blob: https:; connect-src 'self' blob: data: https://unpkg.com https://api.github.com https://*.githubusercontent.com; frame-src 'self'; worker-src 'self' blob:; child-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'
