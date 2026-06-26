@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "npx @11ty/eleventy --serve --port=${PORT:-3000}",
-    "build": "npx @11ty/eleventy"
+    "build": "npx @11ty/eleventy",
+    "deploy": "npm run build && wrangler deploy",
+    "preview": "npm run build && wrangler dev"
   },
   "devDependencies": {
-    "@11ty/eleventy": "^2.0.1"
+    "@11ty/eleventy": "^2.0.1",
+    "wrangler": "^4.105.0"
   }
 }
