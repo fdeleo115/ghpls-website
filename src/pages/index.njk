@@ -5,44 +5,73 @@ activePage: home
 permalink: /
 ---
 
-<section class="hero">
+<section class="home-portal">
   <div class="container">
-    <div class="hero-text">
-      <div class="tag">University of Guelph-Humber</div>
-      <h1>Guelph-Humber<br><em>Pre-Law Society</em></h1>
-      <p>{{ site.description }} Building the next generation of legal minds at UofGH.</p>
-      <a href="/about/" class="btn btn-primary">Learn More</a>
-      <a href="/contact/" class="btn btn-outline">Get Involved</a>
+    <div class="home-intro">
+      <img src="/assets/logo.jpg" alt="GHPLS Logo" class="home-logo">
+      <div class="home-intro-text">
+        <div class="tag">University of Guelph-Humber</div>
+        <h1>Pre-Law Society</h1>
+        <p>{{ site.description }} Building the next generation of legal minds at UofGH.</p>
+      </div>
     </div>
-    <div class="hero-logo">
-      <img src="/assets/logo.jpg" alt="GHPLS Logo">
-    </div>
-  </div>
-</section>
 
-<section class="bg-cream">
-  <div class="container">
-    <div class="section-header">
-      <h2>What We Do</h2>
-      <p>Advocacy, community, and education for aspiring legal professionals.</p>
-      <div class="line"></div>
-    </div>
-    <div class="highlight-grid">
-      <a href="/achievements/" class="highlight-card">
+    <div class="portal-grid">
+      <a href="/about/" class="portal-card">
+        <span class="portal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+        </span>
+        <h3>About</h3>
+        <p>Our mission, team & FAQ</p>
+      </a>
+      <a href="/achievements/" class="portal-card">
+        <span class="portal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM7 4H4v2a3 3 0 0 0 3 3M17 4h3v2a3 3 0 0 1-3 3"/></svg>
+        </span>
         <h3>Achievements</h3>
-        <p>See our competition results from moot courts across Canada.</p>
+        <p>Our moot competition results</p>
       </a>
-      <a href="/ghcup/" class="highlight-card">
+      <a href="/ghcup/" class="portal-card">
+        <span class="portal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 6l1.5 13a2 2 0 0 0 2 1.8h11a2 2 0 0 0 2-1.8L21 6M9 10v6M15 10v6"/></svg>
+        </span>
         <h3>The GH Cup</h3>
-        <p>Our flagship annual moot court competition.</p>
+        <p>Our flagship moot competition</p>
       </a>
-      <a href="/events/" class="highlight-card">
+      <a href="/events/" class="portal-card">
+        <span class="portal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+        </span>
         <h3>Events</h3>
-        <p>Workshops, panels, and networking opportunities.</p>
+        <p>Workshops, panels & socials</p>
       </a>
-      <a href="/contact/" class="highlight-card">
-        <h3>Get Involved</h3>
-        <p>Join the society or reach out with questions.</p>
+      <a href="/photos/" class="portal-card">
+        <span class="portal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        </span>
+        <h3>Photos</h3>
+        <p>Moments from our events</p>
+      </a>
+      <a href="/materials/" class="portal-card">
+        <span class="portal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l6 6v10a0 0 0 0 1 0 0H4V4z"/><path d="M14 4v6h6M9 14h6M9 18h6"/></svg>
+        </span>
+        <h3>Materials</h3>
+        <p>Guides & resources</p>
+      </a>
+      <a href="/contact/" class="portal-card">
+        <span class="portal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        </span>
+        <h3>Contact</h3>
+        <p>Get involved & reach out</p>
+      </a>
+      <a href="{{ site.instagram }}" target="_blank" rel="noopener" class="portal-card">
+        <span class="portal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </span>
+        <h3>Instagram</h3>
+        <p>Follow us for updates</p>
       </a>
     </div>
   </div>
