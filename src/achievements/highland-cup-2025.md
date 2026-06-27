@@ -1,6 +1,7 @@
 ---
 competition: Highland Cup
 year: 2025
+date: 2025-11-23T19:00:00.000Z
 results:
   - award: Champions
     recipients: Francesco Deleo & Christabell Zalwango
