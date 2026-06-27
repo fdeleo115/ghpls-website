@@ -12,5 +12,6 @@ results:
 cardWidth: wide
 photo: /assets/uploads/e5314168-debe-45e6-916d-613036406c33.jpeg
 photoSize: cover
+photoHeight: tall
 photoPosition: 49% 32%
 ---
