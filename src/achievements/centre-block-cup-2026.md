@@ -7,7 +7,7 @@ results:
     recipients: Francesco Deleo & Christabell Zalwango
 photo: /assets/uploads/img_5370.jpeg
 photoSize: cover
-photoHeight: medium
+photoHeight: tall
 photoZoom: 1
 photoPosition: 49% 99%
 ---
