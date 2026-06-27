@@ -1,6 +1,7 @@
 ---
 competition: Highland Cup
 year: 2024
+date: 2024-11-24T19:07:00.000Z
 results:
   - award: Quarter Finalists
     recipients: Francesco Deleo & Christabell Zalwango
