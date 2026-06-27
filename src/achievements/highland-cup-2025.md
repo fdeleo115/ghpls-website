@@ -8,5 +8,6 @@ results:
 cardWidth: wide
 photo: /assets/uploads/dd3731a4-1ccd-412b-8186-e155c1bbbd4a.jpeg
 photoSize: cover
+photoHeight: tall
 photoPosition: 49% 23%
 ---
