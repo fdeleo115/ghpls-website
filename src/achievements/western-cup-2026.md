@@ -9,5 +9,7 @@ results:
     recipients: Ashon Vaz
   - award: Distinguished Oral Advocate
     recipients: Kate Hilton
+cardWidth: normal
 photo: /assets/uploads/img_7285.jpg
+photoHeight: tall
 ---
