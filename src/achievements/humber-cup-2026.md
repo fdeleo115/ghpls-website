@@ -8,4 +8,7 @@ results:
     recipients: Francesco Deleo
   - award: 4th Distinguished Oral Advocate
     recipients: Christabell Zalwango
+photo: /assets/uploads/be553b90-4d56-48f5-96c1-bd3be9b3ad2c.jpeg
+photoSize: cover
+photoPosition: 64% 47%
 ---
