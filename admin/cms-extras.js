@@ -194,6 +194,8 @@
         var fit = opts.fitField
           ? data.get(opts.fitField) || opts.defaultFit
           : opts.defaultFit;
+        var zoom = parseFloat(data.get("photoZoom"));
+        if (isNaN(zoom) || zoom < 1) zoom = 1;
         var src = assetUrl(this.props.getAsset, path);
 
         var frameOuter = {
@@ -215,6 +217,8 @@
               height: "100%",
               objectFit: fit,
               objectPosition: pos,
+              transform: zoom !== 1 ? "scale(" + zoom + ")" : "none",
+              transformOrigin: pos,
               display: "block",
               background: "#0f1830"
             }
@@ -265,6 +269,7 @@
             }
           },
           "Fit: " + fit + "  ·  Focus: " + pos +
+            (zoom !== 1 ? "  ·  Zoom: " + zoom + "x" : "") +
             (opts.note ? "  ·  " + opts.note : "")
         );
 

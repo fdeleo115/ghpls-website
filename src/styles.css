@@ -153,7 +153,8 @@ section { padding: 100px 0; }
 .mission-card p { color: var(--text-light); font-size: 0.95rem; }
 
 /* WINS */
-.wins-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.wins-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; align-items: start; }
+.win-card--wide { grid-column: 1 / -1; }
 .win-card {
   background: var(--white); border-radius: 12px; padding: 32px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.06); border-left: 4px solid var(--peach);
@@ -326,6 +327,9 @@ section { padding: 100px 0; }
 /* WIN CARD WITH PHOTO */
 .win-card--has-photo { padding: 0; overflow: hidden; }
 .win-card-photo { width: 100%; height: 200px; overflow: hidden; }
+.win-card-photo--short { height: 140px; }
+.win-card-photo--medium { height: 200px; }
+.win-card-photo--tall { height: 280px; }
 .win-card-photo img { width: 100%; height: 100%; object-fit: cover; }
 .win-card--has-photo .win-card-content { padding: 24px 32px 32px; }
 
@@ -355,6 +359,7 @@ section { padding: 100px 0; }
 .winner-photo { width: 280px; flex-shrink: 0; }
 .winner-photo img { width: 100%; height: 100%; object-fit: cover; }
 .winner-info { padding: 32px 32px 32px 0; flex: 1; }
+.winner-card--no-photo .winner-info { padding: 32px; }
 .winner-year {
   font-size: 0.85rem; color: var(--peach); font-weight: 700;
   text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
@@ -368,6 +373,16 @@ section { padding: 100px 0; }
   .winner-photo { width: 100%; height: 200px; }
   .winner-info { padding: 24px; }
 }
+
+/* GH CUP FINAL VIDEOS */
+.video-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; max-width: 1000px; margin: 0 auto; }
+.video-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+.video-embed { position: relative; width: 100%; padding-top: 56.25%; background: #000; }
+.video-embed iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+.video-info { padding: 24px 28px 28px; }
+.video-info h3 { font-size: 1.25rem; margin-bottom: 8px; }
+.video-info p { color: var(--text-light); font-size: 0.95rem; }
+@media (max-width: 768px) { .video-grid { grid-template-columns: 1fr; } }
 
 /* PHOTO GALLERY SIZES */
 .photo-wide { grid-column: span 2; }

@@ -6,6 +6,15 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addCollection("achievements", function (collectionApi) {
     return collectionApi.getFilteredByGlob("src/achievements/*.md").sort((a, b) => {
+      // Sort by explicit date when present, otherwise fall back to year.
+      const da = a.data.date ? new Date(a.data.date).getTime() : new Date(a.data.year || 0, 0).getTime();
+      const db = b.data.date ? new Date(b.data.date).getTime() : new Date(b.data.year || 0, 0).getTime();
+      return db - da;
+    });
+  });
+
+  eleventyConfig.addCollection("ghcupVideos", function (collectionApi) {
+    return collectionApi.getFilteredByGlob("src/ghcup-videos/*.md").sort((a, b) => {
       return (b.data.year || 0) - (a.data.year || 0);
     });
   });
@@ -54,6 +63,17 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addFilter("dayNum", function (date) {
     if (!date) return "";
     return new Date(date).getDate();
+  });
+
+  // Pull the 11-character video ID out of any common YouTube URL form.
+  eleventyConfig.addFilter("youtubeId", function (url) {
+    if (!url) return "";
+    const s = String(url).trim();
+    const m = s.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    if (m) return m[1];
+    // If they just pasted the bare ID, accept it as-is.
+    if (/^[A-Za-z0-9_-]{11}$/.test(s)) return s;
+    return "";
   });
 
   return {

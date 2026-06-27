@@ -16,15 +16,15 @@ permalink: /achievements/
   <div class="container">
     <div class="wins-grid">
       {%- for item in collections.achievements %}
-      <div class="win-card {% if item.data.photo %}win-card--has-photo{% endif %}">
+      <div class="win-card {% if item.data.photo %}win-card--has-photo{% endif %} {% if item.data.cardWidth == 'wide' %}win-card--wide{% endif %}">
         {% if item.data.photo %}
-        <div class="win-card-photo">
-          <img src="{{ item.data.photo }}" alt="{{ item.data.competition }}" style="object-fit: {{ item.data.photoSize or 'cover' }}; object-position: {{ item.data.photoPosition or 'center' }};">
+        <div class="win-card-photo win-card-photo--{{ item.data.photoHeight or 'medium' }}">
+          <img src="{{ item.data.photo }}" alt="{{ item.data.competition }}" style="object-fit: {{ item.data.photoSize or 'cover' }}; object-position: {{ item.data.photoPosition or 'center' }};{% if item.data.photoZoom and item.data.photoZoom != 1 %} transform: scale({{ item.data.photoZoom }}); transform-origin: {{ item.data.photoPosition or 'center' }};{% endif %}">
         </div>
         {% endif %}
         <div class="win-card-content">
           <div class="competition">{{ item.data.competition }}</div>
-          <div class="year">{{ item.data.year }}</div>
+          <div class="year">{{ item.data.year }}{% if item.data.date %} · {{ item.data.date | dateFormat }}{% endif %}</div>
           {%- for result in item.data.results %}
           <div class="achievement">
             <span class="badge">{{ result.award }}</span>

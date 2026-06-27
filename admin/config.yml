@@ -23,6 +23,7 @@ collections:
     fields:
       - { label: "Competition Name", name: "competition", widget: "string", hint: "e.g. HSFK Cup, Centre Block Cup" }
       - { label: "Year", name: "year", widget: "number", value_type: "int" }
+      - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, required: false, hint: "When this happened. Newest results show first on the page." }
       - label: "Results"
         name: "results"
         widget: "list"
@@ -30,6 +31,15 @@ collections:
         fields:
           - { label: "Award", name: "award", widget: "string", hint: "e.g. Finalists, Semi-Finalists, Best Oral Advocate" }
           - { label: "Recipients", name: "recipients", widget: "string", hint: "e.g. Kate Hilton & Ava Gonsalves" }
+      - label: "Card Width"
+        name: "cardWidth"
+        widget: "select"
+        required: false
+        default: "normal"
+        hint: "Make a card span the full row (good for ones with lots of results)"
+        options:
+          - { label: "Normal (half row)", value: "normal" }
+          - { label: "Wide (full row)", value: "wide" }
       - { label: "Photo", name: "photo", widget: "image", required: false, hint: "Upload a photo from this competition" }
       - label: "Photo Fit"
         name: "photoSize"
@@ -40,6 +50,17 @@ collections:
         options:
           - { label: "Fill area (crop to fit)", value: "cover" }
           - { label: "Show entire photo (may have gaps)", value: "contain" }
+      - label: "Photo Height"
+        name: "photoHeight"
+        widget: "select"
+        required: false
+        default: "medium"
+        hint: "How tall the photo area is on the card"
+        options:
+          - { label: "Short", value: "short" }
+          - { label: "Medium", value: "medium" }
+          - { label: "Tall", value: "tall" }
+      - { label: "Photo Zoom", name: "photoZoom", widget: "number", required: false, default: 1, value_type: "float", min: 1, max: 3, step: 0.1, hint: "1 = no zoom, 2 = zoom in 2x. Use with focus below to frame the shot." }
       - { label: "Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo", hint: "Drag the dot to choose what part of the photo stays in view" }
 
   - name: "events"
@@ -95,7 +116,23 @@ collections:
         options:
           - { label: "Fill area (crop to fit)", value: "cover" }
           - { label: "Show entire photo (may have gaps)", value: "contain" }
+      - { label: "Photo Zoom", name: "photoZoom", widget: "number", required: false, default: 1, value_type: "float", min: 1, max: 3, step: 0.1, hint: "1 = no zoom, 2 = zoom in 2x." }
       - { label: "Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo", hint: "Drag the dot to choose what part of the photo stays in view" }
+
+  - name: "ghcup-videos"
+    label: "GH Cup Final Videos"
+    label_singular: "Final Video"
+    description: "Add videos of past GH Cup finals. They appear on the GH Cup page."
+    folder: "src/ghcup-videos"
+    create: true
+    identifier_field: "year"
+    slug: "ghcup-final-{{year}}"
+    extension: "md"
+    fields:
+      - { label: "Year", name: "year", widget: "number", value_type: "int", hint: "Year of the final" }
+      - { label: "Title", name: "title", widget: "string", required: false, hint: "e.g. 2025 GH Cup Final" }
+      - { label: "YouTube URL", name: "url", widget: "string", hint: "Paste the full YouTube link, e.g. https://www.youtube.com/watch?v=XXXX" }
+      - { label: "Short Description", name: "description", widget: "text", required: false }
 
   - name: "past-events"
     label: "Past Events"

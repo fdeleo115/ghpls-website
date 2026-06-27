@@ -66,10 +66,10 @@ permalink: /ghcup/
     </div>
     <div class="winners-timeline">
       {%- for winner in collections.ghcupWinners %}
-      <div class="winner-card">
+      <div class="winner-card {% if not winner.data.photo %}winner-card--no-photo{% endif %}">
         {% if winner.data.photo %}
         <div class="winner-photo">
-          <img src="{{ winner.data.photo }}" alt="{{ winner.data.year }} GH Cup" style="object-fit: {{ winner.data.photoSize or 'cover' }}; object-position: {{ winner.data.photoPosition or 'center' }};">
+          <img src="{{ winner.data.photo }}" alt="{{ winner.data.year }} GH Cup" style="object-fit: {{ winner.data.photoSize or 'cover' }}; object-position: {{ winner.data.photoPosition or 'center' }};{% if winner.data.photoZoom and winner.data.photoZoom != 1 %} transform: scale({{ winner.data.photoZoom }}); transform-origin: {{ winner.data.photoPosition or 'center' }};{% endif %}">
         </div>
         {% endif %}
         <div class="winner-info">
@@ -94,7 +94,33 @@ permalink: /ghcup/
   </div>
 </section>
 
+{%- if collections.ghcupVideos.length > 0 %}
 <section class="bg-cream">
+  <div class="container">
+    <div class="section-header">
+      <h2>Final Videos</h2>
+      <p>Watch the moot finals from past GH Cup competitions.</p>
+      <div class="line"></div>
+    </div>
+    <div class="video-grid">
+      {%- for video in collections.ghcupVideos %}
+      <div class="video-card">
+        <div class="video-embed">
+          <iframe src="https://www.youtube.com/embed/{{ video.data.url | youtubeId }}" title="{{ video.data.title or video.data.year }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+        </div>
+        <div class="video-info">
+          <div class="winner-year">{{ video.data.year }}</div>
+          <h3>{{ video.data.title or "GH Cup Final" }}</h3>
+          {% if video.data.description %}<p>{{ video.data.description }}</p>{% endif %}
+        </div>
+      </div>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+{%- endif %}
+
+<section>
   <div class="container">
     <div class="section-header">
       <h2>Sponsors & Partners</h2>
