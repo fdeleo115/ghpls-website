@@ -1,7 +1,7 @@
 ---
 competition: Centre Block Cup
 year: 2026
-date: 2026-06-27T17:57:21.722Z
+date: 2026-01-23T18:57:00.000Z
 results:
   - award: Finalists
     recipients: Francesco Deleo & Christabell Zalwango
