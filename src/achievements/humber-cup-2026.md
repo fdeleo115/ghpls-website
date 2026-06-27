@@ -1,6 +1,7 @@
 ---
 competition: Humber Cup
 year: 2025
+date: 2025-07-27T18:03:00.000Z
 results:
   - award: Semi-Finalists
     recipients: Francesco Deleo & Christabell Zalwango
