@@ -9,6 +9,7 @@ results:
     recipients: Francesco Deleo & Christabell Zalwango
   - award: Best Skeleton Arguments
     recipients: Francesco Deleo & Christabell Zalwango
+cardWidth: wide
 photo: /assets/uploads/e5314168-debe-45e6-916d-613036406c33.jpeg
 photoSize: cover
 photoPosition: 49% 32%
