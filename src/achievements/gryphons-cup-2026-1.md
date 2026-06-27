@@ -9,5 +9,6 @@ results:
     recipients: Kate Hilton & Ava Gonsalves
 photo: /assets/uploads/1f6189da-ba5b-4dcb-b5d3-1d636253768b.jpeg
 photoSize: cover
+photoHeight: tall
 photoPosition: 44% 46%
 ---
