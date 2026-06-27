@@ -1,6 +1,7 @@
 ---
 competition: HSFK Cup
 year: 2026
+date: 2026-06-13T18:02:00.000Z
 results:
   - award: Finalists
     recipients: Kate Hilton & Ava Gonsalves
