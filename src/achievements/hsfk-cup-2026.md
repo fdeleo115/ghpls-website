@@ -9,6 +9,6 @@ results:
   - award: Best Skeleton Arguments
     recipients: Francesco Deleo & Christabell Zalwango
 photo: /assets/uploads/e5314168-debe-45e6-916d-613036406c33.jpeg
-photoPosition: center
-photoSize: contain
+photoSize: cover
+photoPosition: 49% 32%
 ---
