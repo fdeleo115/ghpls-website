@@ -1,6 +1,6 @@
 ---
-name: TBD
-role: Vice President
-order: 2
-photo: ""
+name: Muhammad Ali
+role: Vice President of Communications
+order: 3
+photo: /assets/uploads/img_7279.jpg
 ---
