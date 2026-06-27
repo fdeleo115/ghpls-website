@@ -6,5 +6,6 @@ results:
   - award: Semi-Finalists
     recipients: Kate Hilton & Ava Gonsalves
 photo: /assets/uploads/img_7283.jpg
+photoHeight: tall
 photoPosition: 51% 10%
 ---
