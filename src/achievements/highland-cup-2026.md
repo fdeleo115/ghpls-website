@@ -7,6 +7,8 @@ results:
     recipients: Francesco Deleo & Christabell Zalwango
   - award: Quarter Finalists
     recipients: Oscar Dominguez & Owen Logtenberg-Warford
+photo: /assets/uploads/img_7286.jpg
 photoSize: cover
-photoPosition: center
+photoHeight: tall
+photoPosition: 52% 6%
 ---
