@@ -6,4 +6,5 @@ description: Our annual moot court competition brought together competitors and
 photo: /assets/uploads/dsc_7312.jpeg
 extraPhotos:
   - image: /assets/uploads/img_5810.jpeg
+  - image: /assets/uploads/dsc_4956.jpeg
 ---
