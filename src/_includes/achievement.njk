@@ -1,0 +1,139 @@
+---
+layout: base.njk
+---
+
+<section class="page-header page-header--photo"{% if photo %} style="background-image:url('{{ photo }}'); background-position:{{ photoPosition or 'center' }};"{% endif %}>
+  <div class="container">
+    <div class="detail-back"><a href="/achievements/">&#8592; All Achievements</a></div>
+    <h1>{{ competition }}</h1>
+    <p>{{ year }}{% if date %} · {{ date | dateFormat }}{% endif %}</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="achievement-detail">
+      <div class="detail-main">
+        <div class="detail-results">
+          {%- for result in results %}
+          <div class="detail-result">
+            <span class="badge">{{ result.award }}</span>
+            <span class="names">{{ result.recipients }}</span>
+          </div>
+          {%- endfor %}
+        </div>
+
+        {%- if caseTitle or caseSummary %}
+        <div class="detail-case">
+          {%- if caseTitle %}<h3>{{ caseTitle }}</h3>{%- endif %}
+          {%- if caseSummary %}<p>{{ caseSummary }}</p>{%- endif %}
+        </div>
+        {%- endif %}
+
+        {%- if competitors and competitors.length > 0 %}
+        <div class="detail-competitors">
+          <h3>Who Competed</h3>
+          <ul class="detail-competitors-list">
+            {%- for c in competitors %}
+            <li>{{ c.name }}</li>
+            {%- endfor %}
+          </ul>
+        </div>
+        {%- endif %}
+
+        {%- if content %}
+        <div class="content-block detail-desc">
+          {{ content | safe }}
+        </div>
+        {%- endif %}
+
+        {%- if highlights %}
+        <div class="detail-highlights">
+          <h3>Highlights</h3>
+          <ul>
+            {%- for h in highlights %}
+            <li>{{ h }}</li>
+            {%- endfor %}
+          </ul>
+        </div>
+        {%- endif %}
+
+        {%- if articles and articles.length > 0 %}
+        <div class="detail-articles">
+          <h3>In the News</h3>
+          <ul>
+            {%- for article in articles %}
+            <li>
+              <a href="{{ article.url }}" target="_blank" rel="noopener">{{ article.title }} &#8599;</a>
+              {%- if article.source %}<span class="source">{{ article.source }}</span>{%- endif %}
+            </li>
+            {%- endfor %}
+          </ul>
+        </div>
+        {%- endif %}
+      </div>
+
+      <div class="detail-aside">
+        <div class="detail-fact-card">
+          <div class="detail-fact">
+            <span class="label">Year</span>
+            <span class="value">{{ year }}</span>
+          </div>
+          {%- if date %}
+          <div class="detail-fact">
+            <span class="label">Date</span>
+            <span class="value">{{ date | dateFormat }}</span>
+          </div>
+          {%- endif %}
+          {%- if location %}
+          <div class="detail-fact">
+            <span class="label">Location</span>
+            <span class="value">{{ location }}</span>
+          </div>
+          {%- endif %}
+          {%- if host %}
+          <div class="detail-fact">
+            <span class="label">Host</span>
+            <span class="value">{{ host }}</span>
+          </div>
+          {%- endif %}
+        </div>
+
+        {%- set hasExtras = extraPhotos and extraPhotos.length > 0 %}
+        {%- if photo or hasExtras %}
+        <div class="detail-gallery">
+          {%- if photo %}
+          <div class="detail-photo" data-img="{{ photo }}" data-caption="{{ competition }} {{ year }}" onclick="openLightbox(this.dataset.img, this.dataset.caption)">
+            <img src="{{ photo }}" alt="{{ competition }} {{ year }}" loading="lazy" style="object-position: {{ photoPosition or 'center' }};">
+          </div>
+          {%- endif %}
+          {%- for extra in extraPhotos %}
+          <div class="detail-photo" data-img="{{ extra.image }}" data-caption="{{ extra.caption or (competition + ' ' + year) }}" onclick="openLightbox(this.dataset.img, this.dataset.caption)">
+            <img src="{{ extra.image }}" alt="{{ extra.caption or competition }}" loading="lazy">
+          </div>
+          {%- endfor %}
+        </div>
+        {%- endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-caption" class="lightbox-caption"></div>
+</div>
+<script>
+function openLightbox(src, caption) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-caption').textContent = caption;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>

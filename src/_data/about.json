@@ -5,20 +5,52 @@
   "education": "We host workshops, guest lectures, and study sessions to help students understand the path to law school and legal careers.",
   "faq": [
     {
-      "question": "What is mooting?",
-      "answer": "Mooting is a simulated court proceeding where participants argue a legal case before a panel of judges. It develops skills in legal research, written advocacy, and oral presentation. Think of it as a debate, but structured around a legal dispute with formal court procedures."
+      "question": "What is the Guelph-Humber Pre-Law Society?",
+      "answer": "GHPLS is a student-run society at the University of Guelph-Humber, established in 2013, that promotes a culture of legal inquiry and critical thinking on campus. We prepare and send teams to moot competitions across Canada, host the annual GH Cup, and run workshops, panels, and socials for anyone curious about law."
     },
     {
       "question": "Do I need to be in a law-related program to join?",
-      "answer": "Not at all. The Pre-Law Society welcomes students from all programs at the University of Guelph-Humber. Whether you're considering law school or simply interested in legal advocacy, there's a place for you here."
+      "answer": "Not at all. The Pre-Law Society welcomes students from every program at the University of Guelph-Humber. Whether you're set on law school or simply curious about legal advocacy, there's a place for you here."
+    },
+    {
+      "question": "Which Guelph-Humber programs are a good fit for pre-law students?",
+      "answer": "Students in Justice Studies, Business, Media, Psychology, and Family & Community Social Services all get involved with us. No single program is 'the pre-law path' at Guelph-Humber — what matters is your interest in reasoning, research, and advocacy, all of which mooting builds directly."
+    },
+    {
+      "question": "What is mooting?",
+      "answer": "Mooting is a simulated court proceeding where participants argue a legal case before a panel of judges. It develops legal research, written advocacy, and oral presentation skills. Think of it as a structured debate built around a real legal dispute, following formal court procedures."
     },
     {
       "question": "How do I join the mooting team?",
-      "answer": "Tryouts are typically held early in the fall semester. No prior mooting experience is required. We provide training and mentorship to help you develop your skills. Follow our Instagram or reach out through the contact form to stay informed about tryout dates."
+      "answer": "Tryouts are typically held early in the fall semester, and no prior mooting experience is required. We provide training and mentorship to help you develop your advocacy from the ground up. Follow us on Instagram or reach out through the contact form to be notified of tryout dates."
+    },
+    {
+      "question": "I'm a first-year student — is it too early to get involved?",
+      "answer": "First year is one of the best times to start. Getting involved early gives you more time to develop your advocacy, build relationships with upper-year mentors, and compete in multiple competitions before you graduate. Beginners are always welcome."
+    },
+    {
+      "question": "What is the GH Cup?",
+      "answer": "The GH Cup is our flagship moot court competition, hosted annually by GHPLS and open to undergraduate students across Ontario. Competitors prepare written skeleton arguments and present oral advocacy before a panel of judges drawn from the legal profession. You can read more on The GH Cup page."
+    },
+    {
+      "question": "Which competitions does GHPLS compete in?",
+      "answer": "Our members represent Guelph-Humber at moot competitions hosted by universities across the country. Recent examples include the HSFK Cup, the Centre Block Cup, the Gryphon's Cup, the Humber Cup, and the U of T Cup, alongside our own GH Cup. See the Competitive Achievements page for our results."
+    },
+    {
+      "question": "How much of a time commitment is mooting?",
+      "answer": "It varies by competition, but expect a few hours a week during a preparation cycle, ramping up as the competition date approaches. We work with students to balance mooting alongside coursework and other commitments."
+    },
+    {
+      "question": "Do I have to plan on attending law school to benefit?",
+      "answer": "No. Mooting sharpens research, public speaking, persuasive writing, and quick thinking — skills that transfer to graduate school, business, media, policy, and beyond. Many members join to grow as communicators, whether or not law school is the goal."
     },
     {
       "question": "Are there membership fees?",
       "answer": "Please contact us directly for current information about membership. We strive to keep involvement accessible to all students."
+    },
+    {
+      "question": "How do I stay up to date on events and tryouts?",
+      "answer": "Follow us on Instagram and LinkedIn for announcements, check the Events page for what's coming up, and reach out through the contact form with any questions. That's the best way to hear about tryouts, workshops, and the GH Cup."
     }
   ]
 }

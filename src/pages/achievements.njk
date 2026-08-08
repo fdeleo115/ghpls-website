@@ -5,9 +5,9 @@ activePage: achievements
 permalink: /achievements/
 ---
 
-<section class="page-header">
+<section class="page-header{% if pageHeaders.achievements.photo %} page-header--photo{% endif %}"{% if pageHeaders.achievements.photo %} style="background-image:url('{{ pageHeaders.achievements.photo }}'); background-position:{{ pageHeaders.achievements.photoPosition or 'center' }};"{% endif %}>
   <div class="container">
-    <h1>Competition Achievements</h1>
+    <h1>Competitive Achievements</h1>
     <p>Our members have represented Guelph-Humber with distinction at moot competitions across the country.</p>
   </div>
 </section>
@@ -16,7 +16,7 @@ permalink: /achievements/
   <div class="container">
     <div class="wins-grid">
       {%- for item in collections.achievements %}
-      <div class="win-card {% if item.data.photo %}win-card--has-photo{% endif %} {% if item.data.cardWidth == 'wide' %}win-card--wide{% endif %}">
+      <a href="/achievements/{{ item.fileSlug }}/" class="win-card win-card--link {% if item.data.photo %}win-card--has-photo{% endif %} {% if item.data.cardWidth == 'wide' %}win-card--wide{% endif %}">
         {% if item.data.photo %}
         <div class="win-card-photo win-card-photo--{{ item.data.photoHeight or 'medium' }}">
           <img src="{{ item.data.photo }}" alt="{{ item.data.competition }}" style="object-fit: {{ item.data.photoSize or 'cover' }}; object-position: {{ item.data.photoPosition or 'center' }};{% if item.data.photoZoom and item.data.photoZoom != 1 %} transform: scale({{ item.data.photoZoom }}); transform-origin: {{ item.data.photoPosition or 'center' }};{% endif %}">
@@ -31,8 +31,9 @@ permalink: /achievements/
             <span class="names">{{ result.recipients }}</span>
           </div>
           {%- endfor %}
+          <span class="win-card-more">View details &#8594;</span>
         </div>
-      </div>
+      </a>
       {%- endfor %}
     </div>
   </div>

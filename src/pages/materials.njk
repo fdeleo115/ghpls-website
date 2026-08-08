@@ -5,7 +5,7 @@ activePage: materials
 permalink: /materials/
 ---
 
-<section class="page-header">
+<section class="page-header{% if pageHeaders.materials.photo %} page-header--photo{% endif %}"{% if pageHeaders.materials.photo %} style="background-image:url('{{ pageHeaders.materials.photo }}'); background-position:{{ pageHeaders.materials.photoPosition or 'center' }};"{% endif %}>
   <div class="container">
     <h1>Public Materials</h1>
     <p>Resources to help you prepare for competitions and develop your legal advocacy skills.</p>
@@ -15,30 +15,20 @@ permalink: /materials/
 <section>
   <div class="container">
     <div class="materials-grid">
+      {%- for item in materials.items %}
       <div class="material-card">
         <div class="file-icon">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1a2744" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         </div>
-        <h4>GH Cup Competitor Package</h4>
-        <p>Rules, format, and preparation guidelines for GH Cup competitors.</p>
-        <a href="#" class="btn btn-primary">Download</a>
+        <h4>{{ item.title }}</h4>
+        <p>{{ item.description }}</p>
+        {% if item.file %}
+        <a href="{{ item.file }}" class="btn btn-primary" download>Download</a>
+        {% else %}
+        <span class="btn btn-outline" style="cursor:default; opacity:0.6;">Coming Soon</span>
+        {% endif %}
       </div>
-      <div class="material-card">
-        <div class="file-icon">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1a2744" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        </div>
-        <h4>GH Cup Judges Package</h4>
-        <p>Scoring rubrics and guidelines for volunteer judges.</p>
-        <a href="#" class="btn btn-primary">Download</a>
-      </div>
-      <div class="material-card">
-        <div class="file-icon">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1a2744" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        </div>
-        <h4>Mooting Guide</h4>
-        <p>An introductory guide to mooting for new members and first-time competitors.</p>
-        <a href="#" class="btn btn-primary">Download</a>
-      </div>
+      {%- endfor %}
     </div>
   </div>
 </section>

@@ -5,7 +5,7 @@ activePage: events
 permalink: /events/
 ---
 
-<section class="page-header">
+<section class="page-header{% if pageHeaders.events.photo %} page-header--photo{% endif %}"{% if pageHeaders.events.photo %} style="background-image:url('{{ pageHeaders.events.photo }}'); background-position:{{ pageHeaders.events.photoPosition or 'center' }};"{% endif %}>
   <div class="container">
     <h1>Events</h1>
     <p>Stay up to date with our upcoming events and workshops.</p>
@@ -35,6 +35,22 @@ permalink: /events/
           <p>{{ event.data.description }}</p>
           {% if event.data.time %}<div class="time">{{ event.data.time }}</div>{% endif %}
           {% if event.data.location %}<div class="location">{{ event.data.location }}</div>{% endif %}
+          {%- if event.data.rsvp != false %}
+          <div class="schedule-rsvp">
+            <button type="button" class="rsvp-toggle" aria-expanded="false" onclick="toggleRsvp(this)">RSVP for this event</button>
+            <form class="rsvp-form" name="rsvp" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+              <input type="hidden" name="form-name" value="rsvp">
+              <input type="hidden" name="event" value="{{ event.data.title }}">
+              <p class="hidden" style="display:none"><label>Don't fill this out: <input name="bot-field"></label></p>
+              <div class="rsvp-fields">
+                <input type="text" name="name" placeholder="Your Name" required minlength="2" maxlength="100" autocomplete="name">
+                <input type="email" name="email" placeholder="Your Email" required maxlength="254" autocomplete="email">
+                <input type="number" name="guests" placeholder="How many attending?" min="1" max="20" value="1" required>
+              </div>
+              <button type="submit" class="btn btn-primary">Confirm RSVP</button>
+            </form>
+          </div>
+          {%- endif %}
         </div>
       </div>
       {%- endfor %}
@@ -97,4 +113,12 @@ function closeLightbox() {
   document.body.style.overflow = '';
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+function toggleRsvp(btn) {
+  var form = btn.nextElementSibling;
+  var isHidden = form.hidden;
+  form.hidden = !isHidden;
+  btn.setAttribute('aria-expanded', String(isHidden));
+  btn.textContent = isHidden ? 'Close RSVP' : 'RSVP for this event';
+}
 </script>

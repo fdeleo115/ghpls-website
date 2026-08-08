@@ -5,7 +5,7 @@ activePage: about
 permalink: /about/
 ---
 
-<section class="page-header">
+<section class="page-header{% if pageHeaders.about.photo %} page-header--photo{% endif %}"{% if pageHeaders.about.photo %} style="background-image:url('{{ pageHeaders.about.photo }}'); background-position:{{ pageHeaders.about.photoPosition or 'center' }};"{% endif %}>
   <div class="container">
     <h1>About Us</h1>
     <p>Learn about the Guelph-Humber Pre-Law Society and our mission.</p>
@@ -44,26 +44,152 @@ permalink: /about/
   </div>
 </section>
 
-<section class="bg-cream">
+<section class="bg-cream exec-section">
   <div class="container">
     <div class="section-header">
       <h2>Executive Team</h2>
       <p>Meet the team behind the Guelph-Humber Pre-Law Society.</p>
       <div class="line"></div>
     </div>
-    <div class="exec-grid">
-      {%- for member in collections.team %}
-      <div class="exec-card">
-        {% if member.data.photo %}
-        <img src="{{ member.data.photo }}" alt="{{ member.data.name }}" class="avatar-img" style="object-position: {{ member.data.photoPosition or 'center' }};">
-        {% else %}
-        <div class="avatar">{{ member.data.name[0] }}</div>
-        {% endif %}
-        <h4>{{ member.data.name }}</h4>
-        <div class="role">{{ member.data.role }}</div>
+    <div class="exec-carousel" id="execCarousel">
+      <div class="exec-rail" tabindex="0" role="region" aria-label="Executive team — scrollable">
+        {%- for member in collections.team %}
+        <div class="exec-card">
+          <div class="exec-card-photo">
+            {% if member.data.photo %}
+            <img src="{{ member.data.photo }}" alt="{{ member.data.name }}" style="object-position: {{ member.data.photoPosition or 'center' }};">
+            {% else %}
+            <div class="exec-card-avatar">{{ member.data.name[0] }}</div>
+            {% endif %}
+          </div>
+          <h3>{{ member.data.name }}</h3>
+          <div class="role">{{ member.data.role }}</div>
+          {% if member.data.bio %}
+          <p class="exec-bio">{{ member.data.bio }}</p>
+          {% endif %}
+          <a class="exec-card-link" href="/team/{{ member.fileSlug }}/">View Profile &#8594;</a>
+        </div>
+        {%- endfor %}
       </div>
-      {%- endfor %}
+      <div class="exec-progress" id="execProgress">
+        <div class="exec-progress-fill" id="execProgressFill"></div>
+      </div>
+      <div class="exec-scroll-hint" id="execScrollHint">
+        <span>Drag, scroll, or swipe to meet the rest of the team</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </div>
     </div>
+    <script>
+      (function () {
+        var carousel = document.getElementById('execCarousel');
+        var rail = document.querySelector('#execCarousel .exec-rail');
+        var progress = document.getElementById('execProgress');
+        var fill = document.getElementById('execProgressFill');
+        if (!rail || !progress || !fill) return;
+
+        function updateFill() {
+          var max = rail.scrollWidth - rail.clientWidth;
+          var frac = max > 0 ? rail.scrollLeft / max : 0;
+          fill.style.width = (frac * 100) + '%';
+        }
+        rail.addEventListener('scroll', updateFill, { passive: true });
+        window.addEventListener('resize', updateFill);
+        updateFill();
+
+        // Scroll hint: visible until the visitor discovers the rail scrolls,
+        // either on their own or via the one-time nudge below.
+        var discovered = false;
+        function markDiscovered() {
+          if (discovered) return;
+          discovered = true;
+          carousel.classList.add('is-discovered');
+        }
+        rail.addEventListener('pointerdown', markDiscovered);
+        rail.addEventListener('wheel', markDiscovered, { passive: true });
+        rail.addEventListener('touchstart', markDiscovered, { passive: true });
+        rail.addEventListener('keydown', markDiscovered);
+
+        // One-time gentle auto-nudge shortly after load — physically shows the
+        // rail moves, for anyone who scrolls past the text hint. Skipped
+        // entirely for reduced-motion, and cancelled the instant the visitor
+        // scrolls it themselves first.
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          setTimeout(function () {
+            if (discovered || rail.scrollWidth <= rail.clientWidth) return;
+            var prevBehavior = rail.style.scrollBehavior;
+            rail.style.scrollBehavior = 'smooth';
+            rail.scrollLeft = 64;
+            setTimeout(function () {
+              if (!discovered) rail.scrollLeft = 0;
+              rail.style.scrollBehavior = prevBehavior;
+            }, 550);
+          }, 900);
+        }
+
+        // Drag-to-scroll (mouse equivalent of trackpad/touch swipe, which are
+        // already native to the overflow container). Skip starting a drag
+        // when the pointer comes down on the card's "View Profile" link, so
+        // a plain click/tap on it navigates normally instead of being
+        // swallowed by pointer capture.
+        var isDown = false, startX = 0, startScroll = 0;
+        rail.addEventListener('pointerdown', function (e) {
+          if (e.target.closest('a, button')) return;
+          isDown = true;
+          startX = e.clientX;
+          startScroll = rail.scrollLeft;
+          rail.classList.add('is-dragging');
+          rail.setPointerCapture(e.pointerId);
+        });
+        rail.addEventListener('pointermove', function (e) {
+          if (!isDown) return;
+          rail.scrollLeft = startScroll - (e.clientX - startX);
+          updateFill();
+        });
+        function endDrag() {
+          isDown = false;
+          rail.classList.remove('is-dragging');
+        }
+        rail.addEventListener('pointerup', endDrag);
+        rail.addEventListener('pointercancel', endDrag);
+
+        // Keyboard: advance by one card + gap.
+        rail.addEventListener('keydown', function (e) {
+          var card = rail.querySelector('.exec-card');
+          if (!card) return;
+          var step = card.getBoundingClientRect().width + parseFloat(getComputedStyle(rail).gap || 0);
+          if (e.key === 'ArrowRight') { rail.scrollLeft += step; e.preventDefault(); }
+          else if (e.key === 'ArrowLeft') { rail.scrollLeft -= step; e.preventDefault(); }
+        });
+
+        // The progress track is itself draggable: map pointer-x fraction to scrollLeft.
+        // `is-dragging` drops the rail's smooth scroll-behavior for the duration —
+        // without it each scrollLeft write starts a fresh animation and the rail
+        // rubber-bands behind the cursor instead of tracking it.
+        function scrubTo(clientX) {
+          var rect = progress.getBoundingClientRect();
+          var frac = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+          rail.scrollLeft = frac * (rail.scrollWidth - rail.clientWidth);
+          updateFill();
+        }
+        var scrubbing = false;
+        progress.addEventListener('pointerdown', function (e) {
+          scrubbing = true;
+          markDiscovered();
+          rail.classList.add('is-dragging');
+          progress.setPointerCapture(e.pointerId);
+          scrubTo(e.clientX);
+        });
+        progress.addEventListener('pointermove', function (e) {
+          if (scrubbing) scrubTo(e.clientX);
+        });
+        function endScrub() {
+          scrubbing = false;
+          rail.classList.remove('is-dragging');
+        }
+        progress.addEventListener('pointerup', endScrub);
+        progress.addEventListener('pointercancel', endScrub);
+      })();
+    </script>
   </div>
 </section>
 

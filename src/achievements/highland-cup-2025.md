@@ -5,9 +5,13 @@ date: 2025-11-23T19:00:00.000Z
 results:
   - award: Champions
     recipients: Francesco Deleo & Christabell Zalwango
+competitors:
+  - name: Francesco Deleo
+  - name: Christabell Zalwango
 cardWidth: normal
 photo: /assets/uploads/dd3731a4-1ccd-412b-8186-e155c1bbbd4a.jpeg
 photoSize: cover
 photoHeight: tall
 photoPosition: 49% 23%
 ---
+Francesco Deleo and Christabell Zalwango were crowned Champions of the Highland Cup, taking first place in the competition.

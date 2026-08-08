@@ -1,0 +1,8 @@
+{
+  "layout": "member.njk",
+  "activePage": "about",
+  "eleventyComputed": {
+    "pageTitle": "{{ name }}",
+    "permalink": "/team/{{ page.fileSlug }}/"
+  }
+}

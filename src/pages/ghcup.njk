@@ -5,7 +5,7 @@ activePage: ghcup
 permalink: /ghcup/
 ---
 
-<section class="page-header">
+<section class="page-header{% if pageHeaders.ghcup.photo %} page-header--photo{% endif %}"{% if pageHeaders.ghcup.photo %} style="background-image:url('{{ pageHeaders.ghcup.photo }}'); background-position:{{ pageHeaders.ghcup.photoPosition or 'center' }};"{% endif %}>
   <div class="container">
     <h1>The GH Cup</h1>
     <p>Our flagship annual moot court competition.</p>
@@ -57,7 +57,31 @@ permalink: /ghcup/
   </div>
 </section>
 
+{%- if ghcup.gallery and ghcup.gallery.length > 0 %}
 <section>
+  <div class="container">
+    <div class="section-header">
+      <h2>Competition Gallery</h2>
+      <p>Moments from The GH Cup.</p>
+      <div class="line"></div>
+    </div>
+    <div class="photo-gallery">
+      {%- for shot in ghcup.gallery %}
+      <div class="photo-card" onclick="openLightbox('{{ shot.image }}', '{{ shot.caption }}')">
+        <img src="{{ shot.image }}" alt="{{ shot.caption }}" loading="lazy" style="object-position: {{ shot.photoPosition or 'center' }};">
+        {%- if shot.caption %}
+        <div class="photo-overlay">
+          <h4>{{ shot.caption }}</h4>
+        </div>
+        {%- endif %}
+      </div>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+{%- endif %}
+
+<section class="bg-cream">
   <div class="container">
     <div class="section-header">
       <h2>Previous Winners</h2>
@@ -95,7 +119,7 @@ permalink: /ghcup/
 </section>
 
 {%- if collections.ghcupVideos.length > 0 %}
-<section class="bg-cream">
+<section>
   <div class="container">
     <div class="section-header">
       <h2>Final Videos</h2>
@@ -120,7 +144,7 @@ permalink: /ghcup/
 </section>
 {%- endif %}
 
-<section>
+<section class="bg-cream">
   <div class="container">
     <div class="section-header">
       <h2>Sponsors & Partners</h2>
@@ -135,3 +159,22 @@ permalink: /ghcup/
     <p style="text-align:center; margin-top:32px; color:var(--text-light);">Interested in sponsoring? <a href="/contact/" style="color:var(--peach); font-weight:600;">Get in touch</a></p>
   </div>
 </section>
+
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-caption" class="lightbox-caption"></div>
+</div>
+<script>
+function openLightbox(src, caption) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-caption').textContent = caption;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>

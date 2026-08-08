@@ -1,13 +1,13 @@
 ---
 layout: base.njk
-pageTitle: Photos
+pageTitle: Photo Gallery
 activePage: photos
 permalink: /photos/
 ---
 
-<section class="page-header">
+<section class="page-header{% if pageHeaders.photos.photo %} page-header--photo{% endif %}"{% if pageHeaders.photos.photo %} style="background-image:url('{{ pageHeaders.photos.photo }}'); background-position:{{ pageHeaders.photos.photoPosition or 'center' }};"{% endif %}>
   <div class="container">
-    <h1>Photos</h1>
+    <h1>Guelph-Humber Pre-Law Society Gallery</h1>
     <p>Highlights from our events, competitions, and community.</p>
   </div>
 </section>
@@ -16,10 +16,15 @@ permalink: /photos/
   <div class="container">
     <div class="photo-gallery">
       {%- for photo in collections.photos %}
-      <div class="photo-card photo-{{ photo.data.size or 'normal' }}" onclick="openLightbox('{{ photo.data.image }}', '{{ photo.data.title }}')">
+      <div class="photo-card photo-{{ photo.data.size or 'normal' }}"
+           data-img="{{ photo.data.image }}"
+           data-title="{{ photo.data.title }}"
+           data-desc="{{ photo.data.description }}"
+           onclick="openLightbox(this.dataset.img, this.dataset.title, this.dataset.desc)">
         <img src="{{ photo.data.image }}" alt="{{ photo.data.title }}" loading="lazy" style="object-position: {{ photo.data.photoPosition or 'center' }};">
         <div class="photo-overlay">
           <h4>{{ photo.data.title }}</h4>
+          {% if photo.data.description %}<p>{{ photo.data.description }}</p>{% endif %}
           {% if photo.data.date %}<span>{{ photo.data.date | dateFormat }}</span>{% endif %}
         </div>
       </div>
@@ -34,13 +39,20 @@ permalink: /photos/
 <div id="lightbox" class="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
   <img id="lightbox-img" src="" alt="">
-  <div id="lightbox-caption" class="lightbox-caption"></div>
+  <div class="lightbox-caption">
+    <h4 id="lightbox-title"></h4>
+    <p id="lightbox-desc"></p>
+  </div>
 </div>
 
 <script>
-function openLightbox(src, caption) {
+function openLightbox(src, title, desc) {
   document.getElementById('lightbox-img').src = src;
-  document.getElementById('lightbox-caption').textContent = caption;
+  var t = document.getElementById('lightbox-title');
+  var d = document.getElementById('lightbox-desc');
+  t.textContent = title || '';
+  d.textContent = desc || '';
+  d.style.display = desc ? 'block' : 'none';
   document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
 }

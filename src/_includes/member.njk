@@ -1,0 +1,145 @@
+---
+layout: base.njk
+---
+
+<section class="page-header page-header--photo"{% if photo %} style="background-image:url('{{ photo }}'); background-position:{{ photoPosition or 'center' }};"{% endif %}>
+  <div class="container">
+    <div class="detail-back"><a href="/about/#execCarousel">&#8592; All Executives</a></div>
+    <h1>{{ name }}</h1>
+    <p>{{ role }}{% if previousRole %} &middot; Previously {{ previousRole }}{% endif %}</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    {%- set record = name | memberRecord(collections.achievements) %}
+    <div class="achievement-detail member-detail">
+      <div class="detail-main">
+        {%- if bio %}
+        <div class="content-block detail-desc">
+          <p>{{ bio }}</p>
+        </div>
+        {%- else %}
+        <p class="exec-bio exec-bio--empty detail-desc">Biography coming soon.</p>
+        {%- endif %}
+
+        <div class="detail-competitors">
+          <h3>Competitions Attended</h3>
+          {%- if record.competitions.length > 0 %}
+          <ul class="detail-chip-list">
+            {%- for c in record.competitions %}
+            <li><a class="detail-chip" href="/achievements/{{ c.slug }}/">{{ c.competition }} {{ c.year }}</a></li>
+            {%- endfor %}
+          </ul>
+          {%- else %}
+          <p class="exec-bio exec-bio--empty">No competitions recorded yet.</p>
+          {%- endif %}
+        </div>
+
+        <div class="detail-highlights">
+          <h3>Team Placements</h3>
+          {%- if record.teamPlacements.length > 0 %}
+          <div class="detail-results">
+            {%- for p in record.teamPlacements %}
+            <div class="detail-result">
+              <span class="badge">{{ p.award }}</span>
+              <a class="names" href="/achievements/{{ p.slug }}/">{{ p.competition }} {{ p.year }}</a>
+            </div>
+            {%- endfor %}
+          </div>
+          {%- else %}
+          <p class="exec-bio exec-bio--empty">No team placements recorded yet.</p>
+          {%- endif %}
+        </div>
+
+        <div class="detail-highlights">
+          <h3>Individual Achievements</h3>
+          {%- if record.individualAchievements.length > 0 %}
+          <div class="detail-results">
+            {%- for p in record.individualAchievements %}
+            <div class="detail-result">
+              <span class="badge">{{ p.award }}</span>
+              <a class="names" href="/achievements/{{ p.slug }}/">{{ p.competition }} {{ p.year }}</a>
+            </div>
+            {%- endfor %}
+          </div>
+          {%- else %}
+          <p class="exec-bio exec-bio--empty">No individual achievements recorded yet.</p>
+          {%- endif %}
+        </div>
+
+        {%- if qanda and qanda.length > 0 %}
+        <div class="detail-highlights member-qanda">
+          <h3>A Few Questions</h3>
+          {%- for qa in qanda %}
+          <div class="qanda-item">
+            <p class="qanda-q">{{ qa.question }}</p>
+            <p class="qanda-a">{{ qa.answer }}</p>
+          </div>
+          {%- endfor %}
+        </div>
+        {%- endif %}
+      </div>
+
+      <div class="detail-aside">
+        <div class="detail-fact-card">
+          <div class="detail-fact">
+            <span class="label">Role</span>
+            <span class="value">{{ role }}</span>
+          </div>
+          {%- if previousRole %}
+          <div class="detail-fact">
+            <span class="label">Previous Role</span>
+            <span class="value">{{ previousRole }}</span>
+          </div>
+          {%- endif %}
+          {%- if gradYear %}
+          <div class="detail-fact">
+            <span class="label">Graduating</span>
+            <span class="value">{{ gradYear }}</span>
+          </div>
+          {%- endif %}
+        </div>
+
+        {%- if photo %}
+        {#- Most headshots are circular crops with black corners baked into the
+           JPEG (see .exec-card-photo) — a rectangular frame would expose them,
+           so the headshot gets its own circular treatment here. extraPhotos
+           are ordinary event photos and use the rectangular gallery below. #}
+        <div class="member-headshot" data-img="{{ photo }}" data-caption="{{ name }}" onclick="openLightbox(this.dataset.img, this.dataset.caption)">
+          <img src="{{ photo }}" alt="{{ name }}" loading="lazy" style="object-position: {{ photoPosition or 'center' }};">
+        </div>
+        {%- endif %}
+
+        {%- if extraPhotos and extraPhotos.length > 0 %}
+        <div class="detail-gallery">
+          {%- for extra in extraPhotos %}
+          <div class="detail-photo" data-img="{{ extra.image }}" data-caption="{{ extra.caption or name }}" onclick="openLightbox(this.dataset.img, this.dataset.caption)">
+            <img src="{{ extra.image }}" alt="{{ extra.caption or name }}" loading="lazy">
+          </div>
+          {%- endfor %}
+        </div>
+        {%- endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-caption" class="lightbox-caption"></div>
+</div>
+<script>
+function openLightbox(src, caption) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-caption').textContent = caption;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>

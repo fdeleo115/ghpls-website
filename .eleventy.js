@@ -65,6 +65,44 @@ module.exports = function (eleventyConfig) {
     return new Date(date).getDate();
   });
 
+  // Cross-references a team member's name against the achievements collection
+  // so exec profile pages can show competitions/placements without the exec
+  // having to re-enter data that's already on the achievement entry.
+  // A result's recipients ("Kate Hilton & Ava Gonsalves") counts as a team
+  // placement when it names more than one person, individual otherwise.
+  eleventyConfig.addFilter("memberRecord", function (name, achievements) {
+    const record = { competitions: [], teamPlacements: [], individualAchievements: [] };
+    if (!name || !achievements) return record;
+    const key = name.trim().toLowerCase();
+    function byDateDesc(a, b) {
+      const da = a.date ? new Date(a.date).getTime() : new Date(a.year || 0, 0).getTime();
+      const db = b.date ? new Date(b.date).getTime() : new Date(b.year || 0, 0).getTime();
+      return db - da;
+    }
+    achievements.forEach(function (a) {
+      const d = a.data;
+      const inCompetitors = (d.competitors || []).some(function (c) {
+        return (c.name || "").trim().toLowerCase() === key;
+      });
+      const matchedResults = (d.results || []).filter(function (r) {
+        const tokens = (r.recipients || "").split("&").map(function (s) { return s.trim().toLowerCase(); });
+        return tokens.indexOf(key) !== -1;
+      });
+      if (!inCompetitors && matchedResults.length === 0) return;
+      record.competitions.push({ competition: d.competition, year: d.year, date: d.date, slug: a.fileSlug });
+      matchedResults.forEach(function (r) {
+        const tokens = (r.recipients || "").split("&");
+        const row = { competition: d.competition, year: d.year, date: d.date, slug: a.fileSlug, award: r.award };
+        if (tokens.length > 1) record.teamPlacements.push(row);
+        else record.individualAchievements.push(row);
+      });
+    });
+    record.competitions.sort(byDateDesc);
+    record.teamPlacements.sort(byDateDesc);
+    record.individualAchievements.sort(byDateDesc);
+    return record;
+  });
+
   // Pull the 11-character video ID out of any common YouTube URL form.
   eleventyConfig.addFilter("youtubeId", function (url) {
     if (!url) return "";

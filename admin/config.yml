@@ -31,6 +31,17 @@ collections:
         fields:
           - { label: "Award", name: "award", widget: "string", hint: "e.g. Finalists, Semi-Finalists, Best Oral Advocate" }
           - { label: "Recipients", name: "recipients", widget: "string", hint: "e.g. Kate Hilton & Ava Gonsalves" }
+      - label: "Competitors"
+        name: "competitors"
+        widget: "list"
+        required: false
+        hint: "Everyone who competed at this event, including teammates who didn't place. Results above already show who won what."
+        fields:
+          - { label: "Name", name: "name", widget: "string" }
+      - { label: "Location", name: "location", widget: "string", required: false, hint: "Where this competition took place, e.g. Gowling WLG Moot Court" }
+      - { label: "Host", name: "host", widget: "string", required: false, hint: "The school or society hosting the competition" }
+      - { label: "Case Title", name: "caseTitle", widget: "string", required: false, hint: "The case argued at this competition" }
+      - { label: "Case Summary", name: "caseSummary", widget: "text", required: false, hint: "A short description of the case" }
       - label: "Card Width"
         name: "cardWidth"
         widget: "select"
@@ -62,6 +73,30 @@ collections:
           - { label: "Tall", value: "tall" }
       - { label: "Photo Zoom", name: "photoZoom", widget: "number", required: false, default: 1, value_type: "float", min: 1, max: 3, step: 0.1, hint: "1 = no zoom, 2 = zoom in 2x. Use with focus below to frame the shot." }
       - { label: "Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo", hint: "Drag the dot to choose what part of the photo stays in view" }
+      - label: "Highlights"
+        name: "highlights"
+        widget: "list"
+        required: false
+        hint: "Optional bullet-point highlights shown on this competition's own page (e.g. 'Advanced through three preliminary rounds')."
+        field: { label: "Highlight", name: "highlight", widget: "string" }
+      - label: "More Photos"
+        name: "extraPhotos"
+        widget: "list"
+        required: false
+        hint: "Extra photos shown on this competition's own page."
+        fields:
+          - { label: "Photo", name: "image", widget: "image" }
+          - { label: "Caption", name: "caption", widget: "string", required: false }
+      - label: "Articles"
+        name: "articles"
+        widget: "list"
+        required: false
+        hint: "Links to coverage of this competition"
+        fields:
+          - { label: "Title", name: "title", widget: "string" }
+          - { label: "URL", name: "url", widget: "string" }
+          - { label: "Source", name: "source", widget: "string", required: false, hint: "e.g. the publication or site name" }
+      - { label: "Description", name: "body", widget: "markdown", required: false, hint: "A short write-up of the event and its highlights. Shown on this competition's own page when someone clicks through from the Achievements list." }
 
   - name: "events"
     label: "Upcoming Events"
@@ -76,6 +111,7 @@ collections:
       - { label: "Time", name: "time", widget: "string", hint: "e.g. 5:00 PM - 7:00 PM", required: false }
       - { label: "Location", name: "location", widget: "string", required: false }
       - { label: "Description", name: "description", widget: "text" }
+      - { label: "Allow RSVPs", name: "rsvp", widget: "boolean", required: false, default: true, hint: "Show an RSVP form on this event so visitors can let you know they're coming. RSVPs are collected in your Netlify Forms dashboard under the 'rsvp' form." }
       - { label: "Photo", name: "photo", widget: "image", required: false, hint: "Upload a photo for this event" }
       - label: "Photo Fit"
         name: "photoSize"
@@ -168,13 +204,14 @@ collections:
   - name: "photos"
     label: "Photo Gallery"
     label_singular: "Photo"
-    description: "Upload photos to the gallery. They show up on the Photos page."
+    description: "Upload photos to the gallery. They show up on the Photo Gallery page."
     folder: "src/photos"
     create: true
     slug: "{{slug}}"
     extension: "md"
     fields:
       - { label: "Title / Caption", name: "title", widget: "string", hint: "A short caption for the photo" }
+      - { label: "Description", name: "description", widget: "text", required: false, hint: "A sentence or two giving visitors context for the photo. Shown when the photo is opened." }
       - { label: "Photo", name: "image", widget: "image" }
       - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, required: false }
       - { label: "Category", name: "category", widget: "select", options: ["Competition", "Event", "Social", "Other"], required: false }
@@ -193,16 +230,35 @@ collections:
   - name: "team"
     label: "Executive Team"
     label_singular: "Team Member"
-    description: "Add or update exec team members. They appear on the About page."
+    description: "Add or update exec team members. They appear on the About page carousel and each gets their own profile page. Competitions attended, team placements, and individual achievements are pulled in automatically from the Achievements collection — add them there, tagging this person as a Competitor or Recipient, and they'll show up here on their own."
     folder: "src/team"
     create: true
-    slug: "{{slug}}"
+    slug: "{{name}}"
     fields:
       - { label: "Name", name: "name", widget: "string" }
       - { label: "Role / Title", name: "role", widget: "string", hint: "e.g. President, Vice President" }
+      - { label: "Previous Role", name: "previousRole", widget: "string", required: false, hint: "A role this exec held before their current one, if applicable" }
+      - { label: "Graduating Year", name: "gradYear", widget: "number", value_type: "int", required: false, hint: "e.g. 2027" }
+      - { label: "Biography", name: "bio", widget: "text", required: false, hint: "Written by each executive. Include things like how long you've been in your role, how long you've been mooting, and your passion for law." }
+      - label: "Q&A"
+        name: "qanda"
+        widget: "list"
+        required: false
+        hint: "Optional short Q&A shown on this exec's profile page, e.g. 'Why did you join GHPLS?'"
+        fields:
+          - { label: "Question", name: "question", widget: "string" }
+          - { label: "Answer", name: "answer", widget: "text" }
       - { label: "Display Order", name: "order", widget: "number", value_type: "int", hint: "1 = shown first, 2 = second, etc." }
       - { label: "Photo", name: "photo", widget: "image", required: false, hint: "Upload a headshot" }
       - { label: "Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo", hint: "Drag the dot onto the face so it isn't cut off in the round headshot" }
+      - label: "More Photos"
+        name: "extraPhotos"
+        widget: "list"
+        required: false
+        hint: "Extra photos shown on this exec's own profile page"
+        fields:
+          - { label: "Photo", name: "image", widget: "image" }
+          - { label: "Caption", name: "caption", widget: "string", required: false }
 
   - name: "pages"
     label: "Page Content"
@@ -248,3 +304,74 @@ collections:
             widget: "list"
             field: { label: "Step", name: "step", widget: "string" }
           - { label: "Banner Photo", name: "photo", widget: "image", required: false, hint: "Optional photo for the GH Cup banner" }
+          - label: "Competition Gallery"
+            name: "gallery"
+            widget: "list"
+            required: false
+            hint: "Photos from The GH Cup. They appear in the Competition Gallery section on the GH Cup page."
+            fields:
+              - { label: "Photo", name: "image", widget: "image" }
+              - { label: "Caption", name: "caption", widget: "string", required: false }
+              - { label: "Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "image", hint: "Drag the dot to choose what part of the photo stays in view" }
+
+      - label: "Page Header Photos"
+        name: "page-headers"
+        file: "src/_data/pageHeaders.json"
+        description: "The banner photo shown at the top of each page. Leave a photo blank to fall back to the plain navy banner."
+        fields:
+          - label: "About Page"
+            name: "about"
+            widget: "object"
+            fields:
+              - { label: "Header Photo", name: "photo", widget: "image", required: false }
+              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo" }
+          - label: "Contact Page"
+            name: "contact"
+            widget: "object"
+            fields:
+              - { label: "Header Photo", name: "photo", widget: "image", required: false }
+              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo" }
+          - label: "Materials Page"
+            name: "materials"
+            widget: "object"
+            fields:
+              - { label: "Header Photo", name: "photo", widget: "image", required: false }
+              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo" }
+          - label: "Achievements Page"
+            name: "achievements"
+            widget: "object"
+            fields:
+              - { label: "Header Photo", name: "photo", widget: "image", required: false }
+              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo" }
+          - label: "Events Page"
+            name: "events"
+            widget: "object"
+            fields:
+              - { label: "Header Photo", name: "photo", widget: "image", required: false }
+              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo" }
+          - label: "Photo Gallery Page"
+            name: "photos"
+            widget: "object"
+            fields:
+              - { label: "Header Photo", name: "photo", widget: "image", required: false }
+              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo" }
+          - label: "GH Cup Page"
+            name: "ghcup"
+            widget: "object"
+            fields:
+              - { label: "Header Photo", name: "photo", widget: "image", required: false }
+              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo" }
+
+      - label: "Materials Page"
+        name: "materials-page"
+        file: "src/_data/materials.json"
+        description: "The downloadable resource cards on the Materials page."
+        fields:
+          - label: "Materials"
+            name: "items"
+            widget: "list"
+            hint: "Add, remove, or reorder resource cards. Leave the file empty to show a 'Coming Soon' card instead of a broken download."
+            fields:
+              - { label: "Title", name: "title", widget: "string" }
+              - { label: "Description", name: "description", widget: "text" }
+              - { label: "File (PDF or document)", name: "file", widget: "file", required: false }

@@ -1,0 +1,8 @@
+{
+  "layout": "achievement.njk",
+  "activePage": "achievements",
+  "eleventyComputed": {
+    "pageTitle": "{{ competition }} {{ year }}",
+    "permalink": "/achievements/{{ page.fileSlug }}/"
+  }
+}

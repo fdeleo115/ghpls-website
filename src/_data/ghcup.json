@@ -10,5 +10,11 @@
     "Oral rounds are judged by volunteer lawyers, law students, and professors",
     "Awards are given for best oral advocates and best written submissions"
   ],
-  "photo": ""
+  "photo": "",
+  "gallery": [
+    {
+      "image": "/assets/uploads/img_5810.jpeg",
+      "caption": "Guelph-Humber advocates with The GH Cup banner"
+    }
+  ]
 }

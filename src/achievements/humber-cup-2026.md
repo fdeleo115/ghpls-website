@@ -9,8 +9,12 @@ results:
     recipients: Francesco Deleo
   - award: 4th Distinguished Oral Advocate
     recipients: Christabell Zalwango
+competitors:
+  - name: Francesco Deleo
+  - name: Christabell Zalwango
 photo: /assets/uploads/be553b90-4d56-48f5-96c1-bd3be9b3ad2c.jpeg
 photoSize: cover
 photoHeight: tall
 photoPosition: 53% 46%
 ---
+At the inaugural Humber Cup, Francesco Deleo and Christabell Zalwango reached the semi-finals. Francesco was named 2nd Distinguished Oral Advocate and Christabell 4th Distinguished Oral Advocate for their individual performances.

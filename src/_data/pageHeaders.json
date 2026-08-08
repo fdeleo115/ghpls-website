@@ -1,0 +1,30 @@
+{
+  "about": {
+    "photo": "/assets/uploads/img_5370.jpeg",
+    "photoPosition": "center 35%"
+  },
+  "contact": {
+    "photo": "/assets/uploads/1f6189da-ba5b-4dcb-b5d3-1d636253768b.jpeg",
+    "photoPosition": "center 35%"
+  },
+  "materials": {
+    "photo": "/assets/uploads/img_5370.jpeg",
+    "photoPosition": "center 40%"
+  },
+  "achievements": {
+    "photo": "/assets/uploads/1f6189da-ba5b-4dcb-b5d3-1d636253768b.jpeg",
+    "photoPosition": "center 35%"
+  },
+  "events": {
+    "photo": "/assets/uploads/1908598e-b690-4d97-b522-229b34f34e41.jpeg",
+    "photoPosition": "center 42%"
+  },
+  "photos": {
+    "photo": "/assets/uploads/be553b90-4d56-48f5-96c1-bd3be9b3ad2c.jpeg",
+    "photoPosition": "center 22%"
+  },
+  "ghcup": {
+    "photo": "/assets/uploads/img_5810.jpeg",
+    "photoPosition": "center 28%"
+  }
+}
