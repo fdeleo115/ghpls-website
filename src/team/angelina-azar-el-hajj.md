@@ -1,6 +1,7 @@
 ---
 name: Angelina Azar El-Hajj
 role: Vice President of General Member Experience
+previousRole: Vice President of Moot Training
 gradYear: 2027
 qanda: []
 competitions:
