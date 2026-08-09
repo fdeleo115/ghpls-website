@@ -72,7 +72,26 @@ collections:
           - { label: "Medium", value: "medium" }
           - { label: "Tall", value: "tall" }
       - { label: "Photo Zoom", name: "photoZoom", widget: "number", required: false, default: 1, value_type: "float", min: 1, max: 3, step: 0.1, hint: "1 = no zoom, 2 = zoom in 2x. Use with focus below to frame the shot." }
-      - { label: "Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo", hint: "Drag the dot to choose what part of the photo stays in view" }
+      - label: "Photo Focus (drag to position)"
+        name: "photoPosition"
+        widget: "focal-point"
+        required: false
+        default: "center"
+        image_field: "photo"
+        fitField: "photoSize"
+        zoomField: "photoZoom"
+        hint: "Drag the dot to choose what part of the photo stays in view. The preview on the right shows every place this photo appears on the site."
+        shapes:
+          - label: "Achievements list card"
+            axes:
+              - { by: "cardWidth", values: { normal: 564, wide: 1152 }, default: 564 }
+              - { by: "photoHeight", values: { short: 140, medium: 200, tall: 280 }, default: 200 }
+          - label: "Detail page banner"
+            axes: [{ value: 1600 }, { value: 380 }]
+            overlay: "navy"
+            approx: true
+          - label: "Detail page gallery thumbnail"
+            axes: [{ value: 4 }, { value: 3 }]
       - label: "Highlights"
         name: "highlights"
         widget: "list"
@@ -122,7 +141,18 @@ collections:
         options:
           - { label: "Fill area (crop to fit)", value: "cover" }
           - { label: "Show entire photo (may have gaps)", value: "contain" }
-      - { label: "Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo", hint: "Drag the dot to choose what part of the photo stays in view" }
+      - label: "Photo Focus (drag to position)"
+        name: "photoPosition"
+        widget: "focal-point"
+        required: false
+        default: "center"
+        image_field: "photo"
+        fitField: "photoSize"
+        hint: "Drag the dot to choose what part of the photo stays in view."
+        shapes:
+          - label: "Upcoming event card"
+            axes: [{ value: 1152 }, { value: 180 }]
+            approx: true
 
   - name: "ghcup-winners"
     label: "GH Cup Previous Winners"
@@ -153,7 +183,19 @@ collections:
           - { label: "Fill area (crop to fit)", value: "cover" }
           - { label: "Show entire photo (may have gaps)", value: "contain" }
       - { label: "Photo Zoom", name: "photoZoom", widget: "number", required: false, default: 1, value_type: "float", min: 1, max: 3, step: 0.1, hint: "1 = no zoom, 2 = zoom in 2x." }
-      - { label: "Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo", hint: "Drag the dot to choose what part of the photo stays in view" }
+      - label: "Photo Focus (drag to position)"
+        name: "photoPosition"
+        widget: "focal-point"
+        required: false
+        default: "center"
+        image_field: "photo"
+        fitField: "photoSize"
+        zoomField: "photoZoom"
+        hint: "Drag the dot to choose what part of the photo stays in view."
+        shapes:
+          - label: "Winner card"
+            axes: [{ value: 280 }, { value: 220 }]
+            approx: true
 
   - name: "ghcup-videos"
     label: "GH Cup Final Videos"
@@ -191,7 +233,17 @@ collections:
         options:
           - { label: "Fill area (crop to fit)", value: "cover" }
           - { label: "Show entire photo (may have gaps)", value: "contain" }
-      - { label: "Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo", hint: "Drag the dot to choose what part of the photo stays in view" }
+      - label: "Photo Focus (drag to position)"
+        name: "photoPosition"
+        widget: "focal-point"
+        required: false
+        default: "center"
+        image_field: "photo"
+        fitField: "photoSize"
+        hint: "Drag the dot to choose what part of the photo stays in view."
+        shapes:
+          - label: "Past event card"
+            axes: [{ value: 564 }, { value: 200 }]
       - label: "Extra Photos"
         name: "extraPhotos"
         widget: "list"
@@ -215,7 +267,18 @@ collections:
       - { label: "Photo", name: "image", widget: "image" }
       - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, required: false }
       - { label: "Category", name: "category", widget: "select", options: ["Competition", "Event", "Social", "Other"], required: false }
-      - { label: "Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "image", hint: "Drag the dot to choose what part of the photo stays in view in the gallery grid" }
+      - label: "Photo Focus (drag to position)"
+        name: "photoPosition"
+        widget: "focal-point"
+        required: false
+        default: "center"
+        image_field: "image"
+        hint: "Drag the dot to choose what part of the photo stays in view in the gallery grid."
+        shapes:
+          - label: "Gallery grid cell"
+            axes:
+              - { by: "size", values: { normal: 1, wide: 2, tall: 1, large: 2 }, default: 1 }
+              - { by: "size", values: { normal: 1, wide: 1, tall: 2, large: 2 }, default: 1 }
       - label: "Photo Size in Gallery"
         name: "size"
         widget: "select"
@@ -250,7 +313,21 @@ collections:
           - { label: "Answer", name: "answer", widget: "text" }
       - { label: "Display Order", name: "order", widget: "number", value_type: "int", hint: "1 = shown first, 2 = second, etc." }
       - { label: "Photo", name: "photo", widget: "image", required: false, hint: "Upload a headshot" }
-      - { label: "Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo", hint: "Drag the dot onto the face so it isn't cut off in the round headshot" }
+      - label: "Photo Focus (drag to position)"
+        name: "photoPosition"
+        widget: "focal-point"
+        required: false
+        default: "center"
+        image_field: "photo"
+        hint: "Drag the dot onto the face so it isn't cut off in the round headshot."
+        shapes:
+          - label: "Carousel & profile headshot (circular)"
+            shape: "circle"
+            axes: [{ value: 1 }, { value: 1 }]
+          - label: "Profile page banner"
+            axes: [{ value: 1600 }, { value: 380 }]
+            overlay: "navy"
+            approx: true
       - label: "More Photos"
         name: "extraPhotos"
         widget: "list"
@@ -312,7 +389,16 @@ collections:
             fields:
               - { label: "Photo", name: "image", widget: "image" }
               - { label: "Caption", name: "caption", widget: "string", required: false }
-              - { label: "Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "image", hint: "Drag the dot to choose what part of the photo stays in view" }
+              - label: "Photo Focus (drag to position)"
+                name: "photoPosition"
+                widget: "focal-point"
+                required: false
+                default: "center"
+                image_field: "image"
+                hint: "Drag the dot to choose what part of the photo stays in view."
+                shapes:
+                  - label: "Competition gallery grid"
+                    axes: [{ value: 1 }, { value: 1 }]
 
       - label: "Page Header Photos"
         name: "page-headers"
@@ -324,43 +410,50 @@ collections:
             widget: "object"
             fields:
               - { label: "Header Photo", name: "photo", widget: "image", required: false }
-              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo" }
+              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo",
+                  shapes: [{ label: "About page banner", axes: [{ value: 1600 }, { value: 380 }], overlay: "navy", approx: true }] }
           - label: "Contact Page"
             name: "contact"
             widget: "object"
             fields:
               - { label: "Header Photo", name: "photo", widget: "image", required: false }
-              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo" }
+              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo",
+                  shapes: [{ label: "Contact page banner", axes: [{ value: 1600 }, { value: 380 }], overlay: "navy", approx: true }] }
           - label: "Materials Page"
             name: "materials"
             widget: "object"
             fields:
               - { label: "Header Photo", name: "photo", widget: "image", required: false }
-              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo" }
+              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo",
+                  shapes: [{ label: "Materials page banner", axes: [{ value: 1600 }, { value: 380 }], overlay: "navy", approx: true }] }
           - label: "Achievements Page"
             name: "achievements"
             widget: "object"
             fields:
               - { label: "Header Photo", name: "photo", widget: "image", required: false }
-              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo" }
+              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo",
+                  shapes: [{ label: "Achievements page banner", axes: [{ value: 1600 }, { value: 380 }], overlay: "navy", approx: true }] }
           - label: "Events Page"
             name: "events"
             widget: "object"
             fields:
               - { label: "Header Photo", name: "photo", widget: "image", required: false }
-              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo" }
+              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo",
+                  shapes: [{ label: "Events page banner", axes: [{ value: 1600 }, { value: 380 }], overlay: "navy", approx: true }] }
           - label: "Photo Gallery Page"
             name: "photos"
             widget: "object"
             fields:
               - { label: "Header Photo", name: "photo", widget: "image", required: false }
-              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo" }
+              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo",
+                  shapes: [{ label: "Photo Gallery page banner", axes: [{ value: 1600 }, { value: 380 }], overlay: "navy", approx: true }] }
           - label: "GH Cup Page"
             name: "ghcup"
             widget: "object"
             fields:
               - { label: "Header Photo", name: "photo", widget: "image", required: false }
-              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo" }
+              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo",
+                  shapes: [{ label: "GH Cup page banner", axes: [{ value: 1600 }, { value: 380 }], overlay: "navy", approx: true }] }
 
       - label: "Materials Page"
         name: "materials-page"
