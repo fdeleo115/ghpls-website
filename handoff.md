@@ -2,6 +2,155 @@
 
 _Written: June 2026 · Updated: August 8 2026 · For whoever (human or AI) picks this up next._
 
+> **Section order:** newest first. The "fifth pass" below is the most recent
+> work; sections 0 / 0a / 0b / 0c after it are earlier the same day. Their
+> internal cross-references ("see section 0") still point at each other, not at
+> this section.
+
+## Fifth pass, Aug 8 2026 — editable exec records, mobile audit, responsive images
+
+Three pieces of work: making an exec's competitions/achievements editable in the
+CMS (they weren't), a full mobile pass over every page after the recent
+redesign, and build-time image resizing. **Not yet committed** — the working
+tree has `.eleventy.js`, `admin/config.yml`, `package.json`,
+`package-lock.json`, `src/_includes/member.njk`, `src/pages/materials.njk`,
+`src/styles.css`, and this file.
+
+### 1. Exec competitions/achievements are now CMS-editable
+
+Previously these three sections on an exec's profile page were *only* derived
+from the Achievements collection via the `memberRecord` filter — an exec had no
+way to add anything themselves. Now `memberRecord` merges **two** sources:
+
+- **Auto-pulled** (unchanged): name cross-referenced against the `achievements`
+  collection's `competitors` and `results[].recipients`.
+- **Manual** (new): three optional list fields on the team member —
+  `competitions`, `teamPlacements`, `individualAchievements` — for outside
+  competitions, older awards, or anything the automatic match misses.
+
+Details worth knowing before changing this:
+
+- The two sources are **merged and de-duplicated** on
+  `award|competition|year` (lowercased), so entering something by hand that's
+  already auto-pulled shows once, not twice.
+- A manual entry whose competition name + year matches a real achievement gets
+  **linked to that achievement page automatically**; one that doesn't renders as
+  a plain `.detail-chip--static` chip or a `<span class="names">` rather than a
+  dead link. Both branches are in `member.njk`.
+- A new `manualOnly` boolean on the member **suppresses the auto-pulled side
+  entirely** — the escape hatch for when the name match is wrong (say, two
+  people share a name). The CMS hint tells execs to leave it off.
+- The team collection's `description` in `admin/config.yml` explains all of
+  this to the execs in plain language.
+
+**Verified** with temporary seed data on a real member: merge, de-duplication,
+auto-linking of a hand-typed entry, the no-link fallback, and `manualOnly`
+suppression were each confirmed in the browser, then the seed data was removed
+(that file is unmodified in git).
+
+### 2. Mobile pass — six real defects found and fixed
+
+Audited 13 pages at 320 / 360 / 375 / 414 / 600 / 768 / 900 / 1024 / 1280 /
+1440px. All fixes are in `src/styles.css` unless noted. Result: **zero
+horizontal overflow on any page at any of those widths.**
+
+1. **The hamburger was clipped off the right edge of every page on every
+   phone.** `nav .logo span` was `white-space: nowrap` with no `min-width: 0`
+   on its flex parent, so the long society name couldn't shrink and pushed the
+   menu button ~4px past the viewport. Fixed with `min-width: 0` on
+   `nav .logo`, `flex-shrink: 0` on the button, and a ≤600px block that lets
+   the brand wrap to two lines (it does so only at ≤360px). The button is also
+   now a proper 44×44 touch target instead of 32×24.
+2. **Award rows broke inconsistently on phones.** `[BADGE] recipients` rows
+   (`.win-card .achievement`, `.winner-award`, `.detail-result`) are flex with
+   `flex-wrap`, and because badge widths vary enormously ("FINALISTS" vs
+   "DISTINGUISHED ORAL ADVOCATE") some rows stayed inline while others wrapped
+   with the name landing flush left, reading as a separate item. Below 640px
+   every row now stacks the same way: badge on its own line, name beneath.
+3. **Long badges overflowed the page at 320px.** Same rows — the badges are
+   `white-space: nowrap`, and "2ND DISTINGUISHED ORAL ADVOCATE" is wider than a
+   320px phone, which made the whole page scroll sideways. Now that the badge
+   is on its own line below 640px it's allowed to wrap inside its pill.
+4. **The exec headshot rendered as an oval, not a circle** (on desktop too, not
+   just mobile). `.member-headshot` sets `aspect-ratio: 1`, but `.detail-aside`
+   is a column flexbox and a flex item's automatic minimum size let the tall
+   portrait `img` push the box past its aspect ratio. Fixed with
+   `min-height: 0` — **don't remove that line**, the circle depends on it.
+5. **A single "More Photos" entry sat orphaned at half width.**
+   `.detail-gallery` was a fixed 2-column grid below 640px; it's now
+   `repeat(auto-fit, minmax(150px, 1fr))` so one photo fills the column and two
+   still sit side by side.
+6. **iOS Safari zoomed in whenever a form field was focused.** Contact and RSVP
+   inputs were 15.2px; Safari auto-zooms below 16px. Both are 16px on phones now.
+
+Also fixed along the way: the Materials page's "Coming Soon" placeholder was
+`.btn-outline` (peach text meant for navy backgrounds) at **1.44:1** contrast on
+a white card — effectively invisible. It's now a dedicated `.btn-soon` class at
+4.83:1 with a dashed border. Markup change in `src/pages/materials.njk`.
+
+Confirmed the ≤640px rules don't leak upward — award rows are still inline on
+desktop — and `/admin/` still loads clean with the new CMS fields.
+
+### 3. Build-time responsive images (biggest real mobile win)
+
+Execs upload straight off a phone or DSLR, and those originals were being served
+untouched into 339px-wide boxes: the Events page pulled **6.45 MB** of images,
+GH Cup 5.59 MB, an exec profile 3.65 MB. `.eleventy.js` now generates resized
+JPEGs at build time and rewrites the HTML to use them.
+
+| Page | Before | After | Saved |
+|---|---|---|---|
+| Events | 6.45 MB | 0.21 MB | 97% |
+| Exec profile | 3.65 MB | 0.18 MB | 95% |
+| GH Cup | 5.59 MB | 0.29 MB | 95% |
+| Materials | 1.37 MB | 0.11 MB | 92% |
+| Photo Gallery | 3.74 MB | 0.40 MB | 89% |
+| Achievements | 3.44 MB | 0.47 MB | 86% |
+
+How it works, and the constraints behind each choice:
+
+- `sharp` is now an explicit **devDependency** (it was previously only present
+  as a transitive dep of `wrangler`, which was luck, not a guarantee).
+- An `eleventy.before` hook resizes everything in `assets/uploads/` to widths
+  **480 / 800 / 1280 / 1920**, writing into `_site/assets/uploads/resized/`.
+  Upscales are skipped, and output is cached against source mtime.
+  Clean build ≈ 4.3s; a rebuild with nothing changed ≈ 0.6s.
+- **The originals are never touched.** `assets/uploads/` is unchanged, so the
+  CMS media library and every existing `photo:` path still work. Execs keep
+  uploading full-size photos and never think about any of this. The resized
+  copies live only in `_site/`, which is gitignored.
+- A `responsiveImages` transform adds `srcset`/`sizes` to `<img>` tags, points
+  `src` at the largest variant, and rewrites both inline
+  `background-image:url(...)` (the page-header banners) and the lightbox's
+  `data-img` attributes.
+- **Deliberately `srcset` on the existing `<img>` rather than `<picture>` +
+  WebP.** Wrapping images in `<picture>` inserts a box between the `img` and
+  its styled parent, which would break rules like
+  `.member-headshot img { height: 100% }` — i.e. it would re-break the circular
+  headshot fixed in section 2 above. Resizing alone already removes ~95% of the
+  bytes. WebP is the natural next step (~25% more) if someone wants it, but it
+  needs the `<picture>` layout risk handled first.
+- `.rotate()` runs before the resize so EXIF orientation is baked in — two of
+  the DSLR photos are `orientation: 8` and would otherwise come out sideways.
+  Verified they don't.
+
+**Verified:** every page at 375px and 1280px — no broken images, no
+unresized originals still being served (except `img_7285.jpg`, which is 479px
+wide and correctly below the smallest variant), no overflow, lightbox and page
+header focal points intact.
+
+### Left undone, on purpose
+
+- **Not committed or pushed.** Remember `git pull --rebase origin main` first —
+  execs push CMS commits.
+- The `<picture>`/WebP upgrade described above.
+- Stale build output: a clean `_site` still emits unstyled pages for
+  `/events/<slug>/`, `/photos/<slug>/`, `/past-events/<slug>/` and
+  `/ghcup-winners/<slug>/` — collection items with no layout assigned, the same
+  class of bug that exec profiles had before section 0a. Harmless (nothing links
+  to them) but they're real URLs. Worth either assigning a layout or setting
+  `permalink: false` in a directory data file.
+
 ## 0. Aug 8 2026, fourth pass — CMS photo editor rebuild + committed the backlog
 
 Two things happened this session, on top of finally shipping everything that

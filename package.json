@@ -7,6 +7,7 @@
   },
   "devDependencies": {
     "@11ty/eleventy": "^2.0.1",
+    "sharp": "^0.33.5",
     "wrangler": "^3.99.0"
   }
 }

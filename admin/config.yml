@@ -293,7 +293,7 @@ collections:
   - name: "team"
     label: "Executive Team"
     label_singular: "Team Member"
-    description: "Add or update exec team members. They appear on the About page carousel and each gets their own profile page. Competitions attended, team placements, and individual achievements are pulled in automatically from the Achievements collection — add them there, tagging this person as a Competitor or Recipient, and they'll show up here on their own."
+    description: "Add or update exec team members. They appear on the About page carousel and each gets their own profile page. Competitions attended, team placements, and individual achievements are pulled in automatically from the Achievements collection — add them there, tagging this person as a Competitor or Recipient, and they'll show up here on their own. You can also type any of them in by hand below (for outside competitions, older awards, or anything the automatic match misses)."
     folder: "src/team"
     create: true
     slug: "{{name}}"
@@ -311,6 +311,39 @@ collections:
         fields:
           - { label: "Question", name: "question", widget: "string" }
           - { label: "Answer", name: "answer", widget: "text" }
+      - label: "Competitions Attended"
+        name: "competitions"
+        widget: "list"
+        required: false
+        label_singular: "Competition"
+        collapsed: false
+        hint: "Only needed for competitions that aren't already in the Achievements collection. Anything tagged to this person there shows up automatically — no need to repeat it here. If the name and year match an achievement, this links to it."
+        fields:
+          - { label: "Competition Name", name: "competition", widget: "string", hint: "e.g. HSFK Cup" }
+          - { label: "Year", name: "year", widget: "number", value_type: "int", required: false }
+      - label: "Team Placements"
+        name: "teamPlacements"
+        widget: "list"
+        required: false
+        label_singular: "Team Placement"
+        collapsed: false
+        hint: "A result this person won together with a teammate. Again, only for ones not already recorded in Achievements."
+        fields:
+          - { label: "Award / Placement", name: "award", widget: "string", hint: "e.g. Finalists, Semi-Finalists" }
+          - { label: "Competition Name", name: "competition", widget: "string" }
+          - { label: "Year", name: "year", widget: "number", value_type: "int", required: false }
+      - label: "Individual Achievements"
+        name: "individualAchievements"
+        widget: "list"
+        required: false
+        label_singular: "Individual Achievement"
+        collapsed: false
+        hint: "An award this person won on their own, e.g. Best Oral Advocate."
+        fields:
+          - { label: "Award", name: "award", widget: "string", hint: "e.g. Best Oral Advocate, 3rd Place Factum" }
+          - { label: "Competition Name", name: "competition", widget: "string" }
+          - { label: "Year", name: "year", widget: "number", value_type: "int", required: false }
+      - { label: "Ignore automatic matches", name: "manualOnly", widget: "boolean", required: false, default: false, hint: "Leave this off. Turn it on only if the automatic pull from Achievements is showing something wrong for this person — then the three lists above become the only thing shown on their profile." }
       - { label: "Display Order", name: "order", widget: "number", value_type: "int", hint: "1 = shown first, 2 = second, etc." }
       - { label: "Photo", name: "photo", widget: "image", required: false, hint: "Upload a headshot" }
       - label: "Photo Focus (drag to position)"

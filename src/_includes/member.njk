@@ -12,7 +12,16 @@ layout: base.njk
 
 <section>
   <div class="container">
-    {%- set record = name | memberRecord(collections.achievements) %}
+    {#- Auto-pulled from the Achievements collection, merged with anything the
+       exec typed in by hand on their own CMS entry. See memberRecord in
+       .eleventy.js. #}
+    {%- set manual = {
+      competitions: competitions,
+      teamPlacements: teamPlacements,
+      individualAchievements: individualAchievements,
+      manualOnly: manualOnly
+    } %}
+    {%- set record = name | memberRecord(collections.achievements, manual) %}
     <div class="achievement-detail member-detail">
       <div class="detail-main">
         {%- if bio %}
@@ -27,8 +36,14 @@ layout: base.njk
           <h3>Competitions Attended</h3>
           {%- if record.competitions.length > 0 %}
           <ul class="detail-chip-list">
+            {#- Hand-entered competitions may not correspond to an achievement
+               page, so those render as plain chips rather than dead links. #}
             {%- for c in record.competitions %}
+            {%- if c.slug %}
             <li><a class="detail-chip" href="/achievements/{{ c.slug }}/">{{ c.competition }} {{ c.year }}</a></li>
+            {%- else %}
+            <li><span class="detail-chip detail-chip--static">{{ c.competition }} {{ c.year }}</span></li>
+            {%- endif %}
             {%- endfor %}
           </ul>
           {%- else %}
@@ -43,7 +58,11 @@ layout: base.njk
             {%- for p in record.teamPlacements %}
             <div class="detail-result">
               <span class="badge">{{ p.award }}</span>
+              {%- if p.slug %}
               <a class="names" href="/achievements/{{ p.slug }}/">{{ p.competition }} {{ p.year }}</a>
+              {%- else %}
+              <span class="names">{{ p.competition }} {{ p.year }}</span>
+              {%- endif %}
             </div>
             {%- endfor %}
           </div>
@@ -59,7 +78,11 @@ layout: base.njk
             {%- for p in record.individualAchievements %}
             <div class="detail-result">
               <span class="badge">{{ p.award }}</span>
+              {%- if p.slug %}
               <a class="names" href="/achievements/{{ p.slug }}/">{{ p.competition }} {{ p.year }}</a>
+              {%- else %}
+              <span class="names">{{ p.competition }} {{ p.year }}</span>
+              {%- endif %}
             </div>
             {%- endfor %}
           </div>

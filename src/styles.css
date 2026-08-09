@@ -42,15 +42,15 @@ nav {
 
 nav .nav-inner {
   max-width: 1200px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between; height: 72px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 72px;
 }
 
-nav .logo { display: flex; align-items: center; gap: 12px; }
-nav .logo img { width: 44px; height: 44px; border-radius: 50%; }
-/* padding-right keeps the long brand name off the hamburger on narrow phones,
-   where the two boxes otherwise sit flush at 0px (and would collide outright
-   if the webfont failed and a wider fallback rendered). */
-nav .logo span { font-family: 'Playfair Display', serif; color: var(--white); font-size: 1.05rem; font-weight: 600; white-space: nowrap; padding-right: 10px; }
+/* min-width:0 lets the brand shrink instead of pushing the hamburger off the
+   right edge of narrow phones — a flex item won't go below its content width
+   without it, and the brand name is long. */
+nav .logo { display: flex; align-items: center; gap: 12px; min-width: 0; }
+nav .logo img { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; }
+nav .logo span { font-family: 'Playfair Display', serif; color: var(--white); font-size: 1.05rem; font-weight: 600; white-space: nowrap; }
 
 nav ul { display: flex; list-style: none; gap: 28px; }
 nav ul li a {
@@ -59,9 +59,12 @@ nav ul li a {
 }
 nav ul li a:hover, nav ul li a.active { color: var(--peach); }
 
+/* 44x44 is the minimum comfortable touch target, and flex-shrink:0 keeps the
+   brand name from ever squeezing it off the edge. */
 .hamburger {
-  display: none; flex-direction: column; gap: 5px;
-  cursor: pointer; background: none; border: none; padding: 4px;
+  display: none; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  cursor: pointer; background: none; border: none; padding: 0;
+  width: 44px; height: 44px; flex-shrink: 0;
 }
 .hamburger span { width: 24px; height: 2px; background: var(--peach-light); transition: 0.3s; }
 
@@ -75,6 +78,15 @@ nav ul li a:hover, nav ul li a.active { color: var(--peach); }
   }
   nav ul.open { display: flex; }
   .hamburger { display: flex; }
+}
+
+/* On phones the brand name is wider than the space left beside the hamburger,
+   so let it wrap onto a second line rather than overflow the viewport. */
+@media (max-width: 600px) {
+  nav { padding: 0 16px; }
+  nav .logo { gap: 10px; }
+  nav .logo img { width: 40px; height: 40px; }
+  nav .logo span { white-space: normal; font-size: 0.95rem; line-height: 1.2; }
 }
 
 /* HERO */
@@ -203,6 +215,13 @@ nav ul li a:hover, nav ul li a.active { color: var(--peach); }
 .btn-primary:hover { background: var(--peach-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,168,124,0.3); }
 .btn-outline { background: transparent; color: var(--peach-light); border: 2px solid rgba(232,168,124,0.4); margin-left: 16px; }
 .btn-outline:hover { border-color: var(--peach); color: var(--peach); }
+/* Placeholder for a resource with no file uploaded yet. It sits on a white
+   card, so it can't reuse .btn-outline's peach-on-navy text — that lands at
+   1.4:1 and is unreadable. This is a real message users need to read. */
+.btn-soon {
+  background: transparent; color: var(--text-light); cursor: default;
+  border: 2px dashed rgba(26,39,68,0.22);
+}
 
 /* SECTIONS */
 section { padding: 100px 0; }
@@ -375,8 +394,12 @@ section { padding: 100px 0; }
 }
 .lightbox.open { display: flex; }
 .lightbox img { max-width: 90%; max-height: 80vh; border-radius: 8px; }
+/* The glyph alone is a ~19px-wide hit area, which is far too small to tap
+   reliably; the fixed 44px box gives it a proper touch target. */
 .lightbox-close {
-  position: absolute; top: 20px; right: 30px;
+  position: absolute; top: 12px; right: 16px;
+  display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; line-height: 1;
   color: white; font-size: 2rem; background: none; border: none; cursor: pointer;
 }
 .lightbox-caption { text-align: center; max-width: 640px; margin-top: 16px; padding: 0 20px; }
@@ -615,7 +638,10 @@ section { padding: 100px 0; }
   .detail-aside { position: static; order: 3; }
   .detail-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 }
-@media (max-width: 640px) { .detail-gallery { grid-template-columns: repeat(2, 1fr); } }
+/* auto-fit rather than a fixed 2 columns: with a single extra photo the empty
+   track collapses and the photo fills the width, instead of sitting orphaned
+   at half width against a blank right half. */
+@media (max-width: 640px) { .detail-gallery { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); } }
 
 /* EXEC PROFILE PAGE — reuses .achievement-detail's grid/aside/gallery above */
 .detail-chip-list { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -625,10 +651,18 @@ section { padding: 100px 0; }
   transition: border-color 0.2s, color 0.2s;
 }
 .detail-chip:hover { border-color: var(--peach); color: var(--peach-ink); }
+/* A hand-entered competition with no achievement page behind it — same chip,
+   but nothing to hover toward. */
+.detail-chip--static { cursor: default; }
+.detail-chip--static:hover { border-color: rgba(232,168,124,0.35); color: var(--navy); }
 .detail-result a.names:hover { color: var(--peach-ink); text-decoration: underline; }
 
+/* min-height:0 is load-bearing: .detail-aside is a column flexbox, and a flex
+   item's automatic minimum size lets tall content (a portrait headshot) push
+   the box past its aspect-ratio, turning the circle into an oval. */
 .member-headshot {
   width: clamp(160px, 60%, 220px); aspect-ratio: 1; margin: 0 auto; cursor: pointer;
+  flex: 0 0 auto; min-height: 0;
 }
 .member-headshot img {
   width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;
@@ -824,6 +858,35 @@ footer ul li a:hover { color: var(--peach); }
 
   .win-card .competition { font-size: 1.15rem; }
   .winner-info h3 { font-size: 1.2rem; }
+
+  /* Award rows are "[BADGE] recipients" on one line. Badge widths vary a lot
+     ("FINALISTS" vs "DISTINGUISHED ORAL ADVOCATE"), so on a phone some rows
+     stay inline while others wrap — and a wrapped name lands flush left, where
+     it reads as a separate item rather than part of the row. Stack every row
+     the same way instead, so the rhythm is predictable. */
+  /* iOS Safari auto-zooms the page whenever a focused field's text is under
+     16px, which leaves the user zoomed in and scrolled sideways. 16px exactly
+     is the threshold, so both forms bump up to it on phones. */
+  .contact-form input, .contact-form textarea, .contact-form select,
+  .rsvp-form input { font-size: 16px; }
+
+  .win-card .achievement,
+  .winner-award { display: block; margin-bottom: 16px; }
+  .detail-result { display: block; }
+  /* The badges are nowrap by default so they read as one pill. A long award
+     ("2ND DISTINGUISHED ORAL ADVOCATE") is wider than a 320px phone, though,
+     and nowrap turns that into a sideways-scrolling page — so once the badge
+     is on its own line it's allowed to wrap within the column. */
+  .win-card .achievement .badge,
+  .winner-award .badge,
+  .detail-result .badge {
+    display: block; width: fit-content; max-width: 100%;
+    white-space: normal; margin-bottom: 5px;
+  }
+  .win-card .achievement .names,
+  .winner-award .names,
+  .detail-result .names { display: block; }
+  .detail-results { gap: 18px; }
 }
 
 /* Small phones */
