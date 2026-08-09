@@ -1,8 +1,81 @@
 # Handoff — GHPLS Website
 
-_Written: June 2026 · Updated: August 2026 · For whoever (human or AI) picks this up next._
+_Written: June 2026 · Updated: August 8 2026 · For whoever (human or AI) picks this up next._
 
-## 0a. Aug 8 2026, third pass — exec profile pages, NOT YET COMMITTED
+## 0. Aug 8 2026, fourth pass — CMS photo editor rebuild + committed the backlog
+
+Two things happened this session, on top of finally shipping everything that
+had been piling up uncommitted (see 0a/0b/0c below, now **all pushed**).
+
+- **Committed and pushed sections 0a + 0b + 0c** (commit `bcf7966`) after a
+  clean `git pull --rebase` (an exec had pushed a Past Event + 3 photos via
+  the CMS mid-session; fast-forwarded with no conflicts).
+- **Closed a real "can't edit everything" gap.** Audited every page and found
+  7 page-header banner photos (About, Contact, Materials, Achievements,
+  Events, Photos, GH Cup) and the Materials page's 3 resource cards were
+  hardcoded in `.njk` templates, not CMS-editable at all. Fixed:
+  - New `src/_data/pageHeaders.json` + a "Page Header Photos" section in
+    `admin/config.yml` (image + drag-to-position focal point per page).
+  - New `src/_data/materials.json` + a "Materials Page" CMS entry — the 3
+    resource cards (title/description/file) are now editable; a card with no
+    file shows "Coming Soon" instead of a dead `href="#"` link.
+  - Commit `bcf7966` (bundled with the above), pushed.
+  - **Already validated live**: an exec used the new Page Header Photos field
+    within the same session — all 7 banners now have real photos with precise
+    focal points set (`src/_data/pageHeaders.json` on `origin/main`,
+    commits `ad7eaf4` / `f452fbb`).
+- **Fixed garbled team member URLs** (commit `7bb026a`, run as a background
+  task). The 4 team `.md` files with mangled filenames (see 0a's "known
+  pre-existing quirk" note below — that quirk is now fixed) were renamed to
+  clean name-based slugs (`angelina-azar-el-hajj.md`, `mia-pietrantonio.md`,
+  `ashon-vaz.md`, `ava-gonsalves.md`). Verified no internal links pointed at
+  the old slugs before renaming. **Old bookmarked URLs to those 4 profiles are
+  now broken** — an accepted, one-time tradeoff; not an ongoing concern.
+- **Rebuilt the CMS photo focal-point editor** (commit `7c34382`) — the user
+  reported the drag-to-position tool didn't preview accurately, especially for
+  the new Page Content photos. Found two real bugs, not just missing polish:
+  1. The widget resolved a photo's sibling fields with a flat top-level
+     lookup (`entry.getIn(["data", "photo"])`), which only works for
+     top-level fields. Every **nested** field — all 7 page headers, the GH
+     Cup Competition Gallery — showed an empty box; there was nothing to drag.
+  2. Even where a photo did show, the pointer was mapped against the padded
+     box instead of the actual letterboxed image content, so the position you
+     dragged to rarely matched what got saved.
+  - Fix #1 required reverse-engineering how Decap actually locates a nested
+    field, since it gives widgets **no path prop at all** (verified against
+    decap-cms 3.1.1: full prop list has `path: undefined`, `forID` is passed
+    but never applied to the DOM). What works: container fields (`object`/
+    `list`) emit a DOM id shaped `<fieldName>-field-<n>`; walking up from a
+    widget's own root node and collecting those ids reconstructs its data
+    path, with list indices coming from DOM containment.
+  - `admin/cms-extras.js`'s focal-point widget is now a two-panel crop tool:
+    accurate click-to-image mapping with a real crop-rectangle overlay on the
+    left, and a live result preview on the right for **every real shape a
+    photo lands in on the site** (e.g. an achievement photo shows its list
+    card, its detail-page banner, and its 4:3 gallery thumbnail — all three,
+    live). Shape geometry comes from a new `shapes:` config key per field in
+    `admin/config.yml`, sourced from real measurements in `src/styles.css`
+    (not guesses) — see the long header comment at the top of
+    `admin/cms-extras.js` before touching this widget again.
+  - Also rebuilt the editor's separate right-hand preview pane
+    (`registerPreviewStyle` loads the real site CSS + fonts into the iframe,
+    each collection renders real markup/classes) so it can't drift from what
+    the site actually renders.
+  - **Verified** in a local decap-cms 3.1.1 test-repo harness (GitHub auth
+    isn't available for local testing) — confirmed nested-field resolution,
+    drag accuracy, sibling-driven shape resizing, and — the case that matters
+    most — that two items in the same nested list each resolve their **own**
+    photo, not a shared/stale one. Harness files deleted before commit.
+  - **Deliberately skipped**: a desktop/mobile preview toggle. The multi-shape
+    display already covers the core ask; flagged as a possible follow-up, not
+    done.
+
+**Files touched:** `admin/cms-extras.js` (near-total rewrite),
+`admin/config.yml` (added `shapes`/`fitField`/`zoomField` to every
+focal-point field), plus the `pageHeaders.json`/`materials.json` additions
+above.
+
+## 0a. Aug 8 2026, third pass — exec profile pages (committed in 0, see above)
 
 Two small carousel fixes plus the big addition: each exec now has their own
 profile page, opened from a "View Profile" link on their carousel card. This
@@ -53,16 +126,10 @@ and the day before, respectively.
     is reserved for `extraPhotos` (ordinary, non-circular event photos).
   - Fixed the team collection's CMS slug pattern (`slug: "{{slug}}"` →
     `"{{name}}"`) so *new* members get sane URLs going forward.
-    **Known pre-existing quirk, not fixed:** the 8 current team `.md`
-    filenames don't match their contents (e.g. `president.md` contains
-    Francesco Deleo, VP of Moot Training — not the President; `mooting-director.md`
-    contains Kate Hilton, the President) — an artifact of the old slug
-    pattern from before this fix. Their `/team/<slug>/` URLs are correspondingly
-    misleading (e.g. `/team/president/` shows Francesco Deleo). The pages
-    themselves render the *correct* person and role from front matter — only
-    the URL slug is wrong. Renaming the files would fix this but wasn't part
-    of this request and risks breaking links if anyone's already shared one;
-    flagging it here rather than touching it.
+    **Update (same day, see section 0 above): the pre-existing mismatched
+    filenames this note originally flagged were renamed in commit `7bb026a`**
+    (e.g. `president.md` → `angelina-azar-el-hajj.md`, matching its actual
+    contents). Old URLs to those 4 profiles now 404 — accepted tradeoff.
   - Drag-vs-click: `about.njk`'s pointerdown handler now skips starting a
     drag when the pointer lands on an `a`/`button` inside a card, so clicking
     "View Profile" navigates normally instead of being swallowed by the
@@ -78,10 +145,10 @@ mobile overflow, drag-safety confirmed via direct pointer-event simulation.
 **Files touched:** `.eleventy.js`, `admin/config.yml`, `src/pages/about.njk`,
 `src/styles.css`, new `src/team/team.json`, new `src/_includes/member.njk`.
 
-## 0b. Aug 8 2026, second pass — hero/carousel/achievement pass, NOT YET COMMITTED
+## 0b. Aug 8 2026, second pass — hero/carousel/achievement pass (committed in 0, see above)
 
 A follow-up pass on top of section 0c below, from a second round of user
-feedback. Also uncommitted; all three sessions' work goes out together.
+feedback. Committed together with 0a and 0c in commit `bcf7966` (see section 0).
 
 - **Home hero → split layout.** `.home-hero` is now a two-column grid: copy on
   the left, a much larger crest on the right (`clamp(220px, 26vw, 400px)`, up
@@ -151,12 +218,12 @@ small follow-up that reuses the exact same front-matter fields.
 `src/_includes/achievement.njk`, `admin/config.yml`, all 9
 `src/achievements/*.md`, and this file.
 
-## 0c. Previous session (Aug 2026) — design revamp, NOT YET COMMITTED
+## 0c. Previous session (Aug 2026) — design revamp (committed in 0, see above)
 
-A full pass through the user's change list from their design brief. All of it is
-implemented and verified locally (`npm run build` is clean, pages checked in the
-Browser pane at desktop + mobile), but **nothing from this session is committed
-or pushed yet** — see "Next step" below.
+A full pass through the user's change list from their design brief. Implemented
+and verified locally (`npm run build` clean, pages checked in the Browser pane
+at desktop + mobile), and committed together with 0a and 0b in commit `bcf7966`
+(see section 0).
 
 What changed:
 
@@ -214,8 +281,8 @@ What changed:
   the Materials page — skip until the moot board is actually running, don't
   build it ahead of time.
 
-**Files touched this session** (all currently unstaged — `git status` shows
-this exact list): `admin/config.yml`, `src/_data/about.json`,
+**Files touched this session** (now committed in `bcf7966`, see section 0):
+`admin/config.yml`, `src/_data/about.json`,
 `src/_data/ghcup.json`, `src/_includes/base.njk`, all 9 files in
 `src/achievements/*.md`, `src/pages/{about,achievements,contact,events,ghcup,
 index,materials,photos}.njk`, `src/photos/{ireland,ireland-trip}.md`,
@@ -235,31 +302,48 @@ Cup**. Hard requirements that shaped every decision:
   achievements, events, photos, team, GH Cup winners — through a forms-based
   admin panel, with **no code knowledge**.
 - **Survives handoff**: when the current exec graduates, the next person takes
-  over via GitHub + Netlify logins, no developer required.
+  over via a GitHub login (repo collaborator), no developer required.
 - **Free hosting**, high traffic tolerance.
 - Branding: navy `#1a2744` + peach `#e8a87c` + cream, Playfair Display serif +
   Inter, Lady Justice / scales motif. Logo at `assets/logo.jpg`.
 
 ## 2. Current state — LIVE and working
 
+**Correction (Aug 8 2026):** the notes below in this section had drifted —
+they still described the Netlify-Identity-based setup from an earlier
+migration step. Verified against the actual repo config this session
+(`wrangler.toml`, `worker.js`, `admin/config.yml`) and corrected:
+
 - **Stack:** Eleventy (11ty) static site generator + Decap CMS (`/admin/`) +
-  **GitHub login via Cloudflare Pages Functions** (`functions/api/`).
-- **Hosted:** **Cloudflare Pages** (migrated off Netlify June 2026 after the
-  Netlify free credits ran out). Old Netlify URL is retired.
-- **Repo:** `https://github.com/fdeleo115/ghpls-website` (branch `main`).
-  Every push auto-deploys via Cloudflare. CMS edits commit straight to `main`.
-- **CMS login:** editors sign in with their **GitHub account** (must be a
-  repo collaborator). Requires a GitHub OAuth App whose client id/secret are
-  set as Cloudflare Pages env vars `GITHUB_OAUTH_CLIENT_ID` /
-  `GITHUB_OAUTH_CLIENT_SECRET`. `admin/config.yml` `backend.base_url` must
-  match the live Pages domain.
-- **NOTE:** `netlify.toml` is now unused (kept only for reference). Security
-  headers live in `_headers`; build settings live in the Cloudflare dashboard.
-- **Admin works:** Francesco is invited via Netlify Identity (invite-only).
-  Execs have already uploaded real photos/content through `/admin/` (e.g. Kate
-  Hilton listed as President, Francesco as VP of Moot Training, an Ireland trip
-  photo, a past GH Cup photo). **Note:** the local repo and the live repo can
-  drift because execs edit via CMS — always `git pull --rebase` before pushing.
+  **GitHub OAuth login via a Cloudflare Worker** — NOT Netlify Identity, and
+  NOT Cloudflare Pages Functions. `worker.js` (see `wrangler.toml`, which
+  binds `_site/` as static assets) serves the built site directly and also
+  imports `functions/api/auth.js` / `functions/api/callback.js` to handle the
+  `/api/auth` and `/api/callback` OAuth routes Decap needs. `worker.js` also
+  sets CSP/security headers inline in code — **not** via a `_headers` file
+  (a `_headers` file does nothing on Workers; a prior session's commit
+  message literally notes this: "Move CSP headers into worker.js — `_headers`
+  doesn't work with Workers").
+- **Hosted:** Cloudflare, at `https://ghpls.fdeleo115.workers.dev` (matches
+  `admin/config.yml`'s `backend.base_url`). The repo migrated Netlify →
+  Cloudflare Pages → (this) Cloudflare Worker with static assets, across three
+  separate commits — Pages was an intermediate step, not the final state.
+  `netlify.toml` is legacy/unused, kept only for reference.
+- **Repo:** `https://github.com/fdeleo115/ghpls-website` (branch `main`). CMS
+  edits commit straight to `main`. **Not independently re-verified this
+  session:** whether push-to-deploy is automatic (Cloudflare dashboard Git
+  integration) or manual (`npx wrangler deploy`) — check the Cloudflare
+  dashboard before assuming either way.
+- **CMS login:** editors sign in with their **GitHub account** and must be a
+  **GitHub repo collaborator** — there is no separate invite system (no
+  Netlify Identity). The GitHub OAuth App's client id/secret must be set as
+  Worker secrets/vars in the Cloudflare dashboard (or via `wrangler secret
+  put`), not as "Pages env vars".
+- **Admin works:** execs have uploaded real photos/content through `/admin/`
+  throughout — most recently, an exec filled in all 7 new Page Header Photos
+  fields with real photos and focal points the same day they shipped (see
+  section 0). **Note:** the local repo and the live repo can drift because
+  execs edit via CMS — always `git pull --rebase` before pushing.
 
 ### Pages (all separate, all in nav)
 Home · About (mission + team + FAQ) · Achievements · GH Cup (incl. Previous
@@ -268,25 +352,32 @@ Contact · Privacy · Terms.
 
 ### CMS collections (`admin/config.yml`)
 Achievements · Upcoming Events · Past Events · GH Cup Previous Winners · Photo
-Gallery · Executive Team · Page Content (Site Settings, About, GH Cup). Every
-image field has **photo position** (center/top/bottom/left/right) and most have
-**size** controls, per the user's request to resize/reposition photos.
+Gallery · Executive Team · Page Content (Site Settings, About Page, GH Cup
+Page, **Page Header Photos**, **Materials Page** — the last two added Aug 8
+2026, see section 0). Every image field has a **drag-to-position focal point**
+(rebuilt into an accurate live crop tool this session, see section 0) and most
+have **size**/**fit**/**zoom** controls, per the user's ask to be able to
+resize/reposition every photo and see it accurately before saving.
 
-### Security & legal (done this session)
-- `netlify.toml`: CSP + security headers for `/*`, with a **separate looser CSP
-  scoped to `/admin/*`** so Decap CMS isn't broken (Netlify merges header rules,
-  so admin CSP had to be explicitly re-declared, not omitted).
+### Security & legal
+- CSP + security headers applied for `/*`, with a **separate looser CSP
+  scoped to `/admin/*`** so Decap CMS isn't broken. **Now enforced in
+  `worker.js`** (see section 2's correction above) — `netlify.toml`'s copy of
+  this is legacy/unused.
 - Honeypot + length/type validation on the contact form.
 - `.gitignore` (stopped tracking `node_modules/` + `_site/`).
 - `robots.txt`, Privacy Policy (PIPEDA-aware), Terms of Use, footer disclaimer.
-- Full writeup in `SECURITY.md`.
+- Full writeup in `SECURITY.md` — **note: that document still describes the
+  old Netlify/Netlify-Identity setup** (same drift as section 2 had); it
+  wasn't updated this session since it wasn't in scope, but it should be
+  before anyone relies on it for the current architecture.
 
 ## 3. Files actively being edited
 
-The `email: ghpls@uoguelph.ca` addition (site.json + contact mailto link)
-mentioned below in the June notes is already committed and pushed — `git log`
-confirms it's on `origin/main`. The active uncommitted work now is the combined
-file list from sections 0a, 0b, and 0c above.
+None — working tree is clean and up to date with `origin/main` as of this
+session's end (`git status` clean, `git log HEAD..origin/main` empty after a
+final pull). Everything from sections 0, 0a, 0b, and 0c is committed and
+pushed.
 
 ## 4. What was tried that failed (so you don't repeat it)
 
@@ -310,48 +401,74 @@ file list from sections 0a, 0b, and 0c above.
    via CMS and push commits we don't have locally. **Always
    `git pull --rebase origin main` before pushing.**
 6. **CSP risk on `/admin/`:** a strict global CSP would break Decap. Did NOT
-   apply strict CSP to admin; gave it a documented Decap-compatible CSP instead.
-   **Not yet verified live** — see next step.
+   apply strict CSP to admin; gave it a documented Decap-compatible CSP instead
+   (now enforced in `worker.js` — see section 2).
+7. **(Aug 8 2026) Decap CMS gives custom widgets no data-path prop.** If you
+   ever need a custom widget to read a *sibling* field's value and that field
+   might be nested inside an `object` or `list` widget, `entry.getIn(["data",
+   "fieldName"])` silently returns `undefined` for anything nested — verified
+   empirically, decap-cms 3.1.1's widget props have no `path`, an empty
+   `parentIds`, and a `forID` never applied to the DOM. The working technique
+   (container fields emit a DOM id `<fieldName>-field-<n>`; walk up from the
+   widget's own root node to reconstruct the path) is implemented and
+   commented at length in `admin/cms-extras.js` — read that before
+   reinventing it.
+8. **(Aug 8 2026) Testing the CMS locally without GitHub auth:** set
+   `window.CMS_MANUAL_INIT = true` in a `<script>` *before* the decap-cms
+   `<script>` tag, then `CMS.init({config: {backend: {name: "test-repo"}, ...}})`
+   with a plain JS config object. Two gotchas: (a) `window.repoFiles` — the
+   old `netlify-cms-backend-test` way of pre-seeding fake files — does
+   **not** work in decap-cms 3.1.1, and clearing `localStorage`/
+   `sessionStorage` before reload didn't make it work either; the reliable way
+   to get real data into a test entry is a **folder collection's field-level
+   `default:`** (confirmed working, including `default:` on a `list` field
+   populating multiple items with real image paths) — file-collection
+   (singleton) entries did *not* reliably apply nested `default:` values in
+   testing. (b) Decap auto-boots against the real `/admin/config.yml` the
+   instant its script loads unless `CMS_MANUAL_INIT` is set first — without
+   it, a later `CMS.init` throws `removeChild` errors fighting the auto-boot.
 
 ## 5. Next step I'd take
 
-1. **Commit and push the Aug 2026 design revamp (sections 0a + 0b + 0c):**
-   ```
-   cd ~/Claude/GHPLS/site
-   git pull --rebase origin main
-   git add -A
-   git commit -m "Home hero redesign, exec carousel, achievement detail pages, GH Cup gallery, event RSVP, expanded FAQs"
-   git push
-   ```
-   Do the `git pull --rebase` first — execs may have pushed CMS edits since
-   this session started (the local checkout was `fb6e24f`, up to date with
-   `origin/main` at session start, but confirm again before pushing).
-2. **After it deploys, spot-check the CMS still loads at `/admin/`** and that
-   the new fields show up correctly: Team → Biography, Achievements →
-   Highlights / More Photos / Description, Events → Allow RSVPs, GH Cup Page →
-   Competition Gallery, Photo Gallery → Description.
+1. **Spot-check the live CMS** after this session's changes deploy: confirm
+   `/admin/` still loads, and try the new Page Header Photos / Materials Page
+   fields plus the rebuilt focal-point crop tool on a nested field (e.g. GH
+   Cup → Competition Gallery) — the exec who already used Page Header Photos
+   this session is a good sign it's working, but hasn't been checked against
+   the *new* crop-tool UI specifically (they may have used the old widget,
+   depending on deploy timing).
+2. **Fix `SECURITY.md`** — it still describes the old Netlify/Netlify-Identity
+   architecture (see section 2's correction). Low urgency but will actively
+   mislead anyone who reads it as current.
 3. **Hand to the execs (their to-do, not code work):**
    - Each executive writes their own bio in the CMS (Team collection).
-   - Add more GH Cup photos to the new Competition Gallery — only one real
-     photo was on file.
+   - Add more GH Cup photos to the Competition Gallery.
    - Optionally flesh out achievement detail pages with highlights/extra
      photos beyond the seeded one-paragraph descriptions.
    - When the moot board actually launches, come back for the
-     description/timeline section that was deliberately left out this round.
-4. **Open question raised but not answered (carried over from June):** make
-   the **Privacy/Terms pages CMS-editable** (currently hardcoded in
-   `src/pages/privacy.njk` / `terms.njk`). Would move their text into a
-   `_data` file + add a CMS "Legal Pages" file collection, mirroring how
-   About/GH Cup already work.
-5. **Lower priority / carried over from June:** upload material PDFs
-   (Materials page download buttons are still `href="#"` placeholders), add
-   sponsor logos, fill any remaining GH Cup winner names still marked "TBD".
+     description/timeline section that was deliberately left out.
+4. **Open question, carried over:** make the **Privacy/Terms pages
+   CMS-editable** (currently hardcoded in `src/pages/privacy.njk` /
+   `terms.njk`). Would move their text into a `_data` file + add a CMS "Legal
+   Pages" file collection, mirroring how About/GH Cup already work.
+5. **Lower priority, carried over:** upload the actual material PDFs (the
+   Materials page cards are CMS-editable now, per section 0, but still have no
+   real files attached — each shows "Coming Soon"); add sponsor logos; fill
+   any remaining GH Cup winner names still marked "TBD".
+6. **Possible follow-up, not started:** a desktop/mobile toggle on the CMS's
+   photo crop-tool result panels (deliberately skipped this session — see
+   section 0).
 
 ## Quick reference
 
 - **Local dev:** `cd ~/Claude/GHPLS/site && npx @11ty/eleventy --serve`
 - **Build:** `npx @11ty/eleventy` → outputs to `_site/`
-- **Admin:** `https://guelphhumberprelawsociety.netlify.app/admin/`
-- **Add an exec to CMS:** Netlify dashboard → Identity → Invite users.
-- **Handoff to next exec:** add them as a GitHub collaborator + transfer/share
-  Netlify access; they invite future execs via Netlify Identity.
+- **Admin:** `https://ghpls.fdeleo115.workers.dev/admin/` (GitHub login, must
+  be a repo collaborator — see section 2's correction; the old
+  `guelphhumberprelawsociety.netlify.app` URL is stale, do not use it).
+- **Add an exec to CMS:** add them as a collaborator on the GitHub repo
+  (`https://github.com/fdeleo115/ghpls-website`) — no separate CMS invite step.
+- **Handoff to next exec:** add them as a GitHub collaborator; that's the only
+  access they need to use `/admin/`.
+- **Test CMS changes locally without GitHub auth:** see failure-log item 8
+  above.
