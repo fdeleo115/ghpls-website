@@ -7,6 +7,7 @@ results:
     recipients: Ashon Vaz
 competitors:
   - name: Ashon Vaz
+  - name: Oscar Dominguez
 photo: /assets/uploads/img_7284.jpg
 photoHeight: tall
 photoPosition: 49% 14%
