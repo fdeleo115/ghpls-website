@@ -215,7 +215,20 @@
 
   // === the focal-point crop tool ===========================================
 
-  var BOX_W = 320, BOX_H = 220; // fixed pixel source panel — see render()
+  // Source panel geometry. These are a MAXIMUM width and a reference aspect
+  // ratio, not fixed pixels: on a phone the editor column is narrower than
+  // 320px, so the box is `width: 100%; max-width: BOX_W` with the BOX_W:BOX_H
+  // ratio pinned.
+  //
+  // Nothing measures the rendered width. That is deliberate. The crop overlay
+  // and focal dot are drawn in render(), while the pointer is mapped from the
+  // box's live bounding rect in onPointer() — so any width the render side
+  // stores separately is a second source of truth that can fall out of step
+  // with the first, and when it does, the exec drags to one spot and the site
+  // crops to another with nothing on screen to indicate it. Keeping the ratio
+  // constant and emitting every overlay offset as a PERCENTAGE makes the
+  // rendered geometry width-independent, so the two can never disagree.
+  var BOX_W = 320, BOX_H = 220;
 
   var FocalControl = createClass({
     getInitialState: function () {
@@ -223,16 +236,9 @@
     },
 
     componentDidMount: function () {
-      var self = this;
       // The widget's DOM root (needed to resolve nested sibling paths) only
       // exists after the first commit, so re-render once now that it's ready.
       if (this.forceUpdate) this.forceUpdate();
-      this._onResize = function () { if (self._img && self.forceUpdate) self.forceUpdate(); };
-      try { window.addEventListener("resize", this._onResize); } catch (e) {}
-    },
-
-    componentWillUnmount: function () {
-      try { window.removeEventListener("resize", this._onResize); } catch (e) {}
     },
 
     onImgLoad: function (e) {
@@ -242,6 +248,33 @@
           naturalH: e.target.naturalHeight || 0
         });
       } catch (err) {}
+    },
+
+    // Pointer Events cover mouse, touch and pen with one code path, and
+    // setPointerCapture keeps a drag alive when the finger leaves the box.
+    // The widget previously bound onMouseDown/Move/Up only: iOS synthesises a
+    // click from a tap but does NOT synthesise a mousemove stream from a
+    // drag, so "drag to position" did nothing at all on a phone — the gesture
+    // scrolled the page instead. Mouse handlers are kept below as a fallback
+    // for browsers without PointerEvent, and are suppressed when pointer
+    // events are available so a single drag can't be applied twice.
+    hasPointerEvents: function () {
+      return typeof window !== "undefined" && !!window.PointerEvent;
+    },
+
+    onPointerDown: function (e) {
+      if (this._box && e.pointerId != null && this._box.setPointerCapture) {
+        try { this._box.setPointerCapture(e.pointerId); } catch (err) {}
+      }
+      this.onPointer(e, true);
+      this.onPointer(e);
+    },
+
+    onPointerUp: function (e) {
+      if (this._box && e.pointerId != null && this._box.releasePointerCapture) {
+        try { this._box.releasePointerCapture(e.pointerId); } catch (err) {}
+      }
+      this.onPointer(e, false);
     },
 
     onPointer: function (e, isDown) {
@@ -285,7 +318,18 @@
       if (isNaN(zoom) || zoom < 1) zoom = 1;
 
       var nw = this.state.naturalW, nh = this.state.naturalH;
+
+      // Everything below is laid out in PERCENTAGES of the box, never pixels.
+      // The box has a fixed aspect ratio and a fluid width, so the letterbox
+      // geometry is identical at every width — which means the overlay never
+      // has to know how wide the box actually is on screen. See the note on
+      // BOX_W: an earlier attempt stored a measured pixel width in state, and
+      // any staleness in that number put the crop rectangle and the focal dot
+      // somewhere other than where the pointer mapping (which reads the live
+      // rect) thought they were.
       var content = containRect(BOX_W, BOX_H, nw, nh);
+      var pctX = function (px) { return (px / BOX_W) * 100 + "%"; };
+      var pctY = function (px) { return (px / BOX_H) * 100 + "%"; };
 
       // --- crop overlay on the source image, using the FIRST declared shape
       // as the representative crop (fields with one shape are exact; fields
@@ -304,39 +348,39 @@
         if (crop) {
           overlayEls.push(h("div", {
             key: "dim-l",
-            style: { position: "absolute", left: content.left + "px", top: content.top + "px",
-              width: (crop.left * content.width) + "px", height: content.height + "px",
+            style: { position: "absolute", left: pctX(content.left), top: pctY(content.top),
+              width: pctX(crop.left * content.width), height: pctY(content.height),
               background: "rgba(0,0,0,0.55)", pointerEvents: "none" }
           }));
           overlayEls.push(h("div", {
             key: "dim-r",
-            style: { position: "absolute", left: (content.left + (crop.left + crop.width) * content.width) + "px",
-              top: content.top + "px",
-              width: Math.max(0, content.width - (crop.left + crop.width) * content.width) + "px",
-              height: content.height + "px",
+            style: { position: "absolute", left: pctX(content.left + (crop.left + crop.width) * content.width),
+              top: pctY(content.top),
+              width: pctX(Math.max(0, content.width - (crop.left + crop.width) * content.width)),
+              height: pctY(content.height),
               background: "rgba(0,0,0,0.55)", pointerEvents: "none" }
           }));
           overlayEls.push(h("div", {
             key: "dim-t",
-            style: { position: "absolute", left: (content.left + crop.left * content.width) + "px", top: content.top + "px",
-              width: (crop.width * content.width) + "px", height: (crop.top * content.height) + "px",
+            style: { position: "absolute", left: pctX(content.left + crop.left * content.width), top: pctY(content.top),
+              width: pctX(crop.width * content.width), height: pctY(crop.top * content.height),
               background: "rgba(0,0,0,0.55)", pointerEvents: "none" }
           }));
           overlayEls.push(h("div", {
             key: "dim-b",
-            style: { position: "absolute", left: (content.left + crop.left * content.width) + "px",
-              top: (content.top + (crop.top + crop.height) * content.height) + "px",
-              width: (crop.width * content.width) + "px",
-              height: Math.max(0, content.height - (crop.top + crop.height) * content.height) + "px",
+            style: { position: "absolute", left: pctX(content.left + crop.left * content.width),
+              top: pctY(content.top + (crop.top + crop.height) * content.height),
+              width: pctX(crop.width * content.width),
+              height: pctY(Math.max(0, content.height - (crop.top + crop.height) * content.height)),
               background: "rgba(0,0,0,0.55)", pointerEvents: "none" }
           }));
           overlayEls.push(h("div", {
             key: "crop-rect",
             style: { position: "absolute",
-              left: (content.left + crop.left * content.width) + "px",
-              top: (content.top + crop.top * content.height) + "px",
-              width: (crop.width * content.width) + "px",
-              height: (crop.height * content.height) + "px",
+              left: pctX(content.left + crop.left * content.width),
+              top: pctY(content.top + crop.top * content.height),
+              width: pctX(crop.width * content.width),
+              height: pctY(crop.height * content.height),
               border: "2px solid #e8a87c", boxShadow: "0 0 0 1px rgba(0,0,0,0.5)",
               pointerEvents: "none" }
           }));
@@ -347,37 +391,57 @@
       var dotTop = content.top + (xy[1] / 100) * content.height;
       overlayEls.push(h("div", {
         key: "ch",
-        style: { position: "absolute", left: content.left + "px", right: (BOX_W - content.left - content.width) + "px",
-          top: dotTop + "px", height: "1px", background: "rgba(232,168,124,0.6)", pointerEvents: "none" }
+        style: { position: "absolute", left: pctX(content.left), right: pctX(BOX_W - content.left - content.width),
+          top: pctY(dotTop), height: "1px", background: "rgba(232,168,124,0.6)", pointerEvents: "none" }
       }));
       overlayEls.push(h("div", {
         key: "cv",
-        style: { position: "absolute", top: content.top + "px", bottom: (BOX_H - content.top - content.height) + "px",
-          left: dotLeft + "px", width: "1px", background: "rgba(232,168,124,0.6)", pointerEvents: "none" }
+        style: { position: "absolute", top: pctY(content.top), bottom: pctY(BOX_H - content.top - content.height),
+          left: pctX(dotLeft), width: "1px", background: "rgba(232,168,124,0.6)", pointerEvents: "none" }
       }));
       overlayEls.push(h("div", {
         key: "dot",
-        style: { position: "absolute", left: dotLeft + "px", top: dotTop + "px",
+        style: { position: "absolute", left: pctX(dotLeft), top: pctY(dotTop),
           width: "16px", height: "16px", marginLeft: "-8px", marginTop: "-8px", borderRadius: "50%",
           background: "#e8a87c", border: "3px solid #fff",
           boxShadow: "0 0 0 1px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.4)", pointerEvents: "none" }
       }));
 
+      var usePointer = self.hasPointerEvents();
+      var boxHandlers = usePointer
+        ? {
+            onPointerDown: function (e) { if (!src) return; self.onPointerDown(e); },
+            onPointerMove: function (e) { self.onPointer(e); },
+            onPointerUp: function (e) { self.onPointerUp(e); },
+            onPointerCancel: function (e) { self.onPointerUp(e); }
+          }
+        : {
+            onMouseDown: function (e) { if (!src) return; self.onPointer(e, true); self.onPointer(e); },
+            onMouseMove: function (e) { self.onPointer(e); },
+            onMouseUp: function (e) { self.onPointer(e, false); },
+            onMouseLeave: function (e) { self.onPointer(e, false); }
+          };
+
       var box = h(
         "div",
-        {
+        Object.assign({
           ref: function (el) { self._box = el; },
           style: {
-            position: "relative", width: BOX_W + "px", height: BOX_H + "px",
+            // Shrink to the editor column on a phone, never past BOX_W on
+            // desktop. The aspect ratio is pinned to BOX_W:BOX_H so the
+            // percentage overlay geometry above holds at any width — do not
+            // replace `aspectRatio` with a fixed `height`, that would change
+            // the letterboxing as the box narrows and put the crop rectangle
+            // in the wrong place. `touchAction: none` stops iOS treating the
+            // drag as a page scroll; without it the gesture never reaches the
+            // handler at all.
+            position: "relative", width: "100%", maxWidth: BOX_W + "px",
+            aspectRatio: BOX_W + " / " + BOX_H,
             borderRadius: "8px", border: "1px solid #d6d9e0", overflow: "hidden",
             background: src ? "#0f1830" : "repeating-conic-gradient(#eef0f4 0% 25%, #f7f8fa 0% 50%) 50% / 24px 24px",
             cursor: src ? "crosshair" : "default", userSelect: "none", touchAction: "none"
-          },
-          onMouseDown: function (e) { if (!src) return; self.onPointer(e, true); self.onPointer(e); },
-          onMouseMove: function (e) { self.onPointer(e); },
-          onMouseUp: function (e) { self.onPointer(e, false); },
-          onMouseLeave: function (e) { self.onPointer(e, false); }
-        },
+          }
+        }, boxHandlers),
         src
           ? [h("img", {
               key: "img",
@@ -391,10 +455,12 @@
       );
 
       var srcHint = h("p", { style: { margin: "8px 0 0", fontSize: "12px", color: "#5b6472", lineHeight: 1.4 } },
+        // Wording avoids "on the right": the result panels wrap below the
+        // photo on a phone, where the row runs out of width.
         src
           ? (fit === "contain"
               ? "Fit is set to “show entire photo” — nothing is cropped, so dragging only shifts the photo inside its frame. (" + formatPosition(xy[0], xy[1]) + ")"
-              : "Drag anywhere on the photo to move the focal point. Shaded area is cropped away for the first preview on the right. (" + formatPosition(xy[0], xy[1]) + ")")
+              : "Drag anywhere on the photo to move the focal point. The shaded area is cropped away in the first preview. (" + formatPosition(xy[0], xy[1]) + ")")
           : "Upload a photo above, then drag here to position it."
       );
 
@@ -515,27 +581,10 @@
     ]);
   }
 
-  var PagePreviews = {
-    "page-headers": createClass({
+  function competitionGalleryPreview() {
+    return createClass({
       render: function () {
-        var data = this.props.entry.get("data");
-        var pages = ["about", "contact", "materials", "achievements", "events", "photos", "ghcup"];
-        var labels = { about: "About", contact: "Contact", materials: "Materials", achievements: "Achievements",
-          events: "Events", photos: "Photo Gallery", ghcup: "The GH Cup" };
-        var self = this;
-        return h("div", {}, pages.map(function (p) {
-          var entryData = data.get(p);
-          var photo = entryData ? entryData.get("photo") : null;
-          var pos = entryData ? entryData.get("photoPosition") : null;
-          return h("div", { key: p, style: { marginBottom: "4px" } },
-            pageHeaderPreview(photo, pos || "center", self.props.getAsset, labels[p] + " page banner"));
-        }));
-      }
-    }),
-    "ghcup-page": createClass({
-      render: function () {
-        var data = this.props.entry.get("data");
-        var gallery = data.get("gallery");
+        var gallery = this.props.entry.get("data").get("gallery");
         var getAsset = this.props.getAsset;
         if (!gallery || !gallery.size) {
           return paneWrap(h("p", { style: { color: "#6b7280" } }, "No Competition Gallery photos yet."));
@@ -551,7 +600,33 @@
           )
         );
       }
+    });
+  }
+
+  var PagePreviews = {
+    "page-headers": createClass({
+      render: function () {
+        var data = this.props.entry.get("data");
+        // Keep this list in step with the "Page Header Photos" fields in
+        // admin/config.yml — a page missing here silently gets no preview.
+        var pages = ["about", "contact", "materials", "achievements", "events", "photos", "ghcup", "minimoot"];
+        var labels = { about: "About", contact: "Contact", materials: "Materials", achievements: "Achievements",
+          events: "Events", photos: "Photo Gallery", ghcup: "The GH Cup", minimoot: "The Mini Moot" };
+        var self = this;
+        return h("div", {}, pages.map(function (p) {
+          var entryData = data.get(p);
+          var photo = entryData ? entryData.get("photo") : null;
+          var pos = entryData ? entryData.get("photoPosition") : null;
+          return h("div", { key: p, style: { marginBottom: "4px" } },
+            pageHeaderPreview(photo, pos || "center", self.props.getAsset, labels[p] + " page banner"));
+        }));
+      }
     }),
+    // The GH Cup and Mini Moot entries carry the same Competition Gallery
+    // field, so they share one preview. Both pages' banner photos are
+    // previewed by "page-headers" above, not here.
+    "ghcup-page": competitionGalleryPreview(),
+    "minimoot-page": competitionGalleryPreview(),
     "materials-page": createClass({
       render: function () {
         var data = this.props.entry.get("data");

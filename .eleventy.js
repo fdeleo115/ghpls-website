@@ -201,9 +201,23 @@ module.exports = function (eleventyConfig) {
   });
 
   eleventyConfig.addCollection("events", function (collectionApi) {
-    return collectionApi.getFilteredByGlob("src/events/*.md").sort((a, b) => {
+    const events = collectionApi.getFilteredByGlob("src/events/*.md").sort((a, b) => {
       return new Date(a.data.date) - new Date(b.data.date);
     });
+    // An event whose Time text can't be parsed still gets a calendar button —
+    // it just becomes an all-day entry. That is a quiet downgrade, so say so
+    // at build time; otherwise the only symptom is a calendar entry with no
+    // hours, which nobody notices until they miss the event.
+    events.forEach((e) => {
+      if (e.data.time && !parseEventTime(e.data.time)) {
+        console.warn(
+          `[ghpls] ${e.inputPath}: could not read a start time from "${e.data.time}" — ` +
+            "its Add to Calendar entry will be an all-day event. " +
+            'Use a form like "5:00 PM - 7:00 PM".'
+        );
+      }
+    });
+    return events;
   });
 
   eleventyConfig.addCollection("pastEvents", function (collectionApi) {
@@ -245,20 +259,241 @@ module.exports = function (eleventyConfig) {
     });
   });
 
+  // ---------------------------------------------------------------------------
+  // Dates are CALENDAR DAYS, not instants — read this before changing anything
+  // below.
+  //
+  // The CMS writes `date: 2026-10-20` (datetime widget, `time_format: false`),
+  // and `new Date("2026-10-20")` parses that as UTC midnight. Reading it back
+  // with local getters — `.getDate()`, `toLocaleDateString()` — therefore
+  // returns the PREVIOUS day anywhere west of Greenwich. That is not
+  // hypothetical: an event dated 2026-10-20 rendered as "OCT 19" on a local
+  // build in Toronto (UTC-4) while rendering "OCT 20" on the live site, because
+  // GitHub Actions builds in UTC. The bug was invisible in production purely
+  // because of where the build happens.
+  //
+  // "October 20th" is a calendar day the society picked, not a moment in time,
+  // so every read below uses UTC getters to get that day back out unchanged.
+  // Do not swap these for local getters or bare toLocaleDateString().
+  const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  function calendarParts(date) {
+    if (!date) return null;
+    const d = date instanceof Date ? date : new Date(date);
+    if (isNaN(d.getTime())) return null;
+    return { y: d.getUTCFullYear(), m: d.getUTCMonth(), d: d.getUTCDate() };
+  }
+
   eleventyConfig.addFilter("dateFormat", function (date) {
-    if (!date) return "";
-    const d = new Date(date);
-    return d.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
+    const p = calendarParts(date);
+    if (!p) return "";
+    return `${MONTHS_SHORT[p.m]} ${p.d}, ${p.y}`;
   });
 
   eleventyConfig.addFilter("monthShort", function (date) {
-    if (!date) return "";
-    return new Date(date).toLocaleDateString("en-CA", { month: "short" }).toUpperCase();
+    const p = calendarParts(date);
+    if (!p) return "";
+    return MONTHS_SHORT[p.m].toUpperCase();
   });
 
   eleventyConfig.addFilter("dayNum", function (date) {
-    if (!date) return "";
-    return new Date(date).getDate();
+    const p = calendarParts(date);
+    if (!p) return "";
+    return p.d;
+  });
+
+  // ---------------------------------------------------------------------------
+  // "Add to Calendar" support
+  //
+  // The CMS stores an event's time as FREE TEXT ("5:00 PM - 7:00 PM"), because
+  // that is what execs were already typing and changing it to structured
+  // start/end fields would invalidate every existing entry and make them
+  // re-enter data. So the text is parsed here, and — this is the important part
+  // — an event whose time can't be parsed still gets a working calendar entry:
+  // it falls back to an ALL-DAY event on the right date rather than no button
+  // or, far worse, a button that files the event at the wrong hour. A build
+  // warning names any event that took the fallback, so a typo surfaces at build
+  // time instead of in somebody's calendar.
+  //
+  // Times are written as "floating" (no timezone, no trailing Z). Every client
+  // then reads 5pm as 5pm in the reader's own zone, which is the right answer
+  // for a campus society whose attendees are all in the same place. Attaching
+  // an explicit TZID would need a full VTIMEZONE block that some clients reject.
+  function parseEventTime(timeText) {
+    if (!timeText) return null;
+    const text = String(timeText).trim();
+    if (!text) return null;
+
+    // One matcher for "5pm", "5 PM", "5:00 PM" and 24-hour "17:00".
+    const ONE = /(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?/gi;
+    const found = [];
+    let m;
+    while ((m = ONE.exec(text)) !== null) {
+      let hour = parseInt(m[1], 10);
+      const minute = m[2] ? parseInt(m[2], 10) : 0;
+      const mer = m[3] ? m[3].toLowerCase().replace(/\./g, "") : null;
+      if (hour > 23 || minute > 59) continue;
+      if (mer === "pm" && hour < 12) hour += 12;
+      if (mer === "am" && hour === 12) hour = 0;
+      // A bare 1–12 with no am/pm anywhere in the string is ambiguous ("5 - 7"
+      // could be either). Rather than guess, drop it and let the event fall
+      // back to all-day, which is never wrong by twelve hours.
+      if (!mer && !/[ap]\.?m\.?/i.test(text) && hour < 8) continue;
+      found.push({ hour, minute });
+    }
+    if (found.length === 0) return null;
+
+    // A trailing "pm" often governs an earlier bare hour: "5 - 7 PM".
+    if (found.length >= 2 && /[ap]\.?m\.?\s*$/i.test(text)) {
+      const last = found[found.length - 1];
+      const first = found[0];
+      if (last.hour >= 12 && first.hour < 12 && first.hour < last.hour - 12 + 1) {
+        first.hour += 12;
+      }
+    }
+
+    const start = found[0];
+    let end = found.length > 1 ? found[1] : null;
+    if (!end) {
+      // Only a start time was given. One hour is a stated assumption, not a
+      // fact about the event — see the CMS hint asking for a range.
+      end = { hour: (start.hour + 1) % 24, minute: start.minute };
+    }
+    return { start, end };
+  }
+
+  function pad(n) { return String(n).padStart(2, "0"); }
+
+  // Local-date arithmetic on the calendar day, kept in UTC so it can't drift.
+  function shiftDay(parts, days) {
+    const d = new Date(Date.UTC(parts.y, parts.m, parts.d));
+    d.setUTCDate(d.getUTCDate() + days);
+    return { y: d.getUTCFullYear(), m: d.getUTCMonth(), d: d.getUTCDate() };
+  }
+
+  function calendarStamps(date, timeText) {
+    const p = calendarParts(date);
+    if (!p) return null;
+    const day = `${p.y}${pad(p.m + 1)}${pad(p.d)}`;
+    const t = parseEventTime(timeText);
+
+    if (!t) {
+      // All-day. DTEND is exclusive in iCalendar, so it is the NEXT day —
+      // without the +1 the event disappears from some clients entirely.
+      const next = shiftDay(p, 1);
+      return {
+        allDay: true,
+        parsedTime: false,
+        icsStart: day,
+        icsEnd: `${next.y}${pad(next.m + 1)}${pad(next.d)}`,
+        googleStart: day,
+        googleEnd: `${next.y}${pad(next.m + 1)}${pad(next.d)}`
+      };
+    }
+
+    // An end earlier than the start means it ran past midnight.
+    const endsNextDay =
+      t.end.hour < t.start.hour ||
+      (t.end.hour === t.start.hour && t.end.minute <= t.start.minute);
+    const endParts = endsNextDay ? shiftDay(p, 1) : p;
+    const endDay = `${endParts.y}${pad(endParts.m + 1)}${pad(endParts.d)}`;
+
+    const startStamp = `${day}T${pad(t.start.hour)}${pad(t.start.minute)}00`;
+    const endStamp = `${endDay}T${pad(t.end.hour)}${pad(t.end.minute)}00`;
+    return {
+      allDay: false,
+      parsedTime: true,
+      icsStart: startStamp,
+      icsEnd: endStamp,
+      googleStart: startStamp,
+      googleEnd: endStamp
+    };
+  }
+
+  eleventyConfig.addFilter("calendarStamps", function (date, timeText) {
+    return calendarStamps(date, timeText);
+  });
+
+  // The whole .ics body is assembled here rather than in a Nunjucks template.
+  // RFC 5545 requires CRLF line endings and 75-octet line folding, neither of
+  // which survives contact with template whitespace control — a stray blank
+  // line or a bare LF makes strict parsers (Outlook especially) reject the
+  // file outright, and the failure shows up as "nothing happens when I tap
+  // the button" rather than as an error.
+  function icsEscape(value) {
+    return String(value == null ? "" : value)
+      .replace(/\\/g, "\\\\")
+      .replace(/;/g, "\\;")
+      .replace(/,/g, "\\,")
+      .replace(/\r?\n/g, "\\n");
+  }
+
+  function icsFold(line) {
+    const text = String(line == null ? "" : line);
+    if (text.length <= 75) return text;
+    let out = text.slice(0, 75);
+    let rest = text.slice(75);
+    while (rest.length > 74) {
+      out += "\r\n " + rest.slice(0, 74);
+      rest = rest.slice(74);
+    }
+    return rest ? out + "\r\n " + rest : out;
+  }
+
+  eleventyConfig.addFilter("icsForEvent", function (event, slug) {
+    const stamps = calendarStamps(event.date, event.time);
+    if (!stamps) return "";
+
+    const dtstart = stamps.allDay
+      ? `DTSTART;VALUE=DATE:${stamps.icsStart}`
+      : `DTSTART:${stamps.icsStart}`;
+    const dtend = stamps.allDay
+      ? `DTEND;VALUE=DATE:${stamps.icsEnd}`
+      : `DTEND:${stamps.icsEnd}`;
+
+    // DTSTAMP must be a UTC instant. Fixed to the event's own date rather than
+    // build time so rebuilding doesn't churn the file on every deploy.
+    const p = calendarParts(event.date);
+    const dtstamp = `${p.y}${pad(p.m + 1)}${pad(p.d)}T000000Z`;
+
+    const lines = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Guelph-Humber Pre-Law Society//Events//EN",
+      "CALSCALE:GREGORIAN",
+      "METHOD:PUBLISH",
+      "BEGIN:VEVENT",
+      `UID:${slug}@guelph-humber-pre-law-society`,
+      `DTSTAMP:${dtstamp}`,
+      dtstart,
+      dtend,
+      `SUMMARY:${icsEscape(event.title)}`
+    ];
+    if (event.description) lines.push(`DESCRIPTION:${icsEscape(event.description)}`);
+    if (event.location) lines.push(`LOCATION:${icsEscape(event.location)}`);
+    lines.push("END:VEVENT", "END:VCALENDAR");
+
+    return lines.map(icsFold).join("\r\n") + "\r\n";
+  });
+
+  eleventyConfig.addFilter("googleCalendarUrl", function (event) {
+    const stamps = calendarStamps(event.date, event.time);
+    if (!stamps) return "";
+    const params = new URLSearchParams({
+      action: "TEMPLATE",
+      text: event.title || "Event"
+    });
+    if (event.description) params.set("details", event.description);
+    if (event.location) params.set("location", event.location);
+    // `dates` is appended by hand: URLSearchParams percent-encodes the "/"
+    // separator to %2F, and Google's documented form uses a literal slash.
+    // The two stamps are digits and "T" only, so there is nothing to escape.
+    return (
+      "https://calendar.google.com/calendar/render?" +
+      params.toString() +
+      `&dates=${stamps.googleStart}/${stamps.googleEnd}`
+    );
   });
 
   // Builds the competitions / team placements / individual achievements shown

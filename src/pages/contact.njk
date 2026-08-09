@@ -14,44 +14,48 @@ permalink: /contact/
 
 <section>
   <div class="container">
+    {#- Every contact route appears EXACTLY ONCE on this page. An earlier
+       version listed the email address, Instagram and LinkedIn in a left-hand
+       list and then repeated all three in the right-hand card, under two
+       competing headings ("Get in Touch" / "Send us a message") that invited
+       the same action twice.
+
+       The rule that keeps it honest: the primary card holds whichever route
+       we most want people to use, and "Other ways to reach us" holds the rest
+       — so when a Google contact form is configured the email moves down into
+       the list, and when it isn't, the email *is* the primary action and is
+       therefore left out of the list below. Check both branches if you edit
+       this. #}
     <div class="contact-grid">
       <div class="contact-info">
-        <h3>Get in Touch</h3>
-        <p>Whether you're interested in joining the society, competing in The GH Cup, or partnering with us, reach out and we'll get back to you.</p>
+        <h3>Send us a message</h3>
+        {%- if site.contactFormUrl %}
+        <p>Whether you're interested in joining the society, competing in The GH Cup or the Mini Moot, or partnering with us — fill in our short contact form and we'll get back to you by email.</p>
+        <a class="btn btn-primary" href="{{ site.contactFormUrl }}" target="_blank" rel="noopener">Open the contact form<span class="visually-hidden"> (opens in a new tab)</span></a>
+        {%- elif site.email %}
+        <p>Whether you're interested in joining the society, competing in The GH Cup or the Mini Moot, or partnering with us — email us and we'll get back to you as soon as we can. We read everything that comes in.</p>
+        <a class="btn btn-primary" href="mailto:{{ site.email }}">Email {{ site.email }}</a>
+        {%- endif %}
+      </div>
+      <div class="contact-cta">
+        <h3>Other ways to reach us</h3>
+        <p>We post competition news, event dates, and results here first.</p>
         <div class="contact-links">
           <a href="{{ site.instagram }}" target="_blank" rel="noopener">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
             @ghpls on Instagram
           </a>
           <a href="{{ site.linkedin }}" target="_blank" rel="noopener">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
             LinkedIn
           </a>
-          {% if site.email %}
+          {%- if site.email and site.contactFormUrl %}
           <a href="mailto:{{ site.email }}">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg>
             {{ site.email }}
           </a>
-          {% endif %}
+          {%- endif %}
         </div>
-      </div>
-      {#- This was an on-page form carrying Netlify's `data-netlify` attributes.
-         Those only do anything on Netlify, and the site moved to a Cloudflare
-         Worker that has no form handling — so every "Send Message" returned a
-         405 error page and no message ever arrived. Rather than fake a form
-         with nowhere to POST, we send people to a Google Form (responses land
-         in a Sheet the execs own) and always show the real contact routes
-         underneath. #}
-      <div class="contact-cta">
-        <h3>Send us a message</h3>
-        {%- if site.contactFormUrl %}
-        <p>Fill in our short contact form and we'll get back to you by email.</p>
-        <a class="btn btn-primary" href="{{ site.contactFormUrl }}" target="_blank" rel="noopener">Open the contact form<span class="visually-hidden"> (opens in a new tab)</span></a>
-        {%- elif site.email %}
-        <p>Email us and we'll get back to you as soon as we can. We read everything that comes in.</p>
-        <a class="btn btn-primary" href="mailto:{{ site.email }}">Email {{ site.email }}</a>
-        {%- endif %}
-        <p class="contact-cta-alt">You can also reach us on <a href="{{ site.instagram }}" target="_blank" rel="noopener">Instagram</a> or <a href="{{ site.linkedin }}" target="_blank" rel="noopener">LinkedIn</a>.</p>
       </div>
     </div>
   </div>

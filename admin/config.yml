@@ -89,7 +89,9 @@ collections:
         image_field: "photo"
         fitField: "photoSize"
         zoomField: "photoZoom"
-        hint: "Drag the dot to choose what part of the photo stays in view. The preview on the right shows every place this photo appears on the site."
+        # Says "previews", never "the preview on the right": the panels sit
+        # beside the photo on a desktop but below it on a phone.
+        hint: "Drag the dot to choose what part of the photo stays in view. The “How it looks on the site” previews show every place this photo appears."
         shapes:
           - label: "Achievements list card"
             axes:
@@ -136,7 +138,12 @@ collections:
     fields:
       - { label: "Event Name", name: "title", widget: "string" }
       - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
-      - { label: "Time", name: "time", widget: "string", hint: "e.g. 5:00 PM - 7:00 PM", required: false }
+      # The text here is parsed to build the event's "Add to Calendar" entry,
+      # so the format matters more than it used to. Anything unparseable still
+      # produces a working button — it just becomes an all-day entry — and the
+      # build prints a warning naming the event. See parseEventTime in
+      # .eleventy.js.
+      - { label: "Time", name: "time", widget: "string", required: false, hint: "e.g. 5:00 PM - 7:00 PM. Give a start and end time in this form so the 'Add to Calendar' button can set the right hours — if it can't read the time, the calendar entry covers the whole day instead." }
       - { label: "Location", name: "location", widget: "string", required: false }
       - { label: "Description", name: "description", widget: "text" }
       - { label: "Allow RSVPs", name: "rsvp", widget: "boolean", required: false, default: true, hint: "Show an RSVP button on this event so visitors can let you know they're coming. Responses go to the RSVP Google Form set up under Page Content > Site Settings, and land in that form's response Sheet. If no form is set up yet, the button emails you instead." }
@@ -491,6 +498,7 @@ collections:
       - label: "GH Cup Page"
         name: "ghcup-page"
         file: "src/_data/ghcup.json"
+        description: "The text on the GH Cup page. To change the photo at the top of the page, use \"Page Header Photos\" below — every page's banner is set in that one place."
         fields:
           - { label: "Year", name: "year", widget: "string" }
           - { label: "Headline", name: "headline", widget: "string", hint: "e.g. The GH Cup 2026" }
@@ -500,7 +508,6 @@ collections:
             name: "howItWorks"
             widget: "list"
             field: { label: "Step", name: "step", widget: "string" }
-          - { label: "Banner Photo", name: "photo", widget: "image", required: false, hint: "Optional photo for the GH Cup banner" }
           - label: "Competition Gallery"
             name: "gallery"
             widget: "list"
@@ -523,7 +530,7 @@ collections:
       - label: "Mini Moot Page"
         name: "minimoot-page"
         file: "src/_data/minimoot.json"
-        description: "The Mini Moot is the internal competition, open to Guelph-Humber students only. Same fields as the GH Cup page."
+        description: "The Mini Moot is the internal competition, open to Guelph-Humber students only. Same fields as the GH Cup page. To change the photo at the top of the page, use \"Page Header Photos\" below — every page's banner is set in that one place."
         fields:
           - { label: "Year", name: "year", widget: "string" }
           - { label: "Headline", name: "headline", widget: "string", hint: "e.g. The Mini Moot 2026" }
@@ -534,7 +541,6 @@ collections:
             name: "howItWorks"
             widget: "list"
             field: { label: "Step", name: "step", widget: "string" }
-          - { label: "Banner Photo", name: "photo", widget: "image", required: false, hint: "Optional photo for the Mini Moot banner" }
           - label: "Competition Gallery"
             name: "gallery"
             widget: "list"

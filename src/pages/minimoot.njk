@@ -19,10 +19,13 @@ permalink: /minimoot/
 
 <section>
   <div class="container">
+    {#- The banner photo for this page lives in Page Content → Page Header
+       Photos → Mini Moot Page, alongside every other page's banner and with
+       the same drag-to-position control. There used to be a second "Banner
+       Photo" field on this entry that rendered a 200px circle here instead;
+       an exec set it expecting the header to change, and it silently didn't.
+       Don't reintroduce a second photo field on this page. #}
     <div class="ghcup-hero minimoot-hero">
-      {% if minimoot.photo %}
-      <img src="{{ minimoot.photo }}" alt="The Mini Moot" style="max-width:200px; border-radius:50%; margin-bottom:24px;">
-      {% endif %}
       {% if minimoot.eligibility %}<p class="eligibility-badge">{{ minimoot.eligibility }}</p>{% endif %}
       <h3>{{ minimoot.headline }}</h3>
       <p>{{ minimoot.description }}</p>

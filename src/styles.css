@@ -416,6 +416,47 @@ section { padding: 100px 0; }
 .schedule-rsvp { margin-top: 14px; }
 .rsvp-link { display: inline-block; padding: 11px 26px; font-size: 0.9rem; }
 
+/* ADD TO CALENDAR
+   A <details>/<summary> disclosure, so the whole control works with no
+   JavaScript and stays keyboard operable. Deliberately quieter than the RSVP
+   button beside it: RSVP is the action the society wants, adding to a calendar
+   is a convenience. Peach text on white would be 2.0:1 — use --peach-ink
+   (4.84:1) for any small peach text on a light background here. */
+.cal-add { margin-top: 10px; }
+.cal-add > summary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: 6px;
+  border: 1.5px solid rgba(26,39,68,0.18); background: var(--white);
+  color: var(--navy); font-size: 0.88rem; font-weight: 600;
+  cursor: pointer; user-select: none;
+  list-style: none; /* Firefox */
+  transition: border-color 0.2s, background 0.2s;
+}
+/* Safari/Chrome draw their own triangle; the marker is redundant next to the
+   calendar icon and misaligns the flex row. */
+.cal-add > summary::-webkit-details-marker { display: none; }
+.cal-add > summary::marker { content: ""; }
+.cal-add > summary:hover { border-color: var(--peach); background: var(--cream); }
+.cal-add[open] > summary { border-color: var(--peach); background: var(--cream); }
+.cal-add > summary svg { color: var(--peach-ink); flex-shrink: 0; }
+
+.cal-add-menu {
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 2px; margin-top: 8px; padding: 6px;
+  border: 1px solid rgba(26,39,68,0.12); border-radius: 8px;
+  background: var(--white); box-shadow: 0 6px 20px rgba(26,39,68,0.10);
+  max-width: 280px;
+}
+/* 44px minimum touch target — these two sit 2px apart, so a short row here
+   means a thumb lands on the wrong calendar. */
+.cal-add-menu a {
+  display: flex; align-items: center; min-height: 44px;
+  width: 100%; padding: 10px 12px; border-radius: 5px;
+  color: var(--navy); font-size: 0.88rem; font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+.cal-add-menu a:hover { background: var(--cream); color: var(--peach-ink); }
+
 /* PAST EVENTS */
 .past-events-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
 .past-event-card {
@@ -608,9 +649,10 @@ section { padding: 100px 0; }
   background: var(--cream); border: 1px solid rgba(26,39,68,0.08);
   border-radius: 12px; padding: 28px;
 }
-.contact-cta h3 { margin-top: 0; }
+.contact-cta h3 { margin-top: 0; font-size: 1.5rem; margin-bottom: 16px; }
+.contact-cta p { color: var(--text-light); margin-bottom: 8px; }
 .contact-cta .btn { display: inline-block; }
-.contact-cta-alt { margin-bottom: 0; font-size: 0.9rem; color: #55606f; }
+.contact-cta .contact-links a:last-child { padding-bottom: 0; }
 
 /* WIN CARD AS LINK */
 .win-card--link { display: block; color: inherit; }

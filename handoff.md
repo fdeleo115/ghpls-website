@@ -7,6 +7,189 @@ _Written: June 2026 · Updated: August 8 2026 · For whoever (human or AI) picks
 > cross-references ("see section 0") still point at each other, not at this
 > section.
 
+## Tenth pass, Aug 9 2026 — Mini Moot banner, Contact page, admin on phones, Add to Calendar
+
+Three user-reported problems plus an Add to Calendar feature, all reproduced or
+verified before being called done.
+
+### 0. Add to Calendar on /events/ — and the date bug it exposed
+
+**A latent timezone bug had to be fixed first.** The date filters read a
+calendar day with LOCAL getters (`.getDate()`, `toLocaleDateString()`) out of a
+value that `new Date("2026-10-20")` parses as **UTC midnight**. Every event
+therefore rendered one day early anywhere west of Greenwich: a local build in
+Toronto showed "OCT 19" for an event dated the 20th. **The live site was
+correct only because GitHub Actions builds in UTC** — the bug was invisible in
+production purely by accident of where the build runs. `dateFormat` /
+`monthShort` / `dayNum` now read UTC parts, so local and CI agree. Deployed
+output is unchanged; only local builds were ever wrong. Don't reintroduce local
+getters here — these values are calendar days the society picked, not instants.
+
+The feature itself:
+
+- **One `.ics` file per upcoming event**, generated at build time by new
+  `src/event-ics.njk` at `/events/<slug>.ics`, plus a **Google Calendar
+  pre-filled link**. Two routes because neither covers everyone: the `.ics`
+  opens Apple Calendar directly when tapped on an iPhone and imports into
+  Outlook, while Google users are far better served by a link than by
+  downloading a file and importing it.
+- **The control is a `<details>`/`<summary>` disclosure — no JavaScript.**
+  Keyboard-operable and screen-reader announced for free, and it can't break at
+  runtime. Same reasoning that put RSVP on a plain link (eighth pass).
+- **The `time` field is free text** ("5:00 PM - 7:00 PM") and stays that way —
+  switching to structured start/end fields would invalidate every existing
+  entry and make execs re-type them. `parseEventTime` in `.eleventy.js` reads
+  it, and **anything it can't parse still gets a working button**: the event
+  becomes an **all-day** entry on the right date rather than no button or, far
+  worse, one filed at the wrong hour. A build warning names any event that took
+  the fallback, so a typo surfaces at build time instead of in someone's
+  calendar. Verified against 10 formats: `5:00 PM - 7:00 PM`, `6 PM – 8 PM`
+  (en dash), `5 - 7 PM` (trailing meridiem governs the earlier bare hour →
+  17:00), `17:00 - 19:00`, `7:30 PM` (single time → +1h, a stated assumption),
+  `12:00 PM - 1:30 PM` (noon is 12:00, not 00:00), `9:00 AM - 12:00 PM`,
+  `10 PM - 1 AM` (correctly rolls to the next day), `TBD` (all-day + warning)
+  and empty (all-day, no warning — a missing time isn't a mistake).
+- **A bare hour with no am/pm anywhere is deliberately rejected**, not guessed.
+  "5 - 7" falls back to all-day; being vague beats being twelve hours wrong.
+- **The `.ics` body is assembled in JS, not a Nunjucks template.** RFC 5545
+  needs CRLF endings and 75-octet line folding, and neither survives template
+  whitespace control — a bare LF makes strict parsers (Outlook) reject the file
+  silently, which presents as "nothing happens when I tap the button". Verified
+  the output is 100% CRLF with zero bare LFs, no line over 75 octets, and that
+  folded DESCRIPTION lines unfold back to the exact original text.
+- `dates=` on the Google URL is appended by hand because `URLSearchParams`
+  percent-encodes the `/` separator and Google's documented form uses a literal
+  slash.
+- The CMS hint on the Time field now explains that the format drives the
+  calendar entry.
+
+**Latent, not fixed — worth knowing before the execs add a final video:**
+`SITE_CSP` in `worker.js` has no `frame-src`, so it falls back to
+`default-src 'self'` and **would block the YouTube embeds** on the GH Cup and
+Mini Moot pages. Nothing is broken today only because both video collections
+are empty. Add `frame-src https://www.youtube.com` before the first video goes
+in, or it will look like the video simply doesn't appear.
+
+---
+
+The three reported problems follow. `git pull --rebase origin main` before
+committing — execs push CMS commits.
+
+### 1. The Mini Moot banner "didn't work" because two fields both claimed to be it
+
+An exec set Page Content → Mini Moot Page → **"Banner Photo"** and the banner
+didn't change. Nothing was broken in the usual sense: that field renders a
+**200px circle inside the hero box**, not the page banner. Their photo was
+live the whole time, as a squashed oval halfway down the page (`border-radius:
+50%` on a non-square image), while the real banner — Page Content → **Page
+Header Photos** → Mini Moot Page — was still empty and showing plain navy.
+
+- **Removed the "Banner Photo" field and its `<img>` from both the Mini Moot
+  and GH Cup pages.** The GH Cup copy was unused (`ghcup.json`'s `photo` was
+  `""`) but identical, so it was the same trap waiting for the next editor.
+- **Migrated the exec's photo** (`img_8312.jpeg`) into
+  `pageHeaders.minimoot.photo` so their upload became the real banner instead
+  of being deleted, and set a focal point of `50% 72%` so the group's faces sit
+  in the 380px strip. They can re-drag it in the CMS at any time.
+- **Page Header Photos is now the single place every page banner is set**, with
+  the same drag-to-position control on all nine. Both page entries' CMS
+  descriptions now say so.
+- Fixed two related gaps: the Page Header Photos **preview pane never rendered
+  a Mini Moot entry** (the page list in `cms-extras.js` was written before the
+  Mini Moot existed and nothing keeps them in step — there is now a comment),
+  and **`minimoot-page` had no preview template at all**. GH Cup's gallery
+  preview is now a shared `competitionGalleryPreview()` used by both.
+
+**If you add a 10th page:** it needs an entry in `admin/config.yml` under Page
+Header Photos *and* in the `pages` array in `cms-extras.js`. Miss the second
+and the field works but silently previews nothing.
+
+### 2. Contact page — every route was listed twice
+
+The page invited the same action twice under two headings. "Get in Touch" sat
+above a bare list of Instagram/LinkedIn/email; "Send us a message" then
+repeated the email as a button and Instagram and LinkedIn as a sentence. Three
+routes, six mentions.
+
+Rebuilt so **each route appears exactly once**, with one rule worth preserving:
+the primary card holds whichever route we most want used, and "Other ways to
+reach us" holds the rest — so when `contactFormUrl` is set the email moves down
+into the list, and when it isn't, the email *is* the primary button and is
+therefore omitted from the list. **Both branches were checked** for duplicates
+(the fallback branch is the one live right now, since no Google Form is
+configured yet). `.contact-cta-alt` is gone from `styles.css`.
+
+### 3. `/admin/` on an iPhone — the content was off-screen and unreachable
+
+Measured at 375px: **three Decap containers carry a hard `min-width: 800px`**
+(`AppHeaderContent`, `AppMainContainer`, `EditorContainer`/`ToolbarContainer`),
+so the admin renders on an 800px canvas at any screen size. The entry list, the
+Publish button and the account menu all sat past the right edge — and
+`admin/index.html`'s `overflow-x: hidden`, added previously to stop sideways
+scrolling, **made that unreachable rather than merely awkward**: you saw the
+Collections sidebar and nothing else, with no way to scroll to it. That
+`overflow-x` is now gone; do not put it back.
+
+New `admin/cms-mobile.css`, scoped entirely to `@media (max-width: 799px)` (one
+pixel below Decap's own floor, so **desktop is byte-for-byte unchanged** —
+verified). It releases the min-widths, un-fixes the 250px sidebar so it stacks,
+zeroes the entry list's `padding-left: 280px`, collapses the editor's
+react-split-pane to one column and hides the preview pane, wraps the toolbar so
+Publish is reachable, puts the date field's "Now"/"Clear" on their own row
+(they were rendering one letter per line), forces 16px inputs so iOS stops
+zooming on focus, and sets 44px touch targets.
+
+**Read the header comment in that file before editing it.** Every selector
+matches `[class*="ComponentName"]`, never an emotion hash (`css-y7r3-AppHeader`)
+— the hash changes between Decap versions, the component-name suffix doesn't.
+Two selector mistakes are already documented in there because both were made
+and caught: `[class*="ViewControls"]` unscoped also hides the collection list's
+sort and filter controls, and the "Now" button's wrapper is `Buttons`, not
+`NowButton`.
+
+### The focal-point widget didn't work on touch at all
+
+Separately from layout: the crop tool bound `onMouseDown/Move/Up` only. iOS
+synthesises a click from a tap but **not a mousemove stream from a drag**, so
+"drag to position" did nothing on a phone — the gesture scrolled the page. It
+now uses Pointer Events (mouse, touch and pen in one path) with
+`setPointerCapture`, falling back to the mouse handlers where `PointerEvent` is
+missing, so a drag can't be applied twice. Verified by dispatching real
+`pointerType: "touch"` events and confirming the saved value.
+
+The box was also a hardcoded 320px, wider than the editor column on a phone.
+It is now `width: 100%; max-width: 320px` with the aspect ratio pinned.
+
+**The important part, if you touch this widget:** the crop overlay and focal dot
+are drawn in `render()`, while the pointer is mapped from the box's *live*
+bounding rect in `onPointer()`. A first attempt stored a measured pixel width in
+state to bridge the two — and that number went stale on resize (observed: 283
+stored, 228 actual), which puts the crop guide somewhere other than where the
+finger actually lands, with nothing on screen to reveal it. A `ResizeObserver`
+was tried and **could not be verified** — a control probe confirmed observer
+callbacks are never delivered in this automation environment. So the stored
+width was **removed entirely**: the ratio is pinned and every overlay offset is
+a percentage, which makes the rendered geometry width-independent and leaves
+only one source of truth. Do not reintroduce a measured width here.
+
+Verified by round-trip at 320 / 375 / 414px — drive a drag to a known fraction
+of the box, then read back where the dot actually rendered (e.g. dragged to
+0.65/0.20 → saved `66% 20%` → dot rendered back at 0.645/0.204) — plus a
+desktop check at 1280px confirming the preview pane, resizer, 800px min-width
+and 66px toolbar are all exactly as before.
+
+**Testing the admin locally:** GitHub OAuth isn't available on localhost, so
+this used a throwaway `admin/_local-harness.html` — `CMS_MANUAL_INIT`, fetch
+the real `config.yml`, swap `backend` for `test-repo`, seed a photo via a
+folder collection's field-level `default:` (see failure-log item 8). **It was
+deleted before the end of the session**; recreate it if you need it, and delete
+it again — it must never ship.
+
+**Files touched:** `.eleventy.js`, `admin/cms-extras.js`, `admin/config.yml`,
+`admin/index.html`, `src/_data/{ghcup,minimoot,pageHeaders}.json`,
+`src/pages/{contact,events,ghcup,minimoot}.njk`, `src/styles.css`, new
+`admin/cms-mobile.css`, new `src/event-ics.njk`.
+
 ## Ninth pass, Aug 9 2026 — The Mini Moot page
 
 Added `/minimoot/` for the Mini Moot: the same competition format as the GH
@@ -828,10 +1011,9 @@ resize/reposition every photo and see it accurately before saving.
 
 ## 3. Files actively being edited
 
-None — working tree is clean and up to date with `origin/main` as of this
-session's end (`git status` clean, `git log HEAD..origin/main` empty after a
-final pull). Everything through the sixth pass above is committed and pushed,
-and the live site has been confirmed to match.
+None — the tenth pass is committed, pushed and deployed. `git pull --rebase
+origin main` before pushing anything new; execs push CMS commits while you
+work, and one landed mid-session this time too.
 
 ## 4. What was tried that failed (so you don't repeat it)
 

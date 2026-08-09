@@ -14,10 +14,10 @@ permalink: /ghcup/
 
 <section>
   <div class="container">
+    {#- Banner photo lives in Page Content → Page Header Photos → GH Cup Page.
+       See the matching note in minimoot.njk: the old "Banner Photo" field on
+       this entry rendered a circle here, not the page header, and was a trap. #}
     <div class="ghcup-hero">
-      {% if ghcup.photo %}
-      <img src="{{ ghcup.photo }}" alt="The GH Cup" style="max-width:200px; border-radius:50%; margin-bottom:24px;">
-      {% endif %}
       <h3>{{ ghcup.headline }}</h3>
       <p>{{ ghcup.description }}</p>
       <a href="/contact/" class="btn btn-primary">Stay Updated</a>

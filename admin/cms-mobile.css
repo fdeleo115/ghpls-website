@@ -1,0 +1,243 @@
+/* GHPLS: make Decap CMS usable on a phone.
+ *
+ * ---------------------------------------------------------------------------
+ * WHY THIS FILE EXISTS
+ * ---------------------------------------------------------------------------
+ * Decap CMS 3.1.1 has no responsive layout. Measured in the browser at 375px
+ * (iPhone width), three of its containers carry a hard `min-width: 800px`:
+ *
+ *   AppHeaderContent   min-width: 800px
+ *   AppMainContainer   min-width: 800px
+ *   EditorContainer    min-width: 800px   (ToolbarContainer too)
+ *
+ * So the whole admin renders on an 800px canvas no matter how narrow the
+ * screen is, and the right 425px — the entry list, the Publish button, the
+ * account menu — simply sits off the edge. admin/index.html's
+ * `overflow-x: hidden` (added to stop sideways scrolling) then made that
+ * unreachable rather than merely awkward: you could see the Collections
+ * sidebar and nothing else, with no way to scroll to the content.
+ *
+ * On top of the min-widths, two more things break at phone width:
+ *   - The collection sidebar is `position: fixed; width: 250px`, and the
+ *     entry list clears it with `padding-left: 280px` — 75% of a 375px screen.
+ *   - The editor is a react-split-pane: `.Pane1` (the form) is `width: 50%`
+ *     inline, `.Pane2` is the live preview. Half of 375px is unusable, and the
+ *     inline width means only `!important` can override it.
+ *
+ * ---------------------------------------------------------------------------
+ * HOW THE SELECTORS WORK — read before editing
+ * ---------------------------------------------------------------------------
+ * Decap styles itself with emotion, which emits class names shaped
+ * `css-<hash>-<ComponentName>`. The hash changes whenever Decap's styles
+ * change; the component-name suffix is stable. Every rule below therefore
+ * matches on `[class*="ComponentName"]` and never on a hash. If a Decap
+ * upgrade renames a styled component, the matching rule silently stops
+ * applying — it degrades to today's broken-but-not-worse layout rather than
+ * corrupting anything. Re-verify against a real phone width after any bump of
+ * the decap-cms version pinned in admin/index.html.
+ *
+ * Everything is scoped to `@media (max-width: 799px)`, one pixel below Decap's
+ * own 800px floor, so desktop editing is byte-for-byte unchanged.
+ */
+
+@media (max-width: 799px) {
+
+  /* 1. Release the 800px canvas so the app can actually be 375px wide. */
+  [class*="AppHeaderContent"],
+  [class*="AppMainContainer"],
+  [class*="EditorContainer"],
+  [class*="ToolbarContainer"] {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* 2. Collection view: stack the sidebar above the entry list instead of
+        pinning it over the left 280px of a 375px screen. */
+  [class*="SidebarContainer"] {
+    position: static !important;
+    width: auto !important;
+    max-width: 100% !important;
+    margin-bottom: 16px;
+  }
+  [class*="CollectionMain"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  [class*="CollectionContainer"] {
+    padding: 0 12px !important;
+  }
+
+  /* 3. Editor: one column. The form gets the full width and the live preview
+        pane is hidden — 187px of preview is worth less than 375px of form,
+        and the focal-point widget carries its own "How it looks on the site"
+        preview inside the form anyway (see admin/cms-extras.js). */
+  .SplitPane.vertical > .Pane1 {
+    width: 100% !important;
+    flex: 1 1 auto !important;
+  }
+  .SplitPane.vertical > .Resizer,
+  .SplitPane.vertical > .Pane2 {
+    display: none !important;
+  }
+  /* The preview-pane toggle has nothing left to toggle. Scope this to the
+     editor: `[class*="ViewControls"]` on its own also matches the collection
+     list's ViewControlsSection / ViewControlsButton (sort and filter), and
+     hiding those would take away controls that work fine on a phone. */
+  [class*="EditorContainer"] [class*="ViewControls"] {
+    display: none !important;
+  }
+  [class*="ControlPaneContainer"] {
+    padding: 0 12px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 4. Editor toolbar: Publish was off-screen at x=738 on a 375px viewport.
+        Let the three sections wrap onto two rows and give the toolbar the
+        height to show them. */
+  [class*="ToolbarContainer"] {
+    flex-wrap: wrap !important;
+    height: auto !important;
+    min-height: 66px;
+    padding: 6px 0 !important;
+  }
+  [class*="ToolbarSectionBackLink"] {
+    padding: 0 12px !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+  /* The collection name truncates rather than pushing Publish off the row. */
+  [class*="BackCollection"],
+  [class*="BackStatus"] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  [class*="ToolbarSectionMain"] {
+    flex: 1 1 100% !important;
+    order: 3;
+    justify-content: flex-start !important;
+    padding: 6px 12px 0 !important;
+  }
+  [class*="ToolbarSectionMeta"] {
+    padding: 0 8px !important;
+  }
+
+  /* The editor sits under a now-taller toolbar; measured at 66px, so give it
+     room to grow without the first field hiding behind it. */
+  [class*="EditorContainer"] {
+    padding-top: 112px !important;
+  }
+
+  /* 5. App header: let the nav and the account/quick-add actions share two
+        rows instead of running off the right edge. The header element itself
+        is a fixed 56px tall, so once its content wraps to two rows the
+        overflow lands on top of the Collections card — it has to grow with
+        its content. */
+  header[class*="AppHeader"] {
+    height: auto !important;
+    min-height: 56px;
+  }
+  [class*="AppHeaderContent"] {
+    flex-wrap: wrap !important;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px !important;
+  }
+  [class*="AppHeaderActions"] {
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+  [class*="AppHeaderTestRepoIndicator"] { display: none !important; }
+
+  /* Collection heading and its "New" button shared one non-wrapping row and
+     overlapped at 375px. */
+  [class*="CollectionTopRow"] {
+    flex-wrap: wrap !important;
+    gap: 10px;
+    align-items: flex-start !important;
+  }
+  [class*="CollectionTopHeading"] {
+    min-width: 0 !important;
+    flex: 1 1 100% !important;
+  }
+
+  /* 6. iOS Safari zooms the page whenever a focused field is under 16px.
+        Decap's inputs are 14–15px, so every tap on a text box zoomed in and
+        left the exec panned somewhere off the layout. */
+  input, textarea, select,
+  [class*="ControlContainer"] input,
+  [class*="ControlContainer"] textarea,
+  .cms-editor-visual, .CodeMirror {
+    font-size: 16px !important;
+  }
+
+  /* 7. Touch targets. Decap's buttons are ~28–32px tall; 44px is the floor
+        that stops mis-taps on adjacent list rows. */
+  [class*="SidebarNavList"] a,
+  [class*="ListCard"] a,
+  button, [role="button"] {
+    min-height: 44px;
+  }
+  [class*="SidebarNavList"] a {
+    display: flex;
+    align-items: center;
+  }
+
+  /* 8. Nothing may force the page wider than the screen. Measured offenders:
+        long image paths in the form, and the collection list's empty-state
+        message (`PaginationMessage`), which laid out at 712px and gave the
+        whole document a sideways scroll. */
+  [class*="ControlContainer"],
+  [class*="ControlContainer"] *,
+  [class*="CollectionMain"],
+  [class*="CollectionMain"] * {
+    max-width: 100%;
+    word-break: break-word;
+  }
+  [class*="PaginationMessage"],
+  [class*="NoEntriesMessage"] {
+    width: auto !important;
+    min-width: 0 !important;
+    text-align: center;
+  }
+
+  /* 9. Date/time fields: the "Now" button sat next to a full-width datetime
+        input, got squeezed to about 30px, and rendered its label one letter
+        per line. Give the input and the button their own rows. */
+  [class*="DateTimeControl"],
+  [class*="DateControl"] {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px;
+  }
+  [class*="DateTimeControl"] input,
+  [class*="DateControl"] input {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+  }
+  /* The "Now" control is a `Buttons` wrapper, not a `NowButton` — scoped to
+     the date control so it can't catch other button groups. */
+  [class*="DateTimeControl"] [class*="Buttons"],
+  [class*="DateControl"] [class*="Buttons"],
+  [class*="DateTimeControl"] [class*="Buttons"] button,
+  [class*="DateControl"] [class*="Buttons"] button {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  /* 10. Media library: a fixed-width dialog on a phone is a horizontal scroll
+        trap. Let it fill the screen. */
+  [class*="MediaLibraryModal"],
+  [class*="StyledModal"] {
+    width: 96vw !important;
+    max-width: 96vw !important;
+    min-width: 0 !important;
+    left: 2vw !important;
+    right: 2vw !important;
+  }
+  [class*="MediaLibraryCardGrid"] {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
+  }
+}

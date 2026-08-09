@@ -1,0 +1,16 @@
+---
+# One .ics file per upcoming event, for the "Add to Calendar" button on
+# /events/. The body is built entirely by the `icsForEvent` filter — see the
+# comment above it in .eleventy.js for why it isn't assembled as markup here
+# (CRLF endings and line folding that template whitespace control would break).
+#
+# `eleventyExcludeFromCollections` keeps these out of every collection so they
+# can't show up as pages; the .ics permalink is the only thing they produce.
+pagination:
+  data: collections.events
+  size: 1
+  alias: event
+permalink: "/events/{{ event.fileSlug }}.ics"
+eleventyExcludeFromCollections: true
+---
+{{- event.data | icsForEvent(event.fileSlug) -}}
