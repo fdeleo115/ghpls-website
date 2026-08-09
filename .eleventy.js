@@ -137,7 +137,55 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy("src/styles.css");
   eleventyConfig.addPassthroughCopy("src/robots.txt");
 
+  // A name on an achievement only reaches an exec's profile when it matches
+  // their team entry exactly, so one typo ("Ashon Vas" for "Ashon Vaz") drops
+  // the award off their page with nothing at all to notice. Names that come
+  // close to an exec's without matching are nearly always that typo; names
+  // nowhere near one are just non-exec competitors, and stay quiet.
+  function warnOnNearMissNames(collectionApi) {
+    const execs = collectionApi
+      .getFilteredByGlob("src/team/*.md")
+      .map((t) => String(t.data.name || "").trim())
+      .filter(Boolean);
+    if (execs.length === 0) return;
+
+    function editDistance(a, b) {
+      const row = Array.from({ length: b.length + 1 }, (_, i) => i);
+      for (let i = 1; i <= a.length; i++) {
+        let diag = row[0];
+        row[0] = i;
+        for (let j = 1; j <= b.length; j++) {
+          const above = row[j];
+          row[j] = Math.min(row[j] + 1, row[j - 1] + 1, diag + (a[i - 1] === b[j - 1] ? 0 : 1));
+          diag = above;
+        }
+      }
+      return row[b.length];
+    }
+
+    const reported = new Set();
+    collectionApi.getFilteredByGlob("src/achievements/*.md").forEach((a) => {
+      const names = (a.data.competitors || [])
+        .map((c) => c.name)
+        .concat(...(a.data.results || []).map((r) => String(r.recipients || "").split("&")));
+      names.forEach((raw) => {
+        const name = String(raw || "").trim();
+        if (!name) return;
+        const lower = name.toLowerCase();
+        if (execs.some((e) => e.toLowerCase() === lower)) return;
+        const near = execs.find((e) => editDistance(e.toLowerCase(), lower) <= 2);
+        if (!near || reported.has(name + near)) return;
+        reported.add(name + near);
+        console.warn(
+          `[ghpls] ${a.inputPath}: "${name}" looks like a misspelling of exec "${near}" — ` +
+            "as written it will not appear on their profile."
+        );
+      });
+    });
+  }
+
   eleventyConfig.addCollection("achievements", function (collectionApi) {
+    warnOnNearMissNames(collectionApi);
     return collectionApi.getFilteredByGlob("src/achievements/*.md").sort((a, b) => {
       // Sort by explicit date when present, otherwise fall back to year.
       const da = a.data.date ? new Date(a.data.date).getTime() : new Date(a.data.year || 0, 0).getTime();
@@ -203,15 +251,14 @@ module.exports = function (eleventyConfig) {
   //   1. Auto-pulled — cross-references the member's name against the
   //      achievements collection, so an exec never has to re-enter data that
   //      already lives on the achievement entry and it can't drift out of sync.
-  //      A result's recipients ("Kate Hilton & Ava Gonsalves") counts as a team
-  //      placement when it names more than one person, individual otherwise.
   //   2. Manual — the three optional lists an exec can fill in on their own CMS
   //      entry. Useful for anything not tracked as a GHPLS achievement (an
   //      outside competition, a pre-GHPLS award, a placement recorded under a
   //      different spelling of their name).
-  // The two are merged and de-duplicated. Setting `manualOnly` on the member
-  // suppresses the auto-pulled side entirely, for the case where the automatic
-  // match is wrong and the exec wants full control.
+  // Filling a section in by hand REPLACES the auto-pulled version of that one
+  // section, so an exec can curate what their profile shows without it being
+  // silently topped back up. Sections left empty still fill themselves in, and
+  // `manualOnly` on the member suppresses the auto side across all three.
   eleventyConfig.addFilter("memberRecord", function (name, achievements, manual) {
     const record = { competitions: [], teamPlacements: [], individualAchievements: [] };
     const m = manual || {};
@@ -230,6 +277,30 @@ module.exports = function (eleventyConfig) {
       list.push(row);
     }
 
+    // Which bucket a result belongs in is a question about the *kind* of result,
+    // not how many people won it — a jointly-won award like "Best Skeleton
+    // Arguments" is still an award, not a round the team advanced to. Editors
+    // settle it outright with `type` on the result; the keyword match is only
+    // the guess for when they haven't.
+    const PLACEMENT_RE = /champions?|winners?|finalists?|runners?[-\s]?up|\d+(?:st|nd|rd|th)\s+place/i;
+    function isPlacement(r) {
+      const t = (r.type || "").trim().toLowerCase();
+      if (t === "placement") return true;
+      if (t === "award") return false;
+      return PLACEMENT_RE.test(r.award || "");
+    }
+
+    // A section the exec filled in by hand is theirs alone — the auto-pull stays
+    // out of it rather than merging extra rows back in behind them.
+    function filledIn(rows) {
+      return Array.isArray(rows) && rows.length > 0;
+    }
+    const manualWins = {
+      competitions: filledIn(m.competitions),
+      teamPlacements: filledIn(m.teamPlacements),
+      individualAchievements: filledIn(m.individualAchievements),
+    };
+
     if (key && achievements && !m.manualOnly) {
       achievements.forEach(function (a) {
         const d = a.data;
@@ -241,12 +312,13 @@ module.exports = function (eleventyConfig) {
           return tokens.indexOf(key) !== -1;
         });
         if (!inCompetitors && matchedResults.length === 0) return;
-        pushUnique(record.competitions, { competition: d.competition, year: d.year, date: d.date, slug: a.fileSlug });
+        if (!manualWins.competitions) {
+          pushUnique(record.competitions, { competition: d.competition, year: d.year, date: d.date, slug: a.fileSlug });
+        }
         matchedResults.forEach(function (r) {
-          const tokens = (r.recipients || "").split("&");
-          const row = { competition: d.competition, year: d.year, date: d.date, slug: a.fileSlug, award: r.award };
-          if (tokens.length > 1) pushUnique(record.teamPlacements, row);
-          else pushUnique(record.individualAchievements, row);
+          const bucket = isPlacement(r) ? "teamPlacements" : "individualAchievements";
+          if (manualWins[bucket]) return;
+          pushUnique(record[bucket], { competition: d.competition, year: d.year, date: d.date, slug: a.fileSlug, award: r.award });
         });
       });
     }

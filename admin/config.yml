@@ -31,6 +31,15 @@ collections:
         fields:
           - { label: "Award", name: "award", widget: "string", hint: "e.g. Finalists, Semi-Finalists, Best Oral Advocate" }
           - { label: "Recipients", name: "recipients", widget: "string", hint: "e.g. Kate Hilton & Ava Gonsalves" }
+          - label: "Counts As"
+            name: "type"
+            widget: "select"
+            required: false
+            hint: "Which heading this shows under on each recipient's profile page. Leave on Decide automatically unless it guesses wrong — anything that reads like a round (Champions, Finalists, Semi-Finalists) becomes a Team Placement, and everything else becomes an Individual Achievement."
+            options:
+              - { label: "Decide automatically", value: "auto" }
+              - { label: "Team Placement — how far the team got", value: "placement" }
+              - { label: "Individual Achievement — a named award", value: "award" }
       - label: "Competitors"
         name: "competitors"
         widget: "list"
@@ -293,7 +302,7 @@ collections:
   - name: "team"
     label: "Executive Team"
     label_singular: "Team Member"
-    description: "Add or update exec team members. They appear on the About page carousel and each gets their own profile page. Competitions attended, team placements, and individual achievements are pulled in automatically from the Achievements collection — add them there, tagging this person as a Competitor or Recipient, and they'll show up here on their own. You can also type any of them in by hand below (for outside competitions, older awards, or anything the automatic match misses)."
+    description: "Add or update exec team members. They appear on the About page carousel and each gets their own profile page. Competitions attended, team placements, and individual achievements fill themselves in from the Achievements collection — tag this person there as a Competitor or Recipient and they show up here on their own. Filling in one of those three lists by hand takes that section over completely, so you can curate exactly what your profile shows; leave a section empty to let it keep filling itself in."
     folder: "src/team"
     create: true
     slug: "{{name}}"
@@ -317,7 +326,7 @@ collections:
         required: false
         label_singular: "Competition"
         collapsed: false
-        hint: "Only needed for competitions that aren't already in the Achievements collection. Anything tagged to this person there shows up automatically — no need to repeat it here. If the name and year match an achievement, this links to it."
+        hint: "Leave this empty and the list fills itself in from every Achievement you're tagged in. Add even one entry here and this becomes the whole list instead — use that to choose exactly which competitions your profile shows. Names that match an achievement still link to it."
         fields:
           - { label: "Competition Name", name: "competition", widget: "string", hint: "e.g. HSFK Cup" }
           - { label: "Year", name: "year", widget: "number", value_type: "int", required: false }
@@ -327,7 +336,7 @@ collections:
         required: false
         label_singular: "Team Placement"
         collapsed: false
-        hint: "A result this person won together with a teammate. Again, only for ones not already recorded in Achievements."
+        hint: "How far a team got — Champions, Finalists, Semi-Finalists. Same rule as above: empty fills itself in automatically, anything you add here becomes the whole list."
         fields:
           - { label: "Award / Placement", name: "award", widget: "string", hint: "e.g. Finalists, Semi-Finalists" }
           - { label: "Competition Name", name: "competition", widget: "string" }
@@ -338,7 +347,7 @@ collections:
         required: false
         label_singular: "Individual Achievement"
         collapsed: false
-        hint: "An award this person won on their own, e.g. Best Oral Advocate."
+        hint: "A named award, e.g. Best Oral Advocate or Best Skeleton Arguments — including ones shared with a teammate. Same rule again: empty fills itself in, anything you add becomes the whole list."
         fields:
           - { label: "Award", name: "award", widget: "string", hint: "e.g. Best Oral Advocate, 3rd Place Factum" }
           - { label: "Competition Name", name: "competition", widget: "string" }

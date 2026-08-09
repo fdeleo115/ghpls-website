@@ -4,9 +4,9 @@ year: 2026
 date: 2026-01-31T19:03:00.000Z
 results:
   - award: Oral Advocate Award
-    recipients: Ashon Vas
+    recipients: Ashon Vaz
 competitors:
-  - name: Ashon Vas
+  - name: Ashon Vaz
 photo: /assets/uploads/img_7284.jpg
 photoHeight: tall
 photoPosition: 49% 14%
