@@ -224,6 +224,21 @@ module.exports = function (eleventyConfig) {
     });
   });
 
+  // The Mini Moot is the internal, Guelph-Humber-only counterpart to the GH
+  // Cup and runs the same way, so it keeps its own winners and videos rather
+  // than sharing the GH Cup's — mixing them would misreport who won what.
+  eleventyConfig.addCollection("minimootWinners", function (collectionApi) {
+    return collectionApi.getFilteredByGlob("src/minimoot-winners/*.md").sort((a, b) => {
+      return (b.data.year || 0) - (a.data.year || 0);
+    });
+  });
+
+  eleventyConfig.addCollection("minimootVideos", function (collectionApi) {
+    return collectionApi.getFilteredByGlob("src/minimoot-videos/*.md").sort((a, b) => {
+      return (b.data.year || 0) - (a.data.year || 0);
+    });
+  });
+
   eleventyConfig.addCollection("team", function (collectionApi) {
     return collectionApi.getFilteredByGlob("src/team/*.md").sort((a, b) => {
       return (a.data.order || 99) - (b.data.order || 99);

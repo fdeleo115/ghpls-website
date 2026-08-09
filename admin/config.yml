@@ -221,6 +221,64 @@ collections:
       - { label: "YouTube URL", name: "url", widget: "string", hint: "Paste the full YouTube link, e.g. https://www.youtube.com/watch?v=XXXX" }
       - { label: "Short Description", name: "description", widget: "text", required: false }
 
+  - name: "minimoot-winners"
+    label: "Mini Moot Previous Winners"
+    label_singular: "Mini Moot Year"
+    description: "Add winners for each year of The Mini Moot — the internal, Guelph-Humber-only competition. Kept separate from GH Cup winners so the two competitions' results never get mixed up."
+    folder: "src/minimoot-winners"
+    create: true
+    slug: "minimoot-{{year}}"
+    fields:
+      - { label: "Year", name: "year", widget: "number", value_type: "int" }
+      - { label: "Theme / Title", name: "theme", widget: "string", hint: "e.g. The Mini Moot 2026" }
+      - { label: "Case Title", name: "caseTitle", widget: "string", required: false, hint: "The case used for this year's competition" }
+      - label: "Awards"
+        name: "awards"
+        widget: "list"
+        hint: "Add each award (Winner, Runner-Up, Best Oral Advocate, Best Written, etc.)"
+        fields:
+          - { label: "Award Title", name: "title", widget: "string", hint: "e.g. Winner, Runner-Up, Best Oral Advocate" }
+          - { label: "Recipients", name: "recipients", widget: "string" }
+      - { label: "Photo", name: "photo", widget: "image", required: false, hint: "Upload a photo from this year's Mini Moot" }
+      - label: "Photo Fit"
+        name: "photoSize"
+        widget: "select"
+        required: false
+        default: "cover"
+        hint: "Fill area (crop) or show the entire photo (may leave gaps)"
+        options:
+          - { label: "Fill area (crop to fit)", value: "cover" }
+          - { label: "Show entire photo (may have gaps)", value: "contain" }
+      - { label: "Photo Zoom", name: "photoZoom", widget: "number", required: false, default: 1, value_type: "float", min: 1, max: 3, step: 0.1, hint: "1 = no zoom, 2 = zoom in 2x." }
+      - label: "Photo Focus (drag to position)"
+        name: "photoPosition"
+        widget: "focal-point"
+        required: false
+        default: "center"
+        image_field: "photo"
+        fitField: "photoSize"
+        zoomField: "photoZoom"
+        hint: "Drag the dot to choose what part of the photo stays in view."
+        shapes:
+          - label: "Winner card"
+            axes: [{ value: 280 }, { value: 220 }]
+            approx: true
+
+  - name: "minimoot-videos"
+    label: "Mini Moot Final Videos"
+    label_singular: "Final Video"
+    description: "Add videos of past Mini Moot finals. They appear on the Mini Moot page."
+    folder: "src/minimoot-videos"
+    create: true
+    identifier_field: "year"
+    slug: "minimoot-final-{{year}}"
+    extension: "md"
+    fields:
+      - { label: "Year", name: "year", widget: "number", value_type: "int", hint: "Year of the final" }
+      - { label: "Title", name: "title", widget: "string", required: false, hint: "e.g. 2025 Mini Moot Final" }
+      - { label: "YouTube URL", name: "url", widget: "string", hint: "Paste the full YouTube link, e.g. https://www.youtube.com/watch?v=XXXX" }
+      - { label: "Short Description", name: "description", widget: "text", required: false }
+
   - name: "past-events"
     label: "Past Events"
     label_singular: "Past Event"
@@ -462,6 +520,40 @@ collections:
                   - label: "Competition gallery grid"
                     axes: [{ value: 1 }, { value: 1 }]
 
+      - label: "Mini Moot Page"
+        name: "minimoot-page"
+        file: "src/_data/minimoot.json"
+        description: "The Mini Moot is the internal competition, open to Guelph-Humber students only. Same fields as the GH Cup page."
+        fields:
+          - { label: "Year", name: "year", widget: "string" }
+          - { label: "Headline", name: "headline", widget: "string", hint: "e.g. The Mini Moot 2026" }
+          - { label: "Who can enter", name: "eligibility", widget: "string", required: false, hint: "Shown as a badge above the headline. This is the main thing that sets the Mini Moot apart, so keep it explicit — e.g. 'Open to University of Guelph-Humber students only'." }
+          - { label: "Short Description", name: "description", widget: "text", hint: "The intro paragraph in the banner" }
+          - { label: "About Section", name: "about", widget: "text", hint: "The longer description below. Use a blank line between paragraphs." }
+          - label: "How It Works Steps"
+            name: "howItWorks"
+            widget: "list"
+            field: { label: "Step", name: "step", widget: "string" }
+          - { label: "Banner Photo", name: "photo", widget: "image", required: false, hint: "Optional photo for the Mini Moot banner" }
+          - label: "Competition Gallery"
+            name: "gallery"
+            widget: "list"
+            required: false
+            hint: "Photos from The Mini Moot. They appear in the Competition Gallery section on the Mini Moot page."
+            fields:
+              - { label: "Photo", name: "image", widget: "image" }
+              - { label: "Caption", name: "caption", widget: "string", required: false }
+              - label: "Photo Focus (drag to position)"
+                name: "photoPosition"
+                widget: "focal-point"
+                required: false
+                default: "center"
+                image_field: "image"
+                hint: "Drag the dot to choose what part of the photo stays in view."
+                shapes:
+                  - label: "Competition gallery grid"
+                    axes: [{ value: 1 }, { value: 1 }]
+
       - label: "Page Header Photos"
         name: "page-headers"
         file: "src/_data/pageHeaders.json"
@@ -516,6 +608,13 @@ collections:
               - { label: "Header Photo", name: "photo", widget: "image", required: false }
               - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo",
                   shapes: [{ label: "GH Cup page banner", axes: [{ value: 1600 }, { value: 380 }], overlay: "navy", approx: true }] }
+          - label: "Mini Moot Page"
+            name: "minimoot"
+            widget: "object"
+            fields:
+              - { label: "Header Photo", name: "photo", widget: "image", required: false }
+              - { label: "Header Photo Focus (drag to position)", name: "photoPosition", widget: "focal-point", required: false, default: "center", image_field: "photo",
+                  shapes: [{ label: "Mini Moot page banner", axes: [{ value: 1600 }, { value: 380 }], overlay: "navy", approx: true }] }
 
       - label: "Materials Page"
         name: "materials-page"

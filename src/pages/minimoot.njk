@@ -1,0 +1,174 @@
+---
+layout: base.njk
+pageTitle: The Mini Moot
+activePage: minimoot
+permalink: /minimoot/
+---
+
+{#- Deliberately mirrors ghcup.njk section for section, because the two
+   competitions run the same way and visitors compare them directly. What
+   distinguishes this page is the eligibility rule, which is the single fact
+   most likely to be misread — so it gets a dedicated badge in the header and
+   its own callout rather than being buried in prose. #}
+<section class="page-header{% if pageHeaders.minimoot.photo %} page-header--photo{% endif %}"{% if pageHeaders.minimoot.photo %} style="background-image:url('{{ pageHeaders.minimoot.photo }}'); background-position:{{ pageHeaders.minimoot.photoPosition or 'center' }};"{% endif %}>
+  <div class="container">
+    <h1>The Mini Moot</h1>
+    <p>Our in-house moot court competition — for Guelph-Humber students.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="ghcup-hero minimoot-hero">
+      {% if minimoot.photo %}
+      <img src="{{ minimoot.photo }}" alt="The Mini Moot" style="max-width:200px; border-radius:50%; margin-bottom:24px;">
+      {% endif %}
+      {% if minimoot.eligibility %}<p class="eligibility-badge">{{ minimoot.eligibility }}</p>{% endif %}
+      <h3>{{ minimoot.headline }}</h3>
+      <p>{{ minimoot.description }}</p>
+      <a href="/contact/" class="btn btn-primary">Ask us about competing</a>
+    </div>
+    <div class="ghcup-features">
+      <div class="ghcup-feature">
+        <h4>Start Here</h4>
+        <p>Built for first-time advocates. If you have never mooted before, this is the competition to begin with — most of our competitors started with no experience at all.</p>
+      </div>
+      <div class="ghcup-feature">
+        <h4>Get Coached</h4>
+        <p>Preparation sessions run by the Society walk you through skeleton arguments, oral structure, and answering questions from the bench before you ever stand up.</p>
+      </div>
+      <div class="ghcup-feature">
+        <h4>Go Further</h4>
+        <p>The Mini Moot is where teams that go on to represent Guelph-Humber at competitions across Ontario are found and developed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bg-cream">
+  <div class="container">
+    <div class="section-header">
+      <h2>What is The Mini Moot?</h2>
+      <div class="line"></div>
+    </div>
+    <div class="content-block">
+      <p>{{ minimoot.about | replace("\n\n", "</p><p>") | safe }}</p>
+      <h3>How It Works</h3>
+      <ul>
+        {%- for step in minimoot.howItWorks %}
+        <li>{{ step }}</li>
+        {%- endfor %}
+      </ul>
+      <div class="minimoot-note">
+        <h4>How is this different from The GH Cup?</h4>
+        <p>The GH Cup is our flagship competition and is open to undergraduate students from universities across Ontario. The Mini Moot is internal: only Guelph-Humber students can compete. The format is the same, the scale is smaller, and the emphasis is on learning rather than on placing. <a href="/ghcup/">Read about The GH Cup</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{%- if minimoot.gallery and minimoot.gallery.length > 0 %}
+<section>
+  <div class="container">
+    <div class="section-header">
+      <h2>Competition Gallery</h2>
+      <p>Moments from The Mini Moot.</p>
+      <div class="line"></div>
+    </div>
+    <div class="photo-gallery">
+      {%- for shot in minimoot.gallery %}
+      <div class="photo-card" data-img="{{ shot.image }}" data-caption="{{ shot.caption }}" onclick="openLightbox(this.dataset.img, this.dataset.caption)">
+        <img src="{{ shot.image }}" alt="{{ shot.caption }}" loading="lazy" style="object-position: {{ shot.photoPosition or 'center' }};">
+        {%- if shot.caption %}
+        <div class="photo-overlay">
+          <h4>{{ shot.caption }}</h4>
+        </div>
+        {%- endif %}
+      </div>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+{%- endif %}
+
+<section class="bg-cream">
+  <div class="container">
+    <div class="section-header">
+      <h2>Previous Winners</h2>
+      <p>Celebrating the advocates who have taken The Mini Moot.</p>
+      <div class="line"></div>
+    </div>
+    <div class="winners-timeline">
+      {%- for winner in collections.minimootWinners %}
+      <div class="winner-card {% if not winner.data.photo %}winner-card--no-photo{% endif %}">
+        {% if winner.data.photo %}
+        <div class="winner-photo">
+          <img src="{{ winner.data.photo }}" alt="{{ winner.data.year }} Mini Moot" style="object-fit: {{ winner.data.photoSize or 'cover' }}; object-position: {{ winner.data.photoPosition or 'center' }};{% if winner.data.photoZoom and winner.data.photoZoom != 1 %} transform: scale({{ winner.data.photoZoom }}); transform-origin: {{ winner.data.photoPosition or 'center' }};{% endif %}">
+        </div>
+        {% endif %}
+        <div class="winner-info">
+          <div class="winner-year">{{ winner.data.year }}</div>
+          <h3>{{ winner.data.theme }}</h3>
+          {%- for award in winner.data.awards %}
+          <div class="winner-award">
+            <span class="badge">{{ award.title }}</span>
+            <span class="names">{{ award.recipients }}</span>
+          </div>
+          {%- endfor %}
+          {% if winner.data.caseTitle %}
+          <div class="winner-case">Case: <em>{{ winner.data.caseTitle }}</em></div>
+          {% endif %}
+        </div>
+      </div>
+      {%- endfor %}
+      {%- if collections.minimootWinners.length == 0 %}
+      <p class="empty-state">Previous winners will appear here as they're added.</p>
+      {%- endif %}
+    </div>
+  </div>
+</section>
+
+{%- if collections.minimootVideos.length > 0 %}
+<section>
+  <div class="container">
+    <div class="section-header">
+      <h2>Final Videos</h2>
+      <p>Watch the moot finals from past Mini Moot competitions.</p>
+      <div class="line"></div>
+    </div>
+    <div class="video-grid">
+      {%- for video in collections.minimootVideos %}
+      <div class="video-card">
+        <div class="video-embed">
+          <iframe src="https://www.youtube.com/embed/{{ video.data.url | youtubeId }}" title="{{ video.data.title or video.data.year }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+        </div>
+        <div class="video-info">
+          <div class="winner-year">{{ video.data.year }}</div>
+          <h3>{{ video.data.title or "Mini Moot Final" }}</h3>
+          {% if video.data.description %}<p>{{ video.data.description }}</p>{% endif %}
+        </div>
+      </div>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+{%- endif %}
+
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-caption" class="lightbox-caption"></div>
+</div>
+<script>
+function openLightbox(src, caption) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-caption').textContent = caption;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>

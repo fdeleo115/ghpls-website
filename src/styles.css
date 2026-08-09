@@ -86,7 +86,10 @@ nav .logo { display: flex; align-items: center; gap: 12px; min-width: 0; }
 nav .logo img { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; }
 nav .logo span { font-family: 'Playfair Display', serif; color: var(--white); font-size: 1.05rem; font-weight: 600; white-space: nowrap; }
 
-nav ul { display: flex; list-style: none; gap: 28px; }
+/* 22px, down from 28px, to fit a 9th item (Mini Moot). `.nav-inner` is capped
+   at 1200px, so a wider screen does NOT buy the menu more room — past ~1248px
+   the layout stops changing entirely and the only slack left is this gap. */
+nav ul { display: flex; list-style: none; gap: 22px; }
 nav ul li a {
   color: var(--peach-light); font-size: 0.85rem; font-weight: 500;
   letter-spacing: 0.5px; text-transform: uppercase; transition: color 0.2s;
@@ -103,9 +106,15 @@ nav ul li a:hover, nav ul li a.active { color: var(--peach); }
 .hamburger span { width: 24px; height: 2px; background: var(--peach-light); transition: 0.3s; }
 
 /* Collapse nav to hamburger early enough that the full society name never
-   collides with the horizontal menu. Raised from 1150px because "Photo
-   Gallery" is ~55px wider than "Photos". */
-@media (max-width: 1230px) {
+   collides with the horizontal menu. Raised 1150 -> 1230 when "Photos" became
+   "Photo Gallery", then -> 1360 when "Mini Moot" was added as a 9th item.
+   Measure before changing this. `.nav-inner` is capped at 1200px, so above
+   ~1248px viewport the nav layout is identical at every width and raising this
+   number buys nothing — the squeeze is relieved by the menu `gap` above, not
+   by the breakpoint. What this number does control is the width at which the
+   shrinking nav-inner would let the brand name collide with the menu, which
+   measurement puts just above 1205px. 1250 is that, plus margin. */
+@media (max-width: 1250px) {
   nav ul {
     display: none; position: absolute; top: 72px; left: 0; width: 100%;
     background: var(--navy); flex-direction: column; padding: 24px; gap: 16px;
@@ -351,6 +360,42 @@ section { padding: 100px 0; }
 }
 .ghcup-feature h4 { margin-bottom: 8px; font-size: 1.1rem; }
 .ghcup-feature p { color: var(--text-light); font-size: 0.9rem; }
+
+/* MINI MOOT
+   Shares the GH Cup's structure on purpose — the two competitions run the same
+   way and people compare them side by side. It reads as its own page through a
+   reversed hero (cream on peach rather than peach on navy) and the eligibility
+   badge, which is the one fact that must not be missed: this competition is
+   Guelph-Humber only. */
+.minimoot-hero {
+  background: linear-gradient(135deg, #24365c 0%, #3d3350 55%, var(--peach-ink) 100%);
+}
+.minimoot-hero .eligibility-badge {
+  display: inline-block;
+  background: rgba(253,246,240,0.14);
+  border: 1px solid rgba(232,168,124,0.55);
+  border-radius: 999px;
+  padding: 7px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  /* Text colour is deliberately left to inherit .ghcup-hero p's near-white
+     (7.7:1 here) rather than being tinted peach: the headline directly below
+     is already peach, and a peach pill above it flattens the hierarchy.
+     Selector is .minimoot-hero-scoped so it outweighs `.ghcup-hero p` on the
+     box properties below, which a bare .eligibility-badge would lose. */
+  max-width: none;
+  margin: 0 auto 20px;
+}
+.minimoot-note {
+  margin-top: 40px; padding: 24px 28px;
+  background: var(--white); border-left: 4px solid var(--peach);
+  border-radius: 8px;
+}
+.minimoot-note h4 { margin: 0 0 10px; font-size: 1.05rem; }
+.minimoot-note p { margin-bottom: 0; font-size: 0.98rem; }
+.minimoot-note a { color: var(--peach-ink); font-weight: 600; }
 
 /* SCHEDULE */
 .schedule-list { max-width: 800px; margin: 0 auto; }
