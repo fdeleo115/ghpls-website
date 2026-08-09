@@ -51,9 +51,9 @@ layout: base.njk
           {%- endif %}
         </div>
 
+        {%- if record.teamPlacements.length > 0 %}
         <div class="detail-highlights">
           <h3>Team Placements</h3>
-          {%- if record.teamPlacements.length > 0 %}
           <div class="detail-results">
             {%- for p in record.teamPlacements %}
             <div class="detail-result">
@@ -66,14 +66,12 @@ layout: base.njk
             </div>
             {%- endfor %}
           </div>
-          {%- else %}
-          <p class="exec-bio exec-bio--empty">No team placements recorded yet.</p>
-          {%- endif %}
         </div>
+        {%- endif %}
 
+        {%- if record.individualAchievements.length > 0 %}
         <div class="detail-highlights">
           <h3>Individual Achievements</h3>
-          {%- if record.individualAchievements.length > 0 %}
           <div class="detail-results">
             {%- for p in record.individualAchievements %}
             <div class="detail-result">
@@ -86,10 +84,8 @@ layout: base.njk
             </div>
             {%- endfor %}
           </div>
-          {%- else %}
-          <p class="exec-bio exec-bio--empty">No individual achievements recorded yet.</p>
-          {%- endif %}
         </div>
+        {%- endif %}
 
         {%- if qanda and qanda.length > 0 %}
         <div class="detail-highlights member-qanda">
