@@ -24,7 +24,8 @@ competitions:
     year: 2024
 order: 5
 photo: /assets/uploads/img_6433.jpeg
-photoPosition: 43% 0%
+photoPosition: 37% 0%
+headerPhoto: /assets/uploads/img_5370.jpeg
 extraPhotos:
   - image: /assets/uploads/dsc_7275.jpeg
   - image: /assets/uploads/dsc_4956.jpeg
