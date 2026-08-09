@@ -139,7 +139,7 @@ collections:
       - { label: "Time", name: "time", widget: "string", hint: "e.g. 5:00 PM - 7:00 PM", required: false }
       - { label: "Location", name: "location", widget: "string", required: false }
       - { label: "Description", name: "description", widget: "text" }
-      - { label: "Allow RSVPs", name: "rsvp", widget: "boolean", required: false, default: true, hint: "Show an RSVP form on this event so visitors can let you know they're coming. RSVPs are collected in your Netlify Forms dashboard under the 'rsvp' form." }
+      - { label: "Allow RSVPs", name: "rsvp", widget: "boolean", required: false, default: true, hint: "Show an RSVP button on this event so visitors can let you know they're coming. Responses go to the RSVP Google Form set up under Page Content > Site Settings, and land in that form's response Sheet. If no form is set up yet, the button emails you instead." }
       - { label: "Photo", name: "photo", widget: "image", required: false, hint: "Upload a photo for this event" }
       - label: "Photo Fit"
         name: "photoSize"

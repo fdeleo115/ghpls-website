@@ -2,10 +2,111 @@
 
 _Written: June 2026 · Updated: August 8 2026 · For whoever (human or AI) picks this up next._
 
-> **Section order:** newest first. The "seventh pass" below is the most recent
+> **Section order:** newest first. The "eighth pass" below is the most recent
 > work; sections after it are earlier the same day or before. Their internal
 > cross-references ("see section 0") still point at each other, not at this
 > section.
+
+## Eighth pass, Aug 9 2026 — both forms were dead; accessibility statement
+
+The headline finding: **the contact form and the event RSVP form had never
+worked on the current host, and every submission failed outright.** Both
+carried Netlify's `data-netlify="true"` / `netlify-honeypot` attributes, which
+are a Netlify *platform* feature — they do nothing anywhere else. The site
+moved to a Cloudflare Worker (see section 2), and `worker.js` routes only
+`/api/auth` and `/api/callback`; everything else is static assets, with no
+form handling at all. Verified against the live site: `POST /contact/` and
+`POST /events/` both returned **HTTP 405**. So anyone who used the contact
+form or RSVP'd got an error page, and no message ever reached the exec team.
+This was not a silent queue somewhere — it was a hard failure, and it had been
+live since the Netlify → Cloudflare migration.
+
+**Fixes, all committed in `86b406e` and verified on the live site:**
+
+- **RSVP and contact now link out to Google Forms**, chosen by the user over a
+  third-party form backend or a Cloudflare D1 database, because responses land
+  in a Google Sheet the execs already know how to use and can hand on with the
+  rest of the account. Deliberately a **link**, not an on-page form posting to
+  Google: a link needs no CORS handling, no API key, no CSP relaxation
+  (`form-action 'self'` is untouched), and cannot silently break the way the
+  Netlify markup did.
+  - Configured entirely from the CMS — three new Site Settings fields:
+    `rsvpFormUrl`, `rsvpFormEventField`, `contactFormUrl`. **No code change is
+    needed to finish the setup**, which is the point; see "What the user still
+    has to do" below.
+  - `rsvpFormEventField` takes a Google Forms `entry.123456789` id and
+    **prefills the event name** into the form, so one RSVP form serves every
+    event. Verified: each event generated its own correctly URL-encoded
+    prefill link.
+  - **Both fall back to `mailto:` when unconfigured** (RSVP prefills a
+    "RSVP: <event name>" subject), so the site can never again show a control
+    that goes nowhere. This is the state it's in right now.
+- **Removed the RSVP "how many attending" field** (user's request — it was
+  always 1). The whole inline form, its toggle button, and `toggleRsvp()` are
+  gone; the dead `.rsvp-form` / `.rsvp-fields` / `.rsvp-toggle` and
+  `.contact-form input|textarea|select` CSS went with them.
+- **New `/accessibility/` page** + a footer link beside Privacy and Terms.
+  Written to be **honest rather than maximal**: it claims *partial* WCAG 2.1
+  AA conformance, states plainly that there has been no third-party audit, and
+  names known limitations (volunteer-added photo descriptions, untagged PDFs,
+  third-party embeds like the YouTube iframe). **Every measure it claims was
+  verified present before it was written** — `prefers-reduced-motion` support,
+  zero images missing `alt`, nav/main/footer landmarks, `lang="en"`. Do not
+  upgrade the wording to full conformance without an actual audit; overclaiming
+  here increases legal exposure rather than reducing it.
+- **Real accessibility fixes behind the statement** (these matter more than the
+  page does): a **skip link** as the first tab stop on every page, and a global
+  **`:focus-visible` indicator**. The form styles had been applying
+  `outline: none` with only a border-colour change, which is a WCAG 2.4.7
+  failure — there is now a comment in `styles.css` warning not to reintroduce
+  that. Verified with a real `Tab` keypress in the browser (note: programmatic
+  `.focus()` will *not* match `:focus` when the automation tab lacks system
+  focus — `document.hasFocus()` returns false and it looks like a CSS bug that
+  isn't there).
+- **Stopped emitting 8 layout-less orphan pages** — the `permalink: false`
+  cleanup that sections "Left undone, on purpose" and 0a had both flagged.
+  `src/{events,photos,past-events,ghcup-winners}/<dir>.json` now set
+  `permalink: false`, so collection items stay available to the listing pages
+  but no longer generate their own unstyled, nav-less, CSS-less URLs. Confirmed
+  beforehand that nothing linked to any of them, and afterwards that all
+  collection content still renders (3 photos, 4 GH Cup winner awards, 2 events,
+  1 past event — each matched against its source files). They now 404.
+
+**Gotcha worth knowing:** immediately after a deploy, Cloudflare's CDN can
+serve a cached `200` for a URL the new build no longer contains. Three of the
+removed orphans looked like they were still live until the cache revalidated,
+at which point all returned `404`. Don't chase a phantom bug there — check
+`cf-cache-status` and re-test after a minute.
+
+### What the user still has to do (nothing works end-to-end until this is done)
+
+1. **Create two Google Forms** (RSVP, and contact) on the club's Google
+   account, and link each to a responses Sheet.
+   - RSVP form questions: Name, Email, and an **Event** question (this is the
+     one the prefill targets). *Do not* add a "how many attending" question.
+   - Contact form questions: Name, Email, Subject, Message.
+2. **Paste both "Send → link" URLs** into `/admin/` → Page Content → Site
+   Settings → "RSVP Google Form link" / "Contact Google Form link".
+3. **For the RSVP prefill**, in the Google Form use ⋮ → "Get pre-filled link",
+   type anything into the Event question, click "Get link", and copy the
+   `entry.123456789` portion into "RSVP form — event field ID". Optional; the
+   link works without it, the event just won't be pre-filled.
+4. **Take down the old Netlify site.** `guelphhumberprelawsociety.netlify.app`
+   was still live and serving a stale copy of the whole site (verified HTTP
+   200 this session) — bad for search results and actively misleading. In the
+   Netlify dashboard: pick that site → Site configuration → General → Danger
+   zone → "Delete this site" (or "Stop builds" then unpublish to keep it
+   recoverable). Nothing in this repo depends on it; `netlify.toml` is already
+   documented as legacy.
+
+**Files touched:** `admin/config.yml`, `src/_includes/base.njk`,
+`src/pages/contact.njk`, `src/pages/events.njk`, `src/styles.css`, new
+`src/pages/accessibility.njk`, new `src/{events,photos,past-events,
+ghcup-winners}/<dir>.json`.
+
+**Noticed, not fixed:** the site has **no custom 404 page** — unknown URLs
+return a bare, empty `404`. Low priority, but a styled 404 with a link home
+would be a small, self-contained improvement.
 
 ## Seventh pass, Aug 8 2026 — optional header-photo override on exec profiles
 
@@ -536,6 +637,9 @@ What changed:
   boolean `rsvp` (default true) lets the team hide it per event. This was the
   user's explicit choice over an external form link or a mailto RSVP, so
   responses land in the same place as everything else.
+  **Superseded (eighth pass, Aug 9 2026): this never worked once the site
+  left Netlify — every submission 405'd. Both forms are now Google Form links
+  and the `rsvp` boolean still controls whether the RSVP button shows.**
 - **Small copy changes**: Photos nav subheading → "View our society's
   gallery"; Achievements page title → "Competitive Achievements"; Photos page
   title → "Guelph-Humber Pre-Law Society Gallery"; contact form dropdown
@@ -629,9 +733,13 @@ resize/reposition every photo and see it accurately before saving.
   scoped to `/admin/*`** so Decap CMS isn't broken. **Now enforced in
   `worker.js`** (see section 2's correction above) — `netlify.toml`'s copy of
   this is legacy/unused.
-- Honeypot + length/type validation on the contact form.
+- ~~Honeypot + length/type validation on the contact form.~~ **Gone as of the
+  eighth pass (Aug 9 2026)** — there is no on-site form any more, so there is
+  no submission surface of ours to defend. Spam filtering is Google Forms'
+  problem now.
 - `.gitignore` (stopped tracking `node_modules/` + `_site/`).
-- `robots.txt`, Privacy Policy (PIPEDA-aware), Terms of Use, footer disclaimer.
+- `robots.txt`, Privacy Policy (PIPEDA-aware), Terms of Use, **Accessibility
+  statement** (`/accessibility/`, added eighth pass), footer disclaimer.
 - Full writeup in `SECURITY.md` — **note: that document still describes the
   old Netlify/Netlify-Identity setup** (same drift as section 2 had); it
   wasn't updated this session since it wasn't in scope, but it should be
