@@ -8,6 +8,8 @@ competitions:
     year: 2026
   - competition: Centre Block Cup
     year: 2026
+  - competition: Highland Cup
+    year: 2025
 order: 5
 photo: /assets/uploads/img_6433.jpeg
 photoPosition: 43% 0%
