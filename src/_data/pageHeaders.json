@@ -1,30 +1,30 @@
 {
   "about": {
-    "photo": "/assets/uploads/img_5370.jpeg",
-    "photoPosition": "center 35%"
+    "photo": "/assets/uploads/41ecb5f9-c505-4ea5-8fda-ff20a038269a.jpeg",
+    "photoPosition": "45% 35%"
   },
   "contact": {
-    "photo": "/assets/uploads/1f6189da-ba5b-4dcb-b5d3-1d636253768b.jpeg",
-    "photoPosition": "center 35%"
+    "photo": "/assets/uploads/588045975_18380011228195976_2724672379669267804_n.jpg",
+    "photoPosition": "40% 48%"
   },
   "materials": {
-    "photo": "/assets/uploads/img_5370.jpeg",
-    "photoPosition": "center 40%"
+    "photo": "/assets/uploads/dsc_7312.jpeg",
+    "photoPosition": "47% 79%"
   },
   "achievements": {
-    "photo": "/assets/uploads/1f6189da-ba5b-4dcb-b5d3-1d636253768b.jpeg",
-    "photoPosition": "center 35%"
+    "photo": "/assets/uploads/img_4399.jpeg",
+    "photoPosition": "52% 34%"
   },
   "events": {
-    "photo": "/assets/uploads/1908598e-b690-4d97-b522-229b34f34e41.jpeg",
-    "photoPosition": "center 42%"
+    "photo": "/assets/uploads/625005636_18387201169195976_5859684880427569685_n.jpg",
+    "photoPosition": "47% 60%"
   },
   "photos": {
-    "photo": "/assets/uploads/be553b90-4d56-48f5-96c1-bd3be9b3ad2c.jpeg",
-    "photoPosition": "center 22%"
+    "photo": "/assets/uploads/73e2757d-5b3f-4350-b926-9a2334ad43c5.jpeg",
+    "photoPosition": "55% 26%"
   },
   "ghcup": {
-    "photo": "/assets/uploads/img_5810.jpeg",
-    "photoPosition": "center 28%"
+    "photo": "/assets/uploads/dsc_4994.jpeg",
+    "photoPosition": "57% 36%"
   }
 }
