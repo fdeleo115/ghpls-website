@@ -19,10 +19,10 @@ competitors:
 location: North Ireland
 host: Ulster University
 cardWidth: wide
-photo: /assets/uploads/ce5f91be-e3f3-4a67-98f4-d677eaaf7b57.jpeg
+photo: /assets/uploads/e5314168-debe-45e6-916d-613036406c33.jpeg
 photoSize: cover
 photoHeight: tall
-photoPosition: 49% 32%
+photoPosition: 72% 28%
 articles:
   - url: https://www.guelphhumber.ca/news-events/news/guelph-humber-students-win-big-during-international-mooting-competition-uk
     title: Guelph-Humber students win big during international mooting competition
