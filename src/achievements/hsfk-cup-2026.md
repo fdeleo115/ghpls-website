@@ -14,10 +14,12 @@ competitors:
   - name: Ava Gonsalves
   - name: Francesco Deleo
   - name: Christabell Zalwango
+  - name: Tala Taha
+  - name: Oscar Dominguez
 location: North Ireland
 host: Ulster University
 cardWidth: wide
-photo: /assets/uploads/e5314168-debe-45e6-916d-613036406c33.jpeg
+photo: /assets/uploads/ce5f91be-e3f3-4a67-98f4-d677eaaf7b57.jpeg
 photoSize: cover
 photoHeight: tall
 photoPosition: 49% 32%
