@@ -370,6 +370,23 @@ collections:
             axes: [{ value: 1600 }, { value: 380 }]
             overlay: "navy"
             approx: true
+      - label: "Header Photo (optional — overrides the page banner)"
+        name: "headerPhoto"
+        widget: "image"
+        required: false
+        hint: "By default your profile page banner reuses your headshot above, stretched wide. Leave this blank to keep that. Upload a different photo here if you'd rather the banner show something else instead — a wider action shot usually reads better stretched across the banner than a close-up headshot crop."
+      - label: "Header Photo Focus (drag to position)"
+        name: "headerPhotoPosition"
+        widget: "focal-point"
+        required: false
+        default: "center"
+        image_field: "headerPhoto"
+        hint: "Only applies if a Header Photo above is set."
+        shapes:
+          - label: "Profile page banner"
+            axes: [{ value: 1600 }, { value: 380 }]
+            overlay: "navy"
+            approx: true
       - label: "More Photos"
         name: "extraPhotos"
         widget: "list"

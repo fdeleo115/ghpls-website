@@ -2,7 +2,9 @@
 layout: base.njk
 ---
 
-<section class="page-header page-header--photo"{% if photo %} style="background-image:url('{{ photo }}'); background-position:{{ photoPosition or 'center' }};"{% endif %}>
+{%- set bannerPhoto = headerPhoto or photo %}
+{%- set bannerPosition = (headerPhoto and headerPhotoPosition) or photoPosition or 'center' %}
+<section class="page-header{% if bannerPhoto %} page-header--photo{% endif %}"{% if bannerPhoto %} style="background-image:url('{{ bannerPhoto }}'); background-position:{{ bannerPosition }};"{% endif %}>
   <div class="container">
     <div class="detail-back"><a href="/about/#execCarousel">&#8592; All Executives</a></div>
     <h1>{{ name }}</h1>
