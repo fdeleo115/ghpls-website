@@ -2,10 +2,43 @@
 
 _Written: June 2026 · Updated: August 8 2026 · For whoever (human or AI) picks this up next._
 
-> **Section order:** newest first. The "sixth pass" below is the most recent
+> **Section order:** newest first. The "seventh pass" below is the most recent
 > work; sections after it are earlier the same day or before. Their internal
 > cross-references ("see section 0") still point at each other, not at this
 > section.
+
+## Seventh pass, Aug 8 2026 — optional header-photo override on exec profiles
+
+Small, focused fix. The 7 static pages (About, Contact, Materials,
+Achievements, Events, Photos, GH Cup) each have a dedicated "Header Photo"
+CMS field for the page banner, independent of any other photo on the page —
+see the "Page Header Photos" file collection, section 0. Exec profile pages
+had no equivalent: the banner always reused the circular headshot crop
+stretched wide (`.detail-fact-card`'s sibling shape on the `photo` field),
+which doesn't always read well as a 1600×380 navy-overlaid strip.
+
+- Added two new optional fields to the `team` collection in
+  `admin/config.yml`: `headerPhoto` (image) + `headerPhotoPosition`
+  (focal-point, same "Profile page banner" 1600×380 navy-overlay shape used
+  everywhere else). Placed right after the headshot's own focal-point field.
+- `src/_includes/member.njk`: the banner now resolves
+  `bannerPhoto = headerPhoto or photo` and
+  `bannerPosition = (headerPhoto and headerPhotoPosition) or photoPosition`.
+  Leaving the new fields blank is a no-op — banner behavior for all 8
+  existing execs is byte-identical to before. Setting them swaps in the
+  separate photo and position.
+- **Verified** both branches by temporarily setting `headerPhoto` +
+  `headerPhotoPosition` on `president.md`, confirming the rendered
+  `background-image`/`background-position` changed to the new photo, then
+  reverting the file (`git status` clean afterward) and confirming it fell
+  back to the headshot again.
+- Committed `d82f3a0` (after rebasing on 3 CMS commits that landed
+  mid-session — same "execs push while you work" pattern as always).
+  Deployed via the auto-deploy pipeline from the sixth pass below; confirmed
+  live by fetching `/admin/config.yml` from the deployed site and finding the
+  two new fields.
+
+**Files touched:** `admin/config.yml`, `src/_includes/member.njk`.
 
 ## Sixth pass, Aug 8 2026 — auto-deploy pipeline, profile curation/classification fixes
 
