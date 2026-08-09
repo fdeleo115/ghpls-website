@@ -2,19 +2,100 @@
 
 _Written: June 2026 · Updated: August 8 2026 · For whoever (human or AI) picks this up next._
 
-> **Section order:** newest first. The "fifth pass" below is the most recent
-> work; sections 0 / 0a / 0b / 0c after it are earlier the same day. Their
-> internal cross-references ("see section 0") still point at each other, not at
-> this section.
+> **Section order:** newest first. The "sixth pass" below is the most recent
+> work; sections after it are earlier the same day or before. Their internal
+> cross-references ("see section 0") still point at each other, not at this
+> section.
+
+## Sixth pass, Aug 8 2026 — auto-deploy pipeline, profile curation/classification fixes
+
+Started from a user bug report ("I add competitions/achievements and it
+doesn't update, it just shows the ones you added before") that turned out to
+bundle three separate, real defects. All four items below are committed and
+pushed (`d74bbc0`, `78978a1`, `dfeec82` and one CMS commit rebased in
+between); the live site was checked against each one after deploy.
+
+1. **No deploy pipeline existed — this was the actual cause of the original
+   report.** CMS saves commit straight to `main` (confirmed working), but
+   nothing rebuilt/redeployed the Cloudflare Worker afterward — publishing
+   required someone to run `npx wrangler deploy` by hand. Confirmed by diffing
+   a fresh local build against the live site: byte-identical, meaning the live
+   site was exactly whatever the last manual deploy happened to be, not
+   necessarily the latest commit. **This resolves section 2's old open
+   question** ("not independently re-verified... automatic or manual") — it
+   was manual, and now it's automatic.
+   - Added `.github/workflows/deploy.yml`: on every push to `main`, checks out,
+     `npm ci`, builds with Eleventy, then deploys via
+     `cloudflare/wrangler-action@v3`.
+   - Needs two GitHub repo secrets, both added by the user (never handled by
+     Claude — they're credentials): `CLOUDFLARE_API_TOKEN` (an "Edit Cloudflare
+     Workers" scoped token) and `CLOUDFLARE_ACCOUNT_ID`.
+   - **Verified twice**: pushed the workflow itself, watched the Action run
+     green, confirmed the live site matched. Then pushed the fixes below,
+     watched it run again, confirmed live output for Francesco's and Ashon's
+     profiles matched the new local build exactly.
+   - Deploys take **~30–40 seconds** after a push now — not instant.
+
+2. **`memberRecord` (`.eleventy.js`) merged manual entries into the
+   auto-pulled list instead of letting them replace it.** An exec who typed 3
+   competitions by hand saw 6 — their 3 were deduped against identical
+   auto-pulled rows, and the other 3 auto-pulled rows stayed. Input was
+   technically honoured, practically invisible. Fixed: filling in a section
+   (`competitions` / `teamPlacements` / `individualAchievements`) now
+   **replaces** the auto-pulled version of that one section entirely; leaving
+   a section empty still auto-fills it. Precedence is per-section, so an exec
+   can curate one list without blanking the others. `manualOnly` (unchanged)
+   still suppresses auto-pull across all three at once.
+
+3. **Team Placements vs. Individual Achievements was classified by counting
+   names in `recipients`, not by what kind of result it was.** "Best Skeleton
+   Arguments," shared by two people, was filed as a team placement purely
+   because two names were on it — headcount, not category. Fixed: a new
+   `PLACEMENT_RE` keyword match (champions/finalists/semi-finalists/runners-up/
+   Nth place) decides by default, and a new optional `type` field on each
+   result (`"placement"` or `"award"`) lets an editor override it outright.
+   Exposed in the CMS as a **"Counts As"** select on each Results row in the
+   Achievements collection, defaulting to "Decide automatically."
+
+4. **A name typo silently dropped an award off a profile with zero
+   indication anything was wrong.** `uoft-cup-2026.md` had "Ashon **Vas**" in
+   `competitors`/`recipients` but "Ashon **Vaz**" in the prose and on his team
+   entry — the join is exact-string, so his Oral Advocate Award never reached
+   his profile. No error, no warning, no empty state; it just looked like he
+   hadn't won anything. Fixed the typo, and added a build-time check
+   (`warnOnNearMissNames` in `.eleventy.js`): any achievement name within edit
+   distance 2 of an exec's name that *doesn't* exactly match now prints a
+   console warning during the build. Verified it actually fires by briefly
+   reintroducing the typo and rebuilding, then reverted.
+
+5. **Empty Team Placements / Individual Achievements sections were showing a
+   heading anyway** ("Team Placements" / "No team placements recorded yet.")
+   on a real exec's profile — flagged by the user as "kinda embarrassing" for
+   the several execs with no placements or individual awards yet. Both
+   sections in `member.njk` now render nothing at all when empty, headings
+   included. **Competitions Attended deliberately keeps its "No competitions
+   recorded yet." empty state** — every exec has attended at least one, so in
+   practice it never shows, and the user confirmed leaving it as-is.
+
+**Open item, flagged to the user, not resolved:** Francesco's curated
+Competitions Attended list (3 entries) no longer matches his auto-filled Team
+Placements (6 entries) — his profile currently lists placements at events
+(Humber Cup, Gryphons Cup 2025, Highland Cup 2024) it doesn't list him as
+having attended. Either add those back to his manual Competitions list, or
+curate Team Placements the same way. Left alone deliberately — it's an
+editorial choice, not a bug, and it's his call.
+
+**Files touched:** `.eleventy.js`, `admin/config.yml`,
+`src/_includes/member.njk`, `src/achievements/uoft-cup-2026.md`, new
+`.github/workflows/deploy.yml`.
 
 ## Fifth pass, Aug 8 2026 — editable exec records, mobile audit, responsive images
 
 Three pieces of work: making an exec's competitions/achievements editable in the
 CMS (they weren't), a full mobile pass over every page after the recent
-redesign, and build-time image resizing. **Not yet committed** — the working
-tree has `.eleventy.js`, `admin/config.yml`, `package.json`,
-`package-lock.json`, `src/_includes/member.njk`, `src/pages/materials.njk`,
-`src/styles.css`, and this file.
+redesign, and build-time image resizing. **Committed as `815677d`** (was
+still uncommitted when this section was first written; see the sixth pass
+above for what changed on top of it since).
 
 ### 1. Exec competitions/achievements are now CMS-editable
 
@@ -479,10 +560,12 @@ migration step. Verified against the actual repo config this session
   separate commits — Pages was an intermediate step, not the final state.
   `netlify.toml` is legacy/unused, kept only for reference.
 - **Repo:** `https://github.com/fdeleo115/ghpls-website` (branch `main`). CMS
-  edits commit straight to `main`. **Not independently re-verified this
-  session:** whether push-to-deploy is automatic (Cloudflare dashboard Git
-  integration) or manual (`npx wrangler deploy`) — check the Cloudflare
-  dashboard before assuming either way.
+  edits commit straight to `main`. **Deploy is now automatic** via
+  `.github/workflows/deploy.yml` (added sixth pass, Aug 8 2026) — every push
+  to `main` runs `npx wrangler deploy` in GitHub Actions, ~30–40s after push.
+  Before that workflow existed, deploy was manual (`npx wrangler deploy` from
+  a checkout) and CMS saves could sit un-deployed indefinitely — that gap was
+  the root cause of a real user-facing bug, see the sixth pass writeup.
 - **CMS login:** editors sign in with their **GitHub account** and must be a
   **GitHub repo collaborator** — there is no separate invite system (no
   Netlify Identity). The GitHub OAuth App's client id/secret must be set as
@@ -525,8 +608,8 @@ resize/reposition every photo and see it accurately before saving.
 
 None — working tree is clean and up to date with `origin/main` as of this
 session's end (`git status` clean, `git log HEAD..origin/main` empty after a
-final pull). Everything from sections 0, 0a, 0b, and 0c is committed and
-pushed.
+final pull). Everything through the sixth pass above is committed and pushed,
+and the live site has been confirmed to match.
 
 ## 4. What was tried that failed (so you don't repeat it)
 
