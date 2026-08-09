@@ -410,6 +410,9 @@ collections:
           - { label: "Instagram URL", name: "instagram", widget: "string" }
           - { label: "LinkedIn URL", name: "linkedin", widget: "string" }
           - { label: "Contact Email", name: "email", widget: "string", required: false }
+          - { label: "RSVP Google Form link", name: "rsvpFormUrl", widget: "string", required: false, hint: "Paste the 'Send > link' URL of your RSVP Google Form. Leave blank and the RSVP button emails you instead, so it never breaks." }
+          - { label: "RSVP form — event field ID", name: "rsvpFormEventField", widget: "string", required: false, hint: "Optional. Lets the form open with the event name already filled in. In your Google Form choose 'Get pre-filled link', type ANYTHING into the event question, click Get link, and copy the entry.123456789 part of the URL here." }
+          - { label: "Contact Google Form link", name: "contactFormUrl", widget: "string", required: false, hint: "Paste the 'Send > link' URL of your contact Google Form. Leave blank and the Contact page just shows your email and socials." }
 
       - label: "About Page"
         name: "about-page"

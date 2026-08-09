@@ -1,0 +1,68 @@
+---
+layout: base.njk
+pageTitle: Accessibility
+activePage: accessibility
+permalink: /accessibility/
+---
+
+<section class="page-header">
+  <div class="container">
+    <h1>Accessibility</h1>
+    <p>Our commitment to making this website usable by everyone.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="content-block legal">
+      <p class="legal-updated">Last updated: August 2026</p>
+
+      <p>The Guelph-Humber Pre-Law Society ("we", "us", "the Society") is a student club at the University of Guelph-Humber. We want everyone — including people who use screen readers, keyboard navigation, magnification, captions, or any other assistive technology — to be able to find out about our events, our competitions, and how to get involved.</p>
+
+      <h3>1. What we aim for</h3>
+      <p>We aim to meet the <a href="https://www.w3.org/TR/WCAG21/" target="_blank" rel="noopener">Web Content Accessibility Guidelines (WCAG) 2.1, Level AA</a>. These are the international standard for accessible web content, and they are the standard referenced by Ontario's accessibility legislation.</p>
+
+      <h3>2. Where we currently stand</h3>
+      <p>This website is <strong>partially conformant</strong> with WCAG 2.1 Level AA. "Partially conformant" means most of the site meets the standard, but we have not had a formal third-party accessibility audit, and we cannot claim that every page and every element fully conforms.</p>
+      <p>We are telling you this plainly rather than claiming full conformance we have not verified. Accessibility measures we have deliberately built in include:</p>
+      <ul>
+        <li>A "skip to main content" link so keyboard users can bypass the navigation on every page.</li>
+        <li>A clearly visible focus indicator showing where you are when navigating by keyboard.</li>
+        <li>Text alternatives on images that convey information.</li>
+        <li>Colour combinations checked against the WCAG minimum contrast ratios for text.</li>
+        <li>Semantic page structure (headings, landmarks, lists) so assistive technology can navigate the content.</li>
+        <li>Layouts that reflow without horizontal scrolling down to small phone screens, and that work when text is enlarged.</li>
+        <li>Reduced-motion support, so animated elements are suppressed for anyone whose device requests that.</li>
+      </ul>
+
+      <h3>3. Known limitations</h3>
+      <p>We would rather name these than let you discover them:</p>
+      <ul>
+        <li><strong>Photographs and uploaded documents.</strong> Our photo galleries and any PDFs or documents we post are added by student volunteers. Some images may have brief or missing descriptions, and some documents may not be fully tagged for screen readers. If you need any document in a different format, ask us and we will provide it.</li>
+        <li><strong>Third-party content.</strong> Some features — such as embedded videos, and forms hosted by an outside service — are provided by third parties whose accessibility we do not control.</li>
+        <li><strong>No formal audit.</strong> Our assessment is based on our own review, not an independent evaluation.</li>
+      </ul>
+
+      <h3>4. Tell us about a barrier</h3>
+      <p>If you run into something on this site you cannot access, please tell us. You do not need to explain why you need it, and you will not be asked to justify your request.</p>
+      {% if site.email %}
+      <p>Email <a href="mailto:{{ site.email }}?subject=Website%20accessibility">{{ site.email }}</a> with the page address and a short description of the problem. We aim to respond within <strong>10 business days</strong>.</p>
+      {% endif %}
+      <p>You can also reach us on <a href="{{ site.instagram }}" target="_blank" rel="noopener">Instagram</a> or <a href="{{ site.linkedin }}" target="_blank" rel="noopener">LinkedIn</a>.</p>
+      <p>If you need information from this website in another format — large print, plain text, or read aloud — contact us and we will arrange it at no cost to you.</p>
+
+      <h3>5. Feedback process</h3>
+      <p>We treat accessibility feedback as a priority. When you contact us we will acknowledge your message, tell you what we can do and when, and provide the information you were trying to reach by another means in the meantime. We keep a record of accessibility feedback so it carries over as our executive team changes each year.</p>
+
+      <h3>6. Ongoing work</h3>
+      <p>This site is maintained by students who graduate and hand it on. We review accessibility when we make significant changes to the site, and we treat reported barriers as issues to fix rather than requests to consider.</p>
+
+      <h3>7. Legislative context</h3>
+      <p>Ontario's <em>Accessibility for Ontarians with Disabilities Act</em> (AODA) and its Integrated Accessibility Standards Regulation set web accessibility requirements for certain organisations, measured against WCAG. Obligations under the AODA depend on an organisation's type and size, and as a small student club our specific obligations may differ from those of the University. Regardless of what is strictly required of us, we aim to meet WCAG 2.1 Level AA because it is the right standard for a society that says it is open to everyone.</p>
+      <p>This statement describes our approach to accessibility. It is not legal advice and does not limit any rights you may have.</p>
+
+      <h3>8. About this statement</h3>
+      <p>This statement applies to <strong>{{ site.title }}</strong>'s website. It was last reviewed in August 2026 and is based on our own self-assessment.</p>
+    </div>
+  </div>
+</section>

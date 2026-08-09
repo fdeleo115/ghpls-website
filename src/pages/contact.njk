@@ -35,31 +35,24 @@ permalink: /contact/
           {% endif %}
         </div>
       </div>
-      <!--
-        Spam/abuse defences on this form:
-        1. netlify-honeypot "bot-field" — hidden field; bots fill it, humans don't.
-        2. Input limits + type/pattern validation below — caps payload size and
-           rejects malformed values in the browser (defence-in-depth; Netlify
-           also validates server-side and you can turn on reCAPTCHA — see README).
-        Note: the form is processed by Netlify Forms, not by any code of ours,
-        so there is no injection surface in our app to sanitize.
-      -->
-      <form class="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
-        <input type="hidden" name="form-name" value="contact">
-        <p class="hidden" style="display:none"><label>Don't fill this out: <input name="bot-field"></label></p>
-        <input type="text" name="name" placeholder="Your Name" required minlength="2" maxlength="100" autocomplete="name">
-        <input type="email" name="email" placeholder="Your Email" required maxlength="254" autocomplete="email">
-        <select name="subject" required>
-          <option value="" disabled selected>How can we help?</option>
-          <option>Joining the Society</option>
-          <option>The GH Cup - Competitor Inquiry</option>
-          <option>The GH Cup - Judge Inquiry</option>
-          <option>Sponsorship</option>
-          <option>General Question</option>
-        </select>
-        <textarea name="message" placeholder="Your Message" required minlength="10" maxlength="2000"></textarea>
-        <button type="submit" class="btn btn-primary">Send Message</button>
-      </form>
+      {#- This was an on-page form carrying Netlify's `data-netlify` attributes.
+         Those only do anything on Netlify, and the site moved to a Cloudflare
+         Worker that has no form handling — so every "Send Message" returned a
+         405 error page and no message ever arrived. Rather than fake a form
+         with nowhere to POST, we send people to a Google Form (responses land
+         in a Sheet the execs own) and always show the real contact routes
+         underneath. #}
+      <div class="contact-cta">
+        <h3>Send us a message</h3>
+        {%- if site.contactFormUrl %}
+        <p>Fill in our short contact form and we'll get back to you by email.</p>
+        <a class="btn btn-primary" href="{{ site.contactFormUrl }}" target="_blank" rel="noopener">Open the contact form<span class="visually-hidden"> (opens in a new tab)</span></a>
+        {%- elif site.email %}
+        <p>Email us and we'll get back to you as soon as we can. We read everything that comes in.</p>
+        <a class="btn btn-primary" href="mailto:{{ site.email }}">Email {{ site.email }}</a>
+        {%- endif %}
+        <p class="contact-cta-alt">You can also reach us on <a href="{{ site.instagram }}" target="_blank" rel="noopener">Instagram</a> or <a href="{{ site.linkedin }}" target="_blank" rel="noopener">LinkedIn</a>.</p>
+      </div>
     </div>
   </div>
 </section>

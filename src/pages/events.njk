@@ -35,20 +35,25 @@ permalink: /events/
           <p>{{ event.data.description }}</p>
           {% if event.data.time %}<div class="time">{{ event.data.time }}</div>{% endif %}
           {% if event.data.location %}<div class="location">{{ event.data.location }}</div>{% endif %}
+          {#- RSVPs go to a Google Form so responses land in a Sheet the execs
+             own and can hand on. The site is served by a Cloudflare Worker with
+             no form handling, so an on-page form would have nowhere to POST —
+             it used to carry Netlify's `data-netlify` attributes, which are
+             inert off Netlify and made every submission 405. When no form URL
+             is configured we fall back to email rather than show a dead
+             control. #}
           {%- if event.data.rsvp != false %}
           <div class="schedule-rsvp">
-            <button type="button" class="rsvp-toggle" aria-expanded="false" onclick="toggleRsvp(this)">RSVP for this event</button>
-            <form class="rsvp-form" name="rsvp" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
-              <input type="hidden" name="form-name" value="rsvp">
-              <input type="hidden" name="event" value="{{ event.data.title }}">
-              <p class="hidden" style="display:none"><label>Don't fill this out: <input name="bot-field"></label></p>
-              <div class="rsvp-fields">
-                <input type="text" name="name" placeholder="Your Name" required minlength="2" maxlength="100" autocomplete="name">
-                <input type="email" name="email" placeholder="Your Email" required maxlength="254" autocomplete="email">
-                <input type="number" name="guests" placeholder="How many attending?" min="1" max="20" value="1" required>
-              </div>
-              <button type="submit" class="btn btn-primary">Confirm RSVP</button>
-            </form>
+            {%- if site.rsvpFormUrl %}
+            {%- set rsvpLink = site.rsvpFormUrl %}
+            {%- if site.rsvpFormEventField %}
+            {%- set joiner = "&" if "?" in site.rsvpFormUrl else "?" %}
+            {%- set rsvpLink = site.rsvpFormUrl + joiner + "usp=pp_url&" + site.rsvpFormEventField + "=" + (event.data.title | urlencode) %}
+            {%- endif %}
+            <a class="btn btn-primary rsvp-link" href="{{ rsvpLink }}" target="_blank" rel="noopener">RSVP for this event<span class="visually-hidden"> (opens in a new tab)</span></a>
+            {%- elif site.email %}
+            <a class="btn btn-primary rsvp-link" href="mailto:{{ site.email }}?subject={{ ('RSVP: ' + event.data.title) | urlencode }}">RSVP by email</a>
+            {%- endif %}
           </div>
           {%- endif %}
         </div>
@@ -113,12 +118,4 @@ function closeLightbox() {
   document.body.style.overflow = '';
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
-
-function toggleRsvp(btn) {
-  var form = btn.nextElementSibling;
-  var isHidden = form.hidden;
-  form.hidden = !isHidden;
-  btn.setAttribute('aria-expanded', String(isHidden));
-  btn.textContent = isHidden ? 'Close RSVP' : 'RSVP for this event';
-}
 </script>

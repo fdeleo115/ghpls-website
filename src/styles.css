@@ -12,6 +12,40 @@
   --peach-ink: #a85f2a;
 }
 
+/* ACCESSIBILITY PRIMITIVES
+   Keyboard users need to see where focus is, and need a way past the nav on
+   every page. :focus-visible (not :focus) means mouse clicks don't leave an
+   outline behind, so this costs the pointer experience nothing. Don't add
+   `outline: none` anywhere without putting an equally visible indicator back —
+   that was the bug this replaced. */
+:focus-visible {
+  outline: 3px solid var(--peach-ink);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.page-header :focus-visible,
+nav :focus-visible,
+footer :focus-visible {
+  outline-color: var(--peach);
+}
+
+.skip-link {
+  position: absolute; top: 0; left: 0; z-index: 200;
+  transform: translateY(-120%);
+  background: var(--navy); color: var(--white);
+  padding: 12px 20px; font-weight: 600; text-decoration: none;
+  border-bottom-right-radius: 8px;
+}
+.skip-link:focus { transform: translateY(0); }
+main:focus { outline: none; }
+
+/* Text for screen readers only — kept out of view but still announced. */
+.visually-hidden {
+  position: absolute !important; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 
@@ -335,22 +369,7 @@ section { padding: 100px 0; }
 
 /* EVENT RSVP */
 .schedule-rsvp { margin-top: 14px; }
-.rsvp-toggle {
-  background: transparent; border: 2px solid rgba(232,168,124,0.6); color: var(--navy);
-  padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 0.85rem;
-  cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif;
-}
-.rsvp-toggle:hover { border-color: var(--peach); background: var(--cream); }
-.rsvp-form { margin-top: 16px; max-width: 520px; }
-.rsvp-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-.rsvp-form input {
-  width: 100%; padding: 12px 14px; border: 2px solid #e5e7eb; border-radius: 8px;
-  font-size: 0.9rem; font-family: 'Inter', sans-serif; transition: border-color 0.2s; background: var(--white);
-}
-.rsvp-form input:focus { outline: none; border-color: var(--peach); }
-.rsvp-form input[name="guests"] { grid-column: 1 / -1; }
-.rsvp-form .btn { padding: 11px 26px; font-size: 0.9rem; }
-@media (max-width: 480px) { .rsvp-fields { grid-template-columns: 1fr; } }
+.rsvp-link { display: inline-block; padding: 11px 26px; font-size: 0.9rem; }
 
 /* PAST EVENTS */
 .past-events-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
@@ -540,18 +559,13 @@ section { padding: 100px 0; }
 }
 .contact-links a:hover { color: var(--peach); }
 
-.contact-form input,
-.contact-form textarea,
-.contact-form select {
-  width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 8px;
-  font-size: 0.95rem; font-family: 'Inter', sans-serif; margin-bottom: 16px;
-  transition: border-color 0.2s; background: var(--white);
+.contact-cta {
+  background: var(--cream); border: 1px solid rgba(26,39,68,0.08);
+  border-radius: 12px; padding: 28px;
 }
-.contact-form input:focus, .contact-form textarea:focus, .contact-form select:focus {
-  outline: none; border-color: var(--peach);
-}
-.contact-form textarea { min-height: 140px; resize: vertical; }
-.contact-form .btn { width: 100%; text-align: center; }
+.contact-cta h3 { margin-top: 0; }
+.contact-cta .btn { display: inline-block; }
+.contact-cta-alt { margin-bottom: 0; font-size: 0.9rem; color: #55606f; }
 
 /* WIN CARD AS LINK */
 .win-card--link { display: block; color: inherit; }
@@ -864,12 +878,6 @@ footer ul li a:hover { color: var(--peach); }
      stay inline while others wrap — and a wrapped name lands flush left, where
      it reads as a separate item rather than part of the row. Stack every row
      the same way instead, so the rhythm is predictable. */
-  /* iOS Safari auto-zooms the page whenever a focused field's text is under
-     16px, which leaves the user zoomed in and scrolled sideways. 16px exactly
-     is the threshold, so both forms bump up to it on phones. */
-  .contact-form input, .contact-form textarea, .contact-form select,
-  .rsvp-form input { font-size: 16px; }
-
   .win-card .achievement,
   .winner-award { display: block; margin-bottom: 16px; }
   .detail-result { display: block; }
