@@ -2,8 +2,11 @@
 name: Francesco Deleo
 role: Vice President of Moot Training
 gradYear: 2028
+qanda: []
 competitions:
   - competition: HSFK Cup
+    year: 2026
+  - competition: Centre Block Cup
     year: 2026
 order: 5
 photo: /assets/uploads/img_6433.jpeg
