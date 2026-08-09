@@ -2,10 +2,86 @@
 
 _Written: June 2026 · Updated: August 8 2026 · For whoever (human or AI) picks this up next._
 
-> **Section order:** newest first. The "eighth pass" below is the most recent
+> **Section order:** newest first. The "ninth pass" below is the most recent
 > work; sections after it are earlier the same day or before. Their internal
 > cross-references ("see section 0") still point at each other, not at this
 > section.
+
+## Ninth pass, Aug 9 2026 — The Mini Moot page
+
+Added `/minimoot/` for the Mini Moot: the same competition format as the GH
+Cup, but **open only to University of Guelph-Humber students**. Committed as
+`b30567a`, deployed and verified live.
+
+**Built to mirror `ghcup.njk` section for section on purpose** — the two
+competitions run the same way and visitors compare them directly, so the
+layouts should rhyme. What makes it distinct:
+
+- A **reversed hero gradient** (navy → plum → `--peach-ink`) instead of the GH
+  Cup's flat navy, via `.minimoot-hero`.
+- An **eligibility badge** above the headline (`.eligibility-badge`, CMS field
+  `eligibility`). The Guelph-Humber-only rule is the single fact most likely to
+  be misread, so it is a badge rather than a sentence buried in prose.
+- **Its own three feature cards** — Start Here / Get Coached / Go Further,
+  pitched at first-time advocates — rather than the GH Cup's Compete / Judge /
+  Network.
+- A **"How is this different from The GH Cup?" callout** (`.minimoot-note`)
+  that links across, because the two pages are otherwise near-identical and
+  someone landing on the wrong one should be able to tell immediately.
+- **No sponsors section.** The Mini Moot is internal; soliciting sponsorship on
+  it would be wrong. This is a deliberate omission, not a gap to fill in.
+
+**Data and CMS:** `src/_data/minimoot.json` + a "Mini Moot Page" entry under
+Page Content (same fields as the GH Cup page, plus `eligibility`), a "Mini Moot
+Page" header photo entry, and **separate `minimootWinners` / `minimootVideos`
+collections** with their own CMS sections. Deliberately *not* shared with the
+GH Cup's collections — mixing them would misreport who won which competition.
+Both start empty, so the page shows its empty state rather than seeded or
+invented results; the execs fill them in. Both collection folders carry
+`permalink: false` from the start, so they can't recreate the orphan-page
+problem the eighth pass just cleaned up.
+
+### The nav needed real work to take a 9th item — read this before adding a 10th
+
+`.nav-inner` is capped at `max-width: 1200px`. **A wider screen therefore buys
+the menu nothing**: past roughly 1248px viewport the nav layout is byte-for-byte
+identical at every width, so raising the hamburger breakpoint — the instinctive
+fix, and the one applied twice before — does *not* relieve a crowded menu. It
+only changes the width at which the menu is hidden entirely.
+
+Measured with the 9th item in place: only **7px** separated the brand name from
+the first menu item, at every desktop width. Nothing overlapped, so it looked
+fine, but a fallback font rendering wider than Playfair would have closed that
+gap and reproduced exactly the clipped-hamburger bug from the fifth pass.
+
+The fix was to reclaim space from the menu itself — `nav ul { gap: 28px → 22px }`,
+which frees ~48px and takes the clearance to **45px** — and then set the
+breakpoint from the width where `.nav-inner` actually starts shrinking
+(measured at ~1205px, so `max-width: 1250px`). Verified no overflow, no
+horizontal scroll, and no brand/menu collision at **1391, 1251, 375 and 320px**,
+that the hamburger stays a 44×44 target fully on-screen, that the mobile menu
+lists all 9 items, and that the GH Cup page renders unchanged.
+
+**If a 10th nav item is ever added:** the gap is nearly spent. The next move is
+either a shorter label, raising `.nav-inner`'s `max-width` on wide screens
+(which will misalign the nav from the 1200px page container — check that), or
+accepting the hamburger at desktop widths.
+
+**Reconfirmed the eighth pass's caching gotcha:** `/minimoot/` returned `404`
+and `/admin/config.yml` showed none of the new fields for roughly a minute
+after a green deploy, then both came good with no further action. The CI log
+(`+ /minimoot/index.html` in the wrangler output) is the reliable signal that a
+deploy really shipped a file — check that before debugging a "missing" page.
+
+**Files touched:** `.eleventy.js`, `admin/config.yml`, `src/_data/pageHeaders.json`,
+`src/_includes/base.njk`, `src/pages/index.njk`, `src/styles.css`, new
+`src/_data/minimoot.json`, new `src/pages/minimoot.njk`, new
+`src/minimoot-{winners,videos}/<dir>.json`.
+
+**Left for the execs:** add Mini Moot winners and final videos through
+`/admin/`, set a Mini Moot page header photo and banner photo (both currently
+blank, so the header falls back to the plain navy banner), and add Competition
+Gallery photos once there are some.
 
 ## Eighth pass, Aug 9 2026 — both forms were dead; accessibility statement
 
@@ -716,14 +792,19 @@ migration step. Verified against the actual repo config this session
 
 ### Pages (all separate, all in nav)
 Home · About (mission + team + FAQ) · Achievements · GH Cup (incl. Previous
-Winners) · Events (upcoming + past) · Photos (gallery + lightbox) · Materials ·
-Contact · Privacy · Terms.
+Winners) · **Mini Moot** (Guelph-Humber-only counterpart to the GH Cup, added
+Aug 9 2026) · Events (upcoming + past) · Photos (gallery + lightbox) ·
+Materials · Contact · Privacy · Terms · **Accessibility**.
+Nine items now sit in the nav — see the ninth pass before adding a tenth.
 
 ### CMS collections (`admin/config.yml`)
-Achievements · Upcoming Events · Past Events · GH Cup Previous Winners · Photo
-Gallery · Executive Team · Page Content (Site Settings, About Page, GH Cup
-Page, **Page Header Photos**, **Materials Page** — the last two added Aug 8
-2026, see section 0). Every image field has a **drag-to-position focal point**
+Achievements · Upcoming Events · Past Events · GH Cup Previous Winners · GH Cup
+Final Videos · **Mini Moot Previous Winners** · **Mini Moot Final Videos** ·
+Photo Gallery · Executive Team · Page Content (Site Settings, About Page, GH
+Cup Page, **Mini Moot Page**, **Page Header Photos**, **Materials Page**). The
+Page Header Photos and Materials Page entries were added Aug 8 2026 (section
+0); everything Mini Moot was added Aug 9 2026 (ninth pass).
+Every image field has a **drag-to-position focal point**
 (rebuilt into an accurate live crop tool this session, see section 0) and most
 have **size**/**fit**/**zoom** controls, per the user's ask to be able to
 resize/reposition every photo and see it accurately before saving.
