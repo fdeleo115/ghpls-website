@@ -2,6 +2,7 @@
 name: Francesco Deleo
 role: Vice President of Moot Training
 gradYear: 2028
+bio: My name is Francesco Deleo, and I am currently working on this website
 qanda: []
 competitions:
   - competition: HSFK Cup
