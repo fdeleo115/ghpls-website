@@ -26,6 +26,7 @@ order: 5
 photo: /assets/uploads/img_6433.jpeg
 photoPosition: 37% 0%
 headerPhoto: /assets/uploads/img_5370.jpeg
+headerPhotoPosition: 48% 66%
 extraPhotos:
   - image: /assets/uploads/dsc_7275.jpeg
   - image: /assets/uploads/dsc_4956.jpeg
