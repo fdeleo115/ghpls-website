@@ -22,4 +22,9 @@ competitions:
 order: 8
 photo: /assets/uploads/img_7278.jpg
 photoPosition: center
+extraPhotos:
+  - image: /assets/uploads/img_7407.jpeg
+  - image: /assets/uploads/8d81e8e2-a5bc-41e4-892e-23292518e9f2.jpeg
+  - image: /assets/uploads/img_1366.jpeg
+  - image: /assets/uploads/img_5824.jpeg
 ---
