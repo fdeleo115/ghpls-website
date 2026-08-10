@@ -26,10 +26,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # wrangler 4.x requires Node >= 22. This is not a style preference — it
+      # is why `run_worker_first` in wrangler.toml silently had no effect for
+      # a full deploy cycle even though the config was correct. cloudflare/
+      # wrangler-action detects an incompatible Node version and falls back to
+      # a DIFFERENT, older bundled wrangler (3.90.0 was observed) instead of
+      # the 4.120.0 pinned in package.json — with no error and no warning in
+      # the deploy log. wrangler 3.x doesn't apply `run_worker_first` the same
+      # way, so every request that matched a real static asset kept bypassing
+      # the Worker (and its security headers) exactly as before the fix, while
+      # requests to non-existent paths — a 404, a freshly-added redirect
+      # source — looked fine, because those always reached the Worker either
+      # way. That combination is what made the bug look fixed when it wasn't.
+      #
+      # If you ever bump the wrangler devDependency, check the deploy log for
+      # which version actually ran (`npx --no-install wrangler --version`,
+      # logged early in the "Deploy to Cloudflare Workers" step) — don't
+      # assume it matches package.json.
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: package-lock.json
 

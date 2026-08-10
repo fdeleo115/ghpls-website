@@ -11,25 +11,32 @@ directory = "./_site"
 binding = "ASSETS"
 
 # ---------------------------------------------------------------------------
-# run_worker_first — this line is why the security headers actually exist.
+# run_worker_first — this is why the security headers actually exist, and
+# WHERE it lives here is not a style choice. Read this before moving it.
 #
 # By default, Workers Static Assets serves a matching file DIRECTLY and only
 # falls through to the Worker when nothing matches. That default silently
-# disabled every security header on this site: worker.js sets them, but it was
-# never being invoked for /about/, /, or any other real page, because each of
-# those matched a file. The only requests reaching the Worker were the ones for
-# paths that did not exist.
+# disabled every security header on this site: worker.js sets them, but it
+# was never being invoked for /about/, /, or any other real page, because each
+# of those matched a file. The only requests reaching the Worker were the ones
+# for paths that did not exist — which is also why a naive test against a
+# never-existed URL (a 404, or a freshly-added redirect source) can look like
+# this setting is working even when it isn't: THAT class of request always
+# reached the Worker anyway, with or without this line.
 #
-# The symptom was invisible from the outside — the site looked completely
-# normal — and it survived a migration away from Netlify, where the headers had
-# been configured in netlify.toml and were genuinely live. The headers appeared
-# to have been carried over. They had not.
+# THIS KEY MUST BE INSIDE THE [assets] TABLE, NOT AT THE TOP LEVEL.
+# It was placed after the table once, which made it a top-level key that
+# wrangler silently ignores — no error, no warning, `wrangler deploy --dry-run`
+# gives no indication anything is wrong. The deploy succeeds, the site looks
+# identical, and the headers are simply never sent. That exact mistake shipped
+# once; this comment exists so it doesn't happen again.
 #
-# With run_worker_first, every request goes through worker.js, which fetches the
-# asset via env.ASSETS and attaches the headers on the way out.
-#
-# If you ever see this file without this line, check whether the site is
-# serving a Content-Security-Policy before assuming it is fine:
-#   curl -sD- -o /dev/null https://ghpls.fdeleo115.workers.dev/ | grep -i content-security
-# ---------------------------------------------------------------------------
+# If you ever need to confirm the headers are actually live — not just that
+# this file looks right — check a URL you KNOW matches a real asset, with
+# cache busting (Cloudflare's edge can cache a page from before a fix lands,
+# which looks identical to the fix not having worked):
+#   curl -sD- -o /dev/null "https://ghpls.fdeleo115.workers.dev/?x=$(date +%s)" \
+#     | grep -i content-security
+# If that prints nothing, the headers are off — check this key is still
+# inside [assets] before anything else.
 run_worker_first = true
