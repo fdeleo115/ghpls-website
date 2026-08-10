@@ -3,9 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ pageTitle }} — {{ site.title }}</title>
+
+  {#- Page identity.
+     `pageDescription` is set in a page's front matter where it has something
+     specific to say; everything else falls back to the society's one-line
+     description. Every page previously shipped with no description, no
+     canonical and no social tags at all, which meant a link shared to
+     Instagram — the society's main channel — rendered as a bare URL. #}
+  {%- set metaTitle = title or pageTitle or name or competition or site.title %}
+  {%- set metaDesc = pageDescription or description or caseSummary or bio or site.description %}
+  {%- set metaImage = ogImage or photo or headerPhoto or image or "/assets/logo.jpg" %}
+  <title>{{ metaTitle }} — {{ site.title }}</title>
+  <meta name="description" content="{{ metaDesc | striptags | truncate(160) }}">
+  <link rel="canonical" href="{{ site.url }}{{ page.url }}">
   <link rel="icon" href="/assets/logo.jpg" type="image/jpeg">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ site.title }}">
+  <meta property="og:title" content="{{ metaTitle }}">
+  <meta property="og:description" content="{{ metaDesc | striptags | truncate(160) }}">
+  <meta property="og:url" content="{{ site.url }}{{ page.url }}">
+  <meta property="og:image" content="{{ site.url }}{{ metaImage }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ metaTitle }}">
+  <meta name="twitter:description" content="{{ metaDesc | striptags | truncate(160) }}">
+  <meta name="twitter:image" content="{{ site.url }}{{ metaImage }}">
+  <meta name="theme-color" content="#1a2744">
+
+  {#- Fonts are self-hosted (the @font-face rules are at the top of
+     styles.css) rather than loaded from fonts.googleapis.com, so there is no
+     second origin to preconnect to and no render-blocking third-party
+     stylesheet to fetch before the browser can even start on the font files
+     themselves. See the comment in styles.css for what changed and why.
+
+     `preload` on the two base "latin" files (Inter normal, used everywhere,
+     and Playfair Display normal, used in every heading) tells the browser to
+     start fetching them immediately, in parallel with everything else in
+     <head>, instead of waiting to discover them via styles.css's own
+     @font-face rules partway through the render. The italic and latin-ext
+     files are deliberately NOT preloaded — most page loads never touch
+     italic text or a non-Latin character, and preloading a file the page
+     turns out not to need delays the ones it does need. `crossorigin` is
+     required even though the file is same-origin: fonts are always fetched
+     in CORS mode by spec, and a preload without it is fetched again from
+     scratch when styles.css requests it moments later. #}
+  <link rel="preload" href="/assets/fonts/inter-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/playfair-display-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -18,10 +61,14 @@
       <img src="/assets/logo.jpg" alt="Guelph-Humber Pre-Law Society Logo">
       <span>Guelph-Humber Pre-Law Society</span>
     </a>
-    <button class="hamburger" aria-label="Menu" onclick="document.querySelector('nav ul').classList.toggle('open')">
+    {#- aria-expanded is not optional on a control that opens something: without
+       it a screen reader announces "Menu, button" and never says whether the
+       menu is now open or closed, so there is no feedback from pressing it.
+       aria-controls names what it opens. #}
+    <button class="hamburger" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="navMenu">
       <span></span><span></span><span></span>
     </button>
-    <ul>
+    <ul id="navMenu">
       <li><a href="/" {% if activePage == "home" %}class="active"{% endif %}>Home</a></li>
       <li><a href="/about/" {% if activePage == "about" %}class="active"{% endif %}>About</a></li>
       <li><a href="/achievements/" {% if activePage == "achievements" %}class="active"{% endif %}>Achievements</a></li>
@@ -89,9 +136,34 @@
 </footer>
 
 <script>
-document.querySelectorAll('nav a').forEach(a => {
-  a.addEventListener('click', () => document.querySelector('nav ul').classList.remove('open'));
-});
+(function () {
+  var toggle = document.getElementById('navToggle');
+  var menu = document.getElementById('navMenu');
+  if (!toggle || !menu) return;
+
+  // One function owns the open state, so the class and aria-expanded can never
+  // drift apart and start telling sighted and screen-reader users different
+  // things.
+  function setOpen(open) {
+    menu.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  toggle.addEventListener('click', function () {
+    setOpen(!menu.classList.contains('open'));
+  });
+  menu.querySelectorAll('a').forEach(function (a) {
+    a.addEventListener('click', function () { setOpen(false); });
+  });
+  // Escape closes it and returns focus to the control that opened it —
+  // otherwise a keyboard user who dismisses the menu is left with focus
+  // nowhere.
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && menu.classList.contains('open')) {
+      setOpen(false);
+      toggle.focus();
+    }
+  });
+})();
 </script>
 </body>
 </html>

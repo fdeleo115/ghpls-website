@@ -1,6 +1,7 @@
 # Cloudflare Worker config. The site is built by Eleventy into _site/ and
-# served as static assets; the Worker script (worker.js) only runs for the
-# GitHub-login routes (/api/auth, /api/callback).
+# served as static assets; worker.js adds security headers, handles the
+# GitHub-login routes (/api/auth, /api/callback), and serves redirects for
+# pages that have moved.
 name = "ghpls"
 main = "worker.js"
 compatibility_date = "2025-01-01"
@@ -8,3 +9,27 @@ compatibility_date = "2025-01-01"
 [assets]
 directory = "./_site"
 binding = "ASSETS"
+
+# ---------------------------------------------------------------------------
+# run_worker_first — this line is why the security headers actually exist.
+#
+# By default, Workers Static Assets serves a matching file DIRECTLY and only
+# falls through to the Worker when nothing matches. That default silently
+# disabled every security header on this site: worker.js sets them, but it was
+# never being invoked for /about/, /, or any other real page, because each of
+# those matched a file. The only requests reaching the Worker were the ones for
+# paths that did not exist.
+#
+# The symptom was invisible from the outside — the site looked completely
+# normal — and it survived a migration away from Netlify, where the headers had
+# been configured in netlify.toml and were genuinely live. The headers appeared
+# to have been carried over. They had not.
+#
+# With run_worker_first, every request goes through worker.js, which fetches the
+# asset via env.ASSETS and attaches the headers on the way out.
+#
+# If you ever see this file without this line, check whether the site is
+# serving a Content-Security-Policy before assuming it is fine:
+#   curl -sD- -o /dev/null https://ghpls.fdeleo115.workers.dev/ | grep -i content-security
+# ---------------------------------------------------------------------------
+run_worker_first = true

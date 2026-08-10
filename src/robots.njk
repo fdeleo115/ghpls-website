@@ -1,0 +1,63 @@
+---
+permalink: /robots.txt
+eleventyExcludeFromCollections: true
+---
+# robots.txt — crawler guidance for the GHPLS website
+#
+# IMPORTANT, honest note: robots.txt is a *request*, not a wall. Well-behaved
+# search engines (Google, Bing) obey it. Malicious scrapers and many AI
+# crawlers ignore it. Truly blocking bad bots requires a WAF, not this file.
+# This file does the realistic, useful things: keep the admin panel out of
+# search results and opt out of the major AI training crawlers.
+#
+# This is a template, not a static file, so the sitemap URL below is generated
+# from site.url and cannot drift away from the domain the site is actually on.
+# The previous static version pointed at a Netlify domain for months after the
+# site moved to Cloudflare.
+
+# Allow normal search engines to index the public pages.
+User-agent: *
+Allow: /
+Disallow: /admin/
+
+# NOTE: /assets/uploads/ is deliberately NOT disallowed.
+#
+# It used to be, and that was a mistake worth spelling out so nobody re-adds
+# it: the build writes every responsive image variant to
+# /assets/uploads/resized/, so disallowing the parent path blocked *every
+# photograph on the site* from Google. The society's competition and event
+# photos are a large part of why anyone shares these pages, and they were
+# invisible to image search and unavailable for link previews the whole time.
+
+# Opt out of common AI / LLM training scrapers (they honour these tokens).
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+Sitemap: {{ site.url }}/sitemap.xml

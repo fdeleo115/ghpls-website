@@ -176,7 +176,17 @@ collections:
     description: "Add winners for each year of The GH Cup."
     folder: "src/ghcup-winners"
     create: true
-    slug: "{{slug}}"
+    identifier_field: "theme"
+    # "ghcup-{{year}}", NOT "{{slug}}".
+    #
+    # `{{slug}}` slugifies the collection's identifier field, and this
+    # collection has no `title` — so Decap fell back to slugifying the whole
+    # entry object. That is not a hypothetical: it produced a real file called
+    # map-photosize-cover-photoposition-center-year-2025-theme-the-gh-cup-...
+    # -attorney-general.md, 200 characters long, and it would have produced
+    # another one every year. minimoot-winners already uses the year form; this
+    # collection was simply missed when that was fixed.
+    slug: "ghcup-{{year}}"
     fields:
       - { label: "Year", name: "year", widget: "number", value_type: "int" }
       - { label: "Theme / Title", name: "theme", widget: "string", hint: "e.g. The GH Cup 2026" }
@@ -471,6 +481,7 @@ collections:
         fields:
           - { label: "Site Title", name: "title", widget: "string" }
           - { label: "Short Title (nav bar)", name: "shortTitle", widget: "string" }
+          - { label: "Website address", name: "url", widget: "string", hint: "The full address this site is published at, with https:// and no slash on the end. This one value fills in the sitemap, robots.txt, and the link previews people see when they share a page — so if the site ever moves to a new domain, change it HERE and everything follows. Getting it wrong doesn't break the site, it just makes Google and social previews point at the wrong place." }
           - { label: "Site Description", name: "description", widget: "text", hint: "Shows on the homepage and footer" }
           - { label: "Instagram URL", name: "instagram", widget: "string" }
           - { label: "LinkedIn URL", name: "linkedin", widget: "string" }

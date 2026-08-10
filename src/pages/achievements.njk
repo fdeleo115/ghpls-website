@@ -3,14 +3,11 @@ layout: base.njk
 pageTitle: Achievements
 activePage: achievements
 permalink: /achievements/
+pageDescription: "Competition results for Guelph-Humber mooting teams, including the HSFK Cup, Highland Cup, Centre Block Cup, and Western Cup."
 ---
+{% import "macros.njk" as m %}
 
-<section class="page-header{% if pageHeaders.achievements.photo %} page-header--photo{% endif %}"{% if pageHeaders.achievements.photo %} style="background-image:url('{{ pageHeaders.achievements.photo }}'); background-position:{{ pageHeaders.achievements.photoPosition or 'center' }};"{% endif %}>
-  <div class="container">
-    <h1>Competitive Achievements</h1>
-    <p>Our members have represented Guelph-Humber with distinction at moot competitions across the country.</p>
-  </div>
-</section>
+{{ m.pageHeader(pageHeaders.achievements, "Competitive Achievements", "Our members have represented Guelph-Humber with distinction at moot competitions across the country.") }}
 
 <section>
   <div class="container">
@@ -18,8 +15,14 @@ permalink: /achievements/
       {%- for item in collections.achievements %}
       <a href="/achievements/{{ item.fileSlug }}/" class="win-card win-card--link {% if item.data.photo %}win-card--has-photo{% endif %} {% if item.data.cardWidth == 'wide' %}win-card--wide{% endif %}">
         {% if item.data.photo %}
+        {#- Cards sit two-up in a 1152px content column, so a normal card's
+           photo is 564px wide and a full-width one is 1152px. Below 700px they
+           stack and fill the viewport. #}
+        {%- set cardSizes = "(max-width: 700px) 100vw, 1152px" if item.data.cardWidth == 'wide' else "(max-width: 700px) 100vw, (max-width: 1200px) 50vw, 564px" %}
+        {%- set pos = item.data.photoPosition | cssPosition %}
+        {%- set zoom = item.data.photoZoom | cssZoom %}
         <div class="win-card-photo win-card-photo--{{ item.data.photoHeight or 'medium' }}">
-          <img src="{{ item.data.photo }}" alt="{{ item.data.competition }}" style="object-fit: {{ item.data.photoSize or 'cover' }}; object-position: {{ item.data.photoPosition or 'center' }};{% if item.data.photoZoom and item.data.photoZoom != 1 %} transform: scale({{ item.data.photoZoom }}); transform-origin: {{ item.data.photoPosition or 'center' }};{% endif %}">
+          <img src="{{ item.data.photo }}" alt="{{ item.data.competition }}" data-sizes="{{ cardSizes }}"{% if loop.index == 1 %} data-eager{% endif %} style="object-fit: {{ item.data.photoSize | cssFit }}; object-position: {{ pos }};{% if zoom %} transform: scale({{ zoom }}); transform-origin: {{ pos }};{% endif %}">
         </div>
         {% endif %}
         <div class="win-card-content">

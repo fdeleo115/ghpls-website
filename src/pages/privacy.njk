@@ -3,51 +3,87 @@ layout: base.njk
 pageTitle: Privacy Policy
 activePage: privacy
 permalink: /privacy/
+pageDescription: "How the Guelph-Humber Pre-Law Society collects, uses and stores personal information, and how to ask us to remove a photo."
 ---
+{% import "macros.njk" as m %}
 
-<section class="page-header">
-  <div class="container">
-    <h1>Privacy Policy</h1>
-    <p>How the Guelph-Humber Pre-Law Society handles your information.</p>
-  </div>
-</section>
+{{ m.pageHeader(null, "Privacy Policy", "How the Guelph-Humber Pre-Law Society handles your information.") }}
 
 <section>
   <div class="container">
     <div class="content-block legal">
       <p class="legal-updated">Last updated: August 2026</p>
 
-      <p>The Guelph-Humber Pre-Law Society ("we", "us", "the Society") is a student club at the University of Guelph-Humber. This policy explains what personal information we collect through this website and how we use it. We follow the principles of Canada's <em>Personal Information Protection and Electronic Documents Act</em> (PIPEDA).</p>
+      <p>The Guelph-Humber Pre-Law Society ("we", "us", "the Society") is a student club at the University of Guelph-Humber. This policy explains what personal information reaches us through this website, what we do with it, and how to ask us to change or remove it.</p>
 
-      <h3>1. Information we collect</h3>
+      <p>We have written this to describe what actually happens rather than to cover every eventuality. If something here does not match your experience of the site, that is a mistake on our part and we would like to know.</p>
+
+      <h3>1. Which privacy law applies to us</h3>
+      <p>Canada's <em>Personal Information Protection and Electronic Documents Act</em> (PIPEDA) applies to organisations that handle personal information in the course of commercial activity. As a non-profit student club we are unlikely to fall within that definition, and we are not claiming that PIPEDA governs us.</p>
+      <p>We have chosen to follow its principles anyway — openness about what we collect, collecting only what we need, using it only for the purpose we collected it for, and letting you see and correct it. We hold ourselves to that standard because it is the right one, not because we have been told to.</p>
+
+      <h3>2. What we collect</h3>
       <ul>
-        <li><strong>Contacting us and event RSVPs:</strong> when you message us or RSVP to an event, we collect the information you choose to give us — typically your name, email address, and your message or the event you're attending. Depending on how you reach us, this arrives either by email or through a Google Form, whose responses are collected in a Google Sheet that the Society's executive team controls.</li>
-        <li><strong>Photos:</strong> we publish event and competition photos that may show identifiable people. We only post photos taken at Society events or shared with us for that purpose.</li>
-        <li>We do <strong>not</strong> use advertising trackers, and we do not sell or rent personal information to anyone.</li>
+        <li><strong>Messages and RSVPs.</strong> When you contact us or RSVP to an event you give us whatever you choose to include — usually your name, your email address, and your message. {% if site.contactFormUrl or site.rsvpFormUrl %}Depending on the route you use, this arrives either in the Society's email account or through a Google Form, whose responses collect in a Google Sheet the executive team controls.{% else %}At the moment every contact route on this site is an email link, so your message arrives in the Society's email account. Nothing is collected by this website itself.{% endif %}</li>
+        <li><strong>Photographs.</strong> We publish photos from our events and competitions, and those photos show identifiable people. We only publish photos taken at Society events or given to us for that purpose.</li>
+        <li><strong>Names and competition results.</strong> Our Achievements, GH Cup and Mini Moot pages name the people who competed and what they won. See section 5.</li>
+        <li><strong>Server logs.</strong> Our host records ordinary technical information about requests, including IP addresses, as part of serving and protecting the site. We do not use these logs to build any picture of individual visitors.</li>
+      </ul>
+      <p><strong>This site sets no cookies of its own, runs no analytics, and carries no advertising or tracking pixels.</strong> We do not sell, rent or trade personal information to anyone, and we never will.</p>
+
+      <h3>3. What we use it for</h3>
+      <ul>
+        <li>Replying to you, and following up about membership, competitions or events.</li>
+        <li>Promoting the Society and recording what its members have achieved.</li>
+      </ul>
+      <p>That is the whole list. We do not use your contact details for anything you did not contact us about.</p>
+
+      <h3>4. Who else is involved</h3>
+      <p>Running a website means other companies handle some of this on our behalf. In the interest of being straight with you, here is all of them:</p>
+      <ul>
+        <li><strong>Cloudflare</strong> hosts the site and serves every page. Your request — including your IP address — necessarily passes through their network.</li>
+        <li><strong>GitHub</strong> stores this website's content and code in a <strong>public</strong> repository. Every photo and every word published on this site is publicly visible there as well. Contact messages and RSVP responses are never put in that repository.</li>
+        <li><strong>YouTube</strong> hosts our competition final videos, embedded in privacy-enhanced mode so that nothing is set until you actually press play. This is the only third-party request an ordinary page load makes — everything else on the site, including its fonts, is served from our own site rather than fetched from anyone else.</li>
+        {%- if site.contactFormUrl or site.rsvpFormUrl %}
+        <li><strong>Google Forms and Google Drive</strong> receive contact and RSVP responses, governed by Google's own privacy policy.</li>
+        {%- endif %}
+      </ul>
+      <p>Some of these companies are based outside Canada, so information handled by them may be stored or processed in another country and be subject to that country's laws.</p>
+
+      <h3>5. Names and results on our competition pages</h3>
+      <p>Moot competition results are a matter of public record in the way that any competition's results are: they name who competed and who placed. We publish them because the achievement belongs to the people who earned it, and because recording it is a large part of what this Society is for.</p>
+      <p>We know that not everyone wants their name on a public web page indefinitely, including people who have since left the Society or graduated. <strong>If you are named on this site and would rather not be, tell us and we will remove or anonymise your entry.</strong> You do not have to give a reason.</p>
+
+      <h3>6. Photographs, and how to get one taken down</h3>
+      <p><strong>If you appear in a photo on this site and want it removed, contact us and we will take it down promptly.</strong> You do not need to explain why, and you will not be asked to justify the request.</p>
+      <p>Because our photos are stored in a public code repository, removing a photo from the site removes it from public view but does not erase it from that repository's history. If you need it gone from the history as well, say so and we will do that too — it takes longer, but we will do it.</p>
+      <p>Where a photo shows someone who is under the age of majority, we will not publish it without the agreement of that person and their parent or guardian, and we will remove it immediately on request from either.</p>
+
+      <h3>7. Your rights</h3>
+      <p>You can ask us to tell you what personal information we hold about you, to correct anything that is wrong, or to delete it. We will respond within <strong>30 days</strong>. If we cannot do what you have asked, we will tell you why.</p>
+      <p>Requests can be made through our <a href="/contact/">contact page</a>{% if site.email %}, by email to <a href="mailto:{{ site.email }}">{{ site.email }}</a>{% endif %}, or by messaging us on <a href="{{ site.instagram }}" target="_blank" rel="noopener">Instagram</a>.</p>
+
+      <h3>8. How long we keep things</h3>
+      <ul>
+        <li><strong>Messages and RSVPs</strong> are kept for the academic year they relate to and are cleared out at handover, unless they are part of an ongoing conversation.</li>
+        <li><strong>Photos and competition results</strong> are kept indefinitely as a record of the Society's history — subject always to sections 5 and 6.</li>
+        <li><strong>Server logs</strong> are kept by our host under their own retention schedule, which is measured in days.</li>
       </ul>
 
-      <h3>2. How we use it</h3>
-      <ul>
-        <li>To respond to your inquiries and follow up about membership, competitions, or events.</li>
-        <li>To promote the Society and its activities (e.g. publishing event photos).</li>
-      </ul>
+      <h3>9. If something goes wrong</h3>
+      <p>If personal information we hold is exposed or accessed by someone who should not have it, and there is a real risk of harm to you, we will tell you and describe what happened, what we are doing about it, and what you may want to do.</p>
 
-      <h3>3. Where it is stored</h3>
-      <p>This site is hosted by Cloudflare. Messages and RSVPs you send us through a Google Form are stored in Google Drive, and their handling is governed by Google's own privacy policy; messages you send us by email are held in the Society's email account. Photos and page content are stored in our website's code repository on GitHub, which is publicly visible — please keep in mind that anything published on the site is public. We do not put contact-form or RSVP responses in that repository.</p>
+      <h3>10. Children</h3>
+      <p>This site is aimed at university students and the general public, and we do not knowingly collect personal information from children. If you believe a child has given us information, contact us and we will delete it.</p>
 
-      <h3>4. Photo removal &amp; your rights</h3>
-      <p>You have the right to ask what personal information we hold about you, to correct it, or to have it removed. <strong>If you appear in a photo and want it taken down, contact us and we will remove it promptly.</strong> Requests can be made through our <a href="/contact/">contact page</a> or by messaging us on <a href="{{ site.instagram }}" target="_blank" rel="noopener">Instagram</a>.</p>
+      <h3>11. Changes to this policy</h3>
+      <p>We may update this policy. The "last updated" date at the top always reflects the current version, and because this site's content is public, previous versions remain visible in its repository history.</p>
 
-      <h3>5. Children &amp; students</h3>
-      <p>This site is aimed at university students and the general public. We do not knowingly collect information from anyone under 13.</p>
-
-      <h3>6. Changes to this policy</h3>
-      <p>We may update this policy from time to time. The "last updated" date above will always reflect the current version.</p>
-
-      <h3>7. Contact</h3>
+      <h3>12. Contact</h3>
       <p>Questions about this policy or your information? Reach us through the <a href="/contact/">contact page</a> or on <a href="{{ site.instagram }}" target="_blank" rel="noopener">Instagram</a>{% if site.email %}, or by email at <a href="mailto:{{ site.email }}">{{ site.email }}</a>{% endif %}.</p>
+      <p>If you are not satisfied with how we have handled a privacy question, you may raise it with the Office of the Privacy Commissioner of Canada, or — because we are a club recognised by the University — with the University of Guelph-Humber's student life office.</p>
 
-      <p class="legal-disclaimer"><strong>Note:</strong> This Society is a student organization and is not the University of Guelph-Humber itself. This policy is provided in good faith and is not legal advice.</p>
+      <p class="legal-disclaimer"><strong>Note:</strong> The Society is a student organisation and is not the University of Guelph-Humber itself. This policy is written in good faith by students. It is not legal advice, and it does not limit any rights you have under any law that does apply to us.</p>
     </div>
   </div>
 </section>

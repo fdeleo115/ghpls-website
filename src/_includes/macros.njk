@@ -1,0 +1,24 @@
+{#- ---------------------------------------------------------------------------
+   Shared markup fragments.
+
+   pageHeader() replaces a 200-character <section> line that was copy-pasted
+   into eight page templates verbatim. That duplication was not merely untidy:
+   every one of the eight carried the same unsanitised `photoPosition` straight
+   into a style attribute, so a single fix had to be applied eight times and
+   would silently miss any page added later. Now the banner exists once.
+
+   `header` is the matching entry from src/_data/pageHeaders.json (the CMS's
+   "Page Header Photos"). A page with no entry there renders the plain navy
+   gradient header, which is the correct fallback rather than an error.
+--------------------------------------------------------------------------- #}
+{% macro pageHeader(header, title, subtitle) %}
+{%- set photo = header.photo if header else null %}
+<section class="page-header{% if photo %} page-header--photo{% endif %}"{% if photo %} style="background-image:url('{{ photo }}'); background-position:{{ header.photoPosition | cssPosition }};"{% endif %}>
+  <div class="container">
+    <h1>{{ title }}</h1>
+    {%- if subtitle %}
+    <p>{{ subtitle }}</p>
+    {%- endif %}
+  </div>
+</section>
+{% endmacro %}

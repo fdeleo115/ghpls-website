@@ -6,8 +6,8 @@
     "build": "npx @11ty/eleventy"
   },
   "devDependencies": {
-    "@11ty/eleventy": "^2.0.1",
-    "sharp": "^0.33.5",
-    "wrangler": "^3.99.0"
+    "@11ty/eleventy": "^3.1.6",
+    "sharp": "^0.35.3",
+    "wrangler": "^4.120.0"
   }
 }

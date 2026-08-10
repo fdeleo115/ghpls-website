@@ -3,19 +3,16 @@ layout: base.njk
 pageTitle: The Mini Moot
 activePage: minimoot
 permalink: /minimoot/
+pageDescription: "The Mini Moot is our in-house moot court competition, open only to Guelph-Humber students and built for first-time advocates."
 ---
+{% import "macros.njk" as m %}
 
 {#- Deliberately mirrors ghcup.njk section for section, because the two
    competitions run the same way and visitors compare them directly. What
    distinguishes this page is the eligibility rule, which is the single fact
    most likely to be misread — so it gets a dedicated badge in the header and
    its own callout rather than being buried in prose. #}
-<section class="page-header{% if pageHeaders.minimoot.photo %} page-header--photo{% endif %}"{% if pageHeaders.minimoot.photo %} style="background-image:url('{{ pageHeaders.minimoot.photo }}'); background-position:{{ pageHeaders.minimoot.photoPosition or 'center' }};"{% endif %}>
-  <div class="container">
-    <h1>The Mini Moot</h1>
-    <p>Our in-house moot court competition — for Guelph-Humber students.</p>
-  </div>
-</section>
+{{ m.pageHeader(pageHeaders.minimoot, "The Mini Moot", "Our in-house moot court competition — for Guelph-Humber students.") }}
 
 <section>
   <div class="container">
@@ -55,7 +52,10 @@ permalink: /minimoot/
       <div class="line"></div>
     </div>
     <div class="content-block">
-      <p>{{ minimoot.about | replace("\n\n", "</p><p>") | safe }}</p>
+      {#- The `paragraphs` filter escapes first and adds the <p> tags after,
+         so multi-paragraph text still works without marking editor input
+         as safe HTML. The old `replace(...) | safe` did the opposite. #}
+      {{ minimoot.about | paragraphs | safe }}
       <h3>How It Works</h3>
       <ul>
         {%- for step in minimoot.howItWorks %}
@@ -81,7 +81,7 @@ permalink: /minimoot/
     <div class="photo-gallery">
       {%- for shot in minimoot.gallery %}
       <div class="photo-card" data-img="{{ shot.image }}" data-caption="{{ shot.caption }}" onclick="openLightbox(this.dataset.img, this.dataset.caption)">
-        <img src="{{ shot.image }}" alt="{{ shot.caption }}" loading="lazy" style="object-position: {{ shot.photoPosition or 'center' }};">
+        <img src="{{ shot.image }}" alt="{{ shot.caption }}" loading="lazy" data-sizes="(max-width: 640px) 100vw, (max-width: 1200px) 33vw, 373px" style="object-position: {{ shot.photoPosition | cssPosition }};">
         {%- if shot.caption %}
         <div class="photo-overlay">
           <h4>{{ shot.caption }}</h4>
@@ -103,10 +103,12 @@ permalink: /minimoot/
     </div>
     <div class="winners-timeline">
       {%- for winner in collections.minimootWinners %}
+      {%- set wpos = winner.data.photoPosition | cssPosition %}
+      {%- set wzoom = winner.data.photoZoom | cssZoom %}
       <div class="winner-card {% if not winner.data.photo %}winner-card--no-photo{% endif %}">
         {% if winner.data.photo %}
         <div class="winner-photo">
-          <img src="{{ winner.data.photo }}" alt="{{ winner.data.year }} Mini Moot" style="object-fit: {{ winner.data.photoSize or 'cover' }}; object-position: {{ winner.data.photoPosition or 'center' }};{% if winner.data.photoZoom and winner.data.photoZoom != 1 %} transform: scale({{ winner.data.photoZoom }}); transform-origin: {{ winner.data.photoPosition or 'center' }};{% endif %}">
+          <img src="{{ winner.data.photo }}" alt="{{ winner.data.year }} Mini Moot" loading="lazy" data-sizes="(max-width: 700px) 100vw, 240px" style="object-fit: {{ winner.data.photoSize | cssFit }}; object-position: {{ wpos }};{% if wzoom %} transform: scale({{ wzoom }}); transform-origin: {{ wpos }};{% endif %}">
         </div>
         {% endif %}
         <div class="winner-info">
@@ -143,7 +145,7 @@ permalink: /minimoot/
       {%- for video in collections.minimootVideos %}
       <div class="video-card">
         <div class="video-embed">
-          <iframe src="https://www.youtube.com/embed/{{ video.data.url | youtubeId }}" title="{{ video.data.title or video.data.year }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+          <iframe src="https://www.youtube-nocookie.com/embed/{{ video.data.url | youtubeId }}" title="{{ video.data.title or video.data.year }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
         </div>
         <div class="video-info">
           <div class="winner-year">{{ video.data.year }}</div>

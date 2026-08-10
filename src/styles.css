@@ -1,3 +1,104 @@
+/* ---------------------------------------------------------------------------
+   SELF-HOSTED FONTS
+
+   These used to load from fonts.googleapis.com/fonts.gstatic.com. Self-hosting
+   removes the last third-party request the public site made on every single
+   page load — Google received every visitor's IP address just to draw text —
+   and it is also faster: two DNS lookups and TLS handshakes to a different
+   origin are gone, and the browser can start fetching the font the instant it
+   parses this stylesheet instead of waiting on a second render-blocking
+   stylesheet from fonts.googleapis.com first.
+
+   Each family/style is split into "latin" and "latin-ext" via unicode-range,
+   matching what Google Fonts itself serves for a latin-script site. The
+   browser only downloads latin-ext if it actually meets a character outside
+   the base Latin block — which on this site means the "é" in "café" or a name
+   like "Chita", not every page load. Skipping the other ~10 language blocks
+   Google Fonts normally ships (Cyrillic, Greek, Vietnamese, etc.) keeps the
+   total download small without touching any text this site actually uses.
+
+   Both files are VARIABLE fonts — font-weight: 400 700 means one file serves
+   every weight in that range, which is why this is 8 files rather than 40.
+
+   To update or add a weight/style: regenerate from
+   https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400..700;1,400..700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap
+   with a browser User-Agent (the default curl UA gets served old-style TTF),
+   download the "latin" and "latin-ext" @font-face src URLs into
+   assets/fonts/, and rewrite the url() below to match this site's own path.
+   --------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/assets/fonts/inter-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/assets/fonts/inter-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/assets/fonts/inter-normal-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/assets/fonts/inter-normal-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: italic;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/assets/fonts/playfair-display-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: italic;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/assets/fonts/playfair-display-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/assets/fonts/playfair-display-normal-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/assets/fonts/playfair-display-normal-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
   --navy: #1a2744;
   --navy-light: #2a3a5c;
@@ -48,6 +149,15 @@ main:focus { outline: none; }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
+
+/* LOAD-BEARING — do not delete.
+   The build wraps every photo in a <picture> so it can offer WebP with a JPEG
+   fallback. `display: contents` makes that wrapper generate no box at all, so
+   an <img>'s containing block stays its original styled parent. Without this
+   line, every `height: 100%` and `aspect-ratio` rule below resolves against
+   the <picture> instead and the photos collapse. See the long note above the
+   image pipeline in .eleventy.js. */
+picture { display: contents; }
 
 body {
   font-family: 'Inter', sans-serif;
@@ -281,9 +391,30 @@ section { padding: 100px 0; }
   padding: 140px 0 80px;
   text-align: center;
 }
-/* Optional background photo: set inline background-image on the section.
-   A navy wash keeps the white heading fully legible over any photo. */
-.page-header--photo { background-size: cover; background-position: center; background-repeat: no-repeat; }
+/* Optional background photo. A navy wash keeps the white heading fully legible
+   over any photo.
+
+   The image itself is chosen at three breakpoints rather than downloaded once
+   at full size. The build emits --bg-sm / --bg-md / --bg-lg on the section as
+   inline custom properties (see the banner note in .eleventy.js); this picks
+   between them. Every page header used to serve the 1920px copy — around
+   370KB — to a 390px phone screen, and it is the largest element on the page,
+   so it was also the thing the visitor was waiting for.
+
+   The var() fallback chains are deliberate: a source photo narrower than
+   1280px has no --bg-lg, and a bare var(--bg-lg) would make the whole
+   declaration invalid and leave the banner with no photo at all. */
+.page-header--photo {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+@media (min-width: 641px) {
+  .page-header--photo { background-image: var(--bg-md, var(--bg-sm)); }
+}
+@media (min-width: 1201px) {
+  .page-header--photo { background-image: var(--bg-lg, var(--bg-md, var(--bg-sm))); }
+}
 .page-header--photo::before {
   content: ''; position: absolute; inset: 0;
   background: linear-gradient(135deg, rgba(26,39,68,0.90) 0%, rgba(26,39,68,0.78) 100%);
@@ -409,7 +540,10 @@ section { padding: 100px 0; }
 .schedule-date .day { font-size: 1.8rem; font-weight: 700; line-height: 1.2; }
 .schedule-info h4 { font-size: 1.15rem; margin-bottom: 4px; }
 .schedule-info p { color: var(--text-light); font-size: 0.9rem; }
-.schedule-info .time { color: var(--peach); font-weight: 600; font-size: 0.85rem; margin-top: 4px; }
+/* --peach-ink, not --peach: this sits on a white card. See the contrast note
+   above .cal-add. Peach on white is 1.9:1 and fails WCAG AA outright, and the
+   event's start time is not decoration — it is the thing people came for. */
+.schedule-info .time { color: var(--peach-ink); font-weight: 600; font-size: 0.85rem; margin-top: 4px; }
 .schedule-info .location { color: var(--text-light); font-size: 0.8rem; margin-top: 2px; }
 
 /* EVENT RSVP */
@@ -466,7 +600,8 @@ section { padding: 100px 0; }
 .past-event-card:hover { transform: translateY(-4px); }
 .past-event-img { width: 100%; height: 200px; object-fit: cover; }
 .past-event-info { padding: 24px; }
-.past-event-date { font-size: 0.8rem; color: var(--peach); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+/* --peach-ink: white card background. */
+.past-event-date { font-size: 0.8rem; color: var(--peach-ink); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
 .past-event-info h4 { margin-bottom: 8px; }
 .past-event-info p { color: var(--text-light); font-size: 0.9rem; }
 
@@ -603,10 +738,30 @@ section { padding: 100px 0; }
   50% { transform: translateX(5px); }
 }
 
+/* Reduced motion.
+   This used to name three specific things, which meant the accessibility
+   statement's promise that "animated elements are suppressed" was not true:
+   smooth scrolling and roughly thirty hover transforms and transitions all
+   kept running. Blanket rules are the right shape here — the site has no
+   animation that carries meaning, so there is nothing that needs to survive,
+   and a blanket rule also covers whatever gets added next.
+   The durations are near-zero rather than `none` so that transitionend and
+   animationend still fire and no script waiting on them can hang. */
 @media (prefers-reduced-motion: reduce) {
-  .exec-rail { scroll-behavior: auto; }
-  .exec-card:hover { transform: none; }
-  .exec-scroll-hint svg { animation: none; }
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .exec-card:hover,
+  .portal-card:hover,
+  .win-card:hover,
+  .past-event-card:hover,
+  .photo-card:hover img,
+  .detail-photo:hover img,
+  .extra-photo:hover img { transform: none; }
 }
 
 @media (max-width: 640px) {
@@ -614,19 +769,38 @@ section { padding: 100px 0; }
   .exec-scroll-hint { font-size: 0.8rem; }
 }
 
-/* FAQ */
+/* FAQ
+   Built on <details>/<summary>, the same reasoning as the Add to Calendar
+   disclosure: open/closed state is announced by screen readers for free, it is
+   keyboard operable for free, and it cannot break at runtime.
+
+   The previous version was a <button> toggling a class, with two problems that
+   are invisible unless you test with a screen reader. The button never carried
+   aria-expanded, so its state was never announced — and .faq-answer was hidden
+   with `max-height: 0; overflow: hidden`, which hides content visually while
+   leaving it fully present in the accessibility tree. A screen-reader user
+   therefore heard every answer read out at once and got no feedback at all
+   from pressing the control. */
 .faq-list { max-width: 800px; margin: 0 auto; }
 .faq-item { border-bottom: 1px solid #e5e7eb; }
 .faq-question {
-  width: 100%; background: none; border: none; padding: 24px 0;
+  width: 100%; padding: 24px 0;
   font-size: 1.1rem; font-family: 'Playfair Display', serif; color: var(--navy);
-  text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  text-align: left; cursor: pointer; display: flex; justify-content: space-between;
+  align-items: center; gap: 16px; list-style: none;
 }
-.faq-question::after { content: '+'; font-size: 1.5rem; color: var(--peach); transition: transform 0.3s; }
-.faq-item.open .faq-question::after { transform: rotate(45deg); }
-.faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+/* Suppress the native disclosure triangle in both engines — the +/× below is
+   the affordance. */
+.faq-question::-webkit-details-marker { display: none; }
+.faq-question::after {
+  content: '+'; font-size: 1.5rem; line-height: 1;
+  /* --peach-ink, not --peach: this is the only thing indicating open/closed,
+     so it is a meaningful interface component and owes 3:1 against the white
+     background under WCAG 1.4.11. Peach managed 1.9:1. */
+  color: var(--peach-ink); transition: transform 0.3s; flex-shrink: 0;
+}
+.faq-item[open] .faq-question::after { transform: rotate(45deg); }
 .faq-answer p { padding-bottom: 24px; color: var(--text-light); font-size: 0.95rem; }
-.faq-item.open .faq-answer { max-height: 500px; }
 
 /* SPONSORS */
 .sponsors-row { display: flex; justify-content: center; align-items: center; gap: 64px; flex-wrap: wrap; }
@@ -643,7 +817,9 @@ section { padding: 100px 0; }
   display: flex; align-items: center; gap: 12px; padding: 12px 0;
   color: var(--navy); font-weight: 500; transition: color 0.2s;
 }
-.contact-links a:hover { color: var(--peach); }
+/* --peach-ink: hover state on a white background. A hover colour still has to
+   meet contrast — it is the colour the text is while you are reading it. */
+.contact-links a:hover { color: var(--peach-ink); }
 
 .contact-cta {
   background: var(--cream); border: 1px solid rgba(26,39,68,0.08);

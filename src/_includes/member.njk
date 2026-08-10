@@ -4,7 +4,7 @@ layout: base.njk
 
 {%- set bannerPhoto = headerPhoto or photo %}
 {%- set bannerPosition = (headerPhoto and headerPhotoPosition) or photoPosition or 'center' %}
-<section class="page-header{% if bannerPhoto %} page-header--photo{% endif %}"{% if bannerPhoto %} style="background-image:url('{{ bannerPhoto }}'); background-position:{{ bannerPosition }};"{% endif %}>
+<section class="page-header{% if bannerPhoto %} page-header--photo{% endif %}"{% if bannerPhoto %} style="background-image:url('{{ bannerPhoto }}'); background-position:{{ bannerPosition | cssPosition }};"{% endif %}>
   <div class="container">
     <div class="detail-back"><a href="/about/#execCarousel">&#8592; All Executives</a></div>
     <h1>{{ name }}</h1>
@@ -128,7 +128,7 @@ layout: base.njk
            so the headshot gets its own circular treatment here. extraPhotos
            are ordinary event photos and use the rectangular gallery below. #}
         <div class="member-headshot" data-img="{{ photo }}" data-caption="{{ name }}" onclick="openLightbox(this.dataset.img, this.dataset.caption)">
-          <img src="{{ photo }}" alt="{{ name }}" loading="lazy" style="object-position: {{ photoPosition or 'center' }};">
+          <img src="{{ photo }}" alt="{{ name }}" loading="lazy" data-sizes="(max-width: 900px) 100vw, 340px" style="object-position: {{ photoPosition | cssPosition }};">
         </div>
         {%- endif %}
 
@@ -136,7 +136,7 @@ layout: base.njk
         <div class="detail-gallery">
           {%- for extra in extraPhotos %}
           <div class="detail-photo" data-img="{{ extra.image }}" data-caption="{{ extra.caption or name }}" onclick="openLightbox(this.dataset.img, this.dataset.caption)">
-            <img src="{{ extra.image }}" alt="{{ extra.caption or name }}" loading="lazy">
+            <img src="{{ extra.image }}" alt="{{ extra.caption or name }}" loading="lazy" data-sizes="(max-width: 900px) 100vw, 340px">
           </div>
           {%- endfor %}
         </div>

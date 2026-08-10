@@ -3,14 +3,11 @@ layout: base.njk
 pageTitle: About
 activePage: about
 permalink: /about/
+pageDescription: "Meet the executive team behind the Guelph-Humber Pre-Law Society, read our mission, and find answers to common questions about joining."
 ---
+{% import "macros.njk" as m %}
 
-<section class="page-header{% if pageHeaders.about.photo %} page-header--photo{% endif %}"{% if pageHeaders.about.photo %} style="background-image:url('{{ pageHeaders.about.photo }}'); background-position:{{ pageHeaders.about.photoPosition or 'center' }};"{% endif %}>
-  <div class="container">
-    <h1>About Us</h1>
-    <p>Learn about the Guelph-Humber Pre-Law Society and our mission.</p>
-  </div>
-</section>
+{{ m.pageHeader(pageHeaders.about, "About Us", "Learn about the Guelph-Humber Pre-Law Society and our mission.") }}
 
 <section>
   <div class="container">
@@ -56,8 +53,12 @@ permalink: /about/
         {%- for member in collections.team %}
         <div class="exec-card">
           <div class="exec-card-photo">
+            {#- data-sizes: the headshot renders in a circle that is never wider
+               than 190px (see .exec-card-photo). Without this the build falls
+               back to assuming full viewport width, and a phone downloads the
+               1280px copy of all eight headshots to show them at 190. #}
             {% if member.data.photo %}
-            <img src="{{ member.data.photo }}" alt="{{ member.data.name }}" style="object-position: {{ member.data.photoPosition or 'center' }};">
+            <img src="{{ member.data.photo }}" alt="{{ member.data.name }}" data-sizes="190px" style="object-position: {{ member.data.photoPosition | cssPosition }};">
             {% else %}
             <div class="exec-card-avatar">{{ member.data.name[0] }}</div>
             {% endif %}
@@ -200,11 +201,13 @@ permalink: /about/
       <div class="line"></div>
     </div>
     <div class="faq-list">
+      {#- <details>, not a button toggling a class — see the FAQ block in
+         styles.css for why. No JavaScript is involved at all now. #}
       {%- for item in about.faq %}
-      <div class="faq-item">
-        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">{{ item.question }}</button>
+      <details class="faq-item">
+        <summary class="faq-question">{{ item.question }}</summary>
         <div class="faq-answer"><p>{{ item.answer }}</p></div>
-      </div>
+      </details>
       {%- endfor %}
     </div>
   </div>

@@ -1,21 +1,43 @@
 ---
 permalink: /sitemap.xml
 eleventyExcludeFromCollections: true
-pages:
+staticPages:
   - ""
   - "about/"
   - "achievements/"
   - "ghcup/"
+  - "minimoot/"
   - "events/"
   - "photos/"
   - "materials/"
   - "contact/"
   - "privacy/"
   - "terms/"
+  - "accessibility/"
 ---
-<?xml version="1.0" encoding="utf-8"?>
+{#- The detail pages are generated from the collections rather than listed by
+   hand. A hand-maintained list goes stale the moment an exec adds anything
+   through the CMS — and it did: the previous version of this file listed ten
+   URLs on a domain the site had already moved off, and omitted every
+   achievement page, every exec profile, and two whole sections.
+
+   The origin comes from site.url for the same reason. It appears here, in
+   robots.txt, and in the canonical/Open Graph tags, and those four must never
+   disagree about where the site lives.
+
+   This comment closes on the same line as the XML declaration below, and that
+   is deliberate: the declaration has to be the very first byte of the file, and
+   closing the comment on its own line leaves a newline ahead of it that makes
+   strict parsers reject the whole sitemap. Nunjucks has no whitespace-trimming
+   form of the comment close tag, so same-line is the only way to do it. #}<?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-{%- for page in pages %}
-  <url><loc>https://guelphhumberprelawsociety.netlify.app/{{ page }}</loc></url>
+{%- for page in staticPages %}
+  <url><loc>{{ site.url }}/{{ page }}</loc></url>
+{%- endfor %}
+{%- for item in collections.achievements %}
+  <url><loc>{{ site.url }}/achievements/{{ item.fileSlug }}/</loc>{% if item.data.date %}<lastmod>{{ item.data.date | isoDate }}</lastmod>{% endif %}</url>
+{%- endfor %}
+{%- for member in collections.team %}
+  <url><loc>{{ site.url }}/team/{{ member.fileSlug }}/</loc></url>
 {%- endfor %}
 </urlset>

@@ -3,50 +3,58 @@ layout: base.njk
 pageTitle: Terms of Use
 activePage: terms
 permalink: /terms/
+pageDescription: "The terms that apply to using the Guelph-Humber Pre-Law Society website."
 ---
+{% import "macros.njk" as m %}
 
-<section class="page-header">
-  <div class="container">
-    <h1>Terms of Use</h1>
-    <p>The rules for using this website.</p>
-  </div>
-</section>
+{{ m.pageHeader(null, "Terms of Use", "The rules for using this website.") }}
 
 <section>
   <div class="container">
     <div class="content-block legal">
-      <p class="legal-updated">Last updated: June 2026</p>
+      <p class="legal-updated">Last updated: August 2026</p>
 
       <p>By using this website ("the Site"), operated by the Guelph-Humber Pre-Law Society ("the Society"), you agree to these terms. If you do not agree, please do not use the Site.</p>
 
       <h3>1. The Society is a student club</h3>
-      <p>The Society is a student-run organization at the University of Guelph-Humber. It is <strong>not</strong> the University itself, and content on this Site does not represent the official position of the University of Guelph-Humber.</p>
+      <p>The Society is a student-run organisation at the University of Guelph-Humber. It is <strong>not</strong> the University itself, and nothing on this Site represents the official position of the University of Guelph-Humber.</p>
 
       <h3>2. No legal advice</h3>
-      <p>This Site is about pre-law education, mooting, and Society activities. <strong>Nothing on this Site is legal advice</strong>, and using the Site does not create a lawyer–client relationship. For legal matters, consult a licensed lawyer or paralegal.</p>
+      <p>This Site is about pre-law education, mooting, and Society activities. <strong>Nothing on this Site is legal advice</strong>, and using the Site does not create a lawyer–client relationship. Our members are undergraduate students, not lawyers. For any legal matter, consult a licensed lawyer or paralegal.</p>
 
       <h3>3. Accuracy of information</h3>
-      <p>We try to keep event dates, competition details, and other information accurate and current, but we make no guarantees. Details may change; always confirm important details (e.g. competition deadlines) directly with us.</p>
+      <p>We try to keep event dates, competition details and results accurate and current, but we make no guarantees. Details change. Always confirm anything that matters — a competition deadline, an event time — directly with us before relying on it.</p>
 
       <h3>4. Intellectual property</h3>
-      <p>The Society's name, logo, written content, and photos are the property of the Society or used with permission. Please do not copy, redistribute, or use them for commercial purposes without our written permission. You may share links to our pages freely.</p>
+      <p>The written content and photographs on this Site are owned by the Society or published with the permission of the person who owns them. Please do not copy or redistribute them for commercial purposes without our written permission. You may share links to our pages freely, and you may quote us with attribution.</p>
+      <p>Our name and crest incorporate the name of the University of Guelph-Humber, and we use them as a recognised student club of the University rather than as the owner of the University's marks. Nothing here claims any right in those marks, and nothing here gives you permission to use them.</p>
+      <p>If you believe something on this Site infringes your copyright — including a photograph you took — see section 10 and we will take it down while we sort it out.</p>
 
       <h3>5. Acceptable use</h3>
-      <p>You agree not to use the Site to break the law, to scrape or harvest data in bulk, to attempt to gain unauthorized access to the admin area, or to interfere with the Site's operation.</p>
+      <p>You agree not to use the Site to break the law, to harvest personal information in bulk, to attempt to gain unauthorised access to the admin area, or to interfere with the Site's operation.</p>
 
-      <h3>6. External links</h3>
-      <p>The Site links to external sites (such as Instagram and LinkedIn). We are not responsible for the content or practices of those sites.</p>
+      <h3>6. External links and embedded content</h3>
+      <p>The Site links to external sites such as Instagram and LinkedIn, and embeds videos hosted by YouTube. We do not control those services and are not responsible for their content or their practices. Once you follow a link or press play on a video, that service's own terms and privacy policy apply to you.</p>
 
       <h3>7. Limitation of liability</h3>
-      <p>The Site is provided "as is." To the fullest extent permitted by law, the Society and its members are not liable for any loss or damage arising from your use of the Site or reliance on its content.</p>
+      <p>The Site is provided "as is." To the fullest extent permitted by law, the Society and its members are not liable for any loss or damage arising from your use of the Site or from relying on its content. Nothing in these terms limits any liability that cannot lawfully be limited, or affects your rights under consumer protection law.</p>
 
-      <h3>8. Governing law</h3>
-      <p>These terms are governed by the laws of the Province of Ontario and the applicable laws of Canada.</p>
+      <h3>8. Changes to these terms</h3>
+      <p>We may update these terms. The "last updated" date at the top always reflects the current version, and continuing to use the Site after a change means you accept the updated terms. We will not apply a change retroactively to something you did before it.</p>
 
-      <h3>9. Contact</h3>
+      <h3>9. If part of this is unenforceable</h3>
+      <p>If any part of these terms turns out to be unenforceable, the rest of them still stand. That one part is treated as removed rather than invalidating everything else.</p>
+
+      <h3>10. Complaints, copyright, and takedown requests</h3>
+      <p>If you want something removed — a photograph of you, your name, or material you own the copyright in — contact us through the <a href="/contact/">contact page</a>{% if site.email %} or email <a href="mailto:{{ site.email }}">{{ site.email }}</a>{% endif %}. Tell us which page and what the problem is. We will acknowledge you, and where the request concerns your own image or name we will act on it without asking you to justify it. See our <a href="/privacy/">Privacy Policy</a> for how personal information is handled.</p>
+
+      <h3>11. Governing law</h3>
+      <p>These terms are governed by the laws of the Province of Ontario and the applicable laws of Canada, and the courts of Ontario have jurisdiction over any dispute about them.</p>
+
+      <h3>12. Contact</h3>
       <p>Questions about these terms? Reach us through the <a href="/contact/">contact page</a> or on <a href="{{ site.instagram }}" target="_blank" rel="noopener">Instagram</a>.</p>
 
-      <p class="legal-disclaimer"><strong>Note:</strong> These terms are provided in good faith as a reasonable baseline for a student club website. They are not legal advice. Have them reviewed if the Society's activities grow (e.g. paid registrations, sponsorships with contracts).</p>
+      <p class="legal-disclaimer"><strong>Note:</strong> These terms are written in good faith by students as a reasonable baseline for a student club website. They are not legal advice and were not drafted by a lawyer. If the Society's activities grow — paid registrations, sponsorship contracts, or handling money on behalf of others — have them reviewed properly, and look into incorporating: an unincorporated association gives its individual members little protection no matter what a web page says.</p>
     </div>
   </div>
 </section>

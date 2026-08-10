@@ -3,14 +3,11 @@ layout: base.njk
 pageTitle: The GH Cup
 activePage: ghcup
 permalink: /ghcup/
+pageDescription: "The GH Cup is our flagship moot court competition, open to undergraduate students from universities across Ontario."
 ---
+{% import "macros.njk" as m %}
 
-<section class="page-header{% if pageHeaders.ghcup.photo %} page-header--photo{% endif %}"{% if pageHeaders.ghcup.photo %} style="background-image:url('{{ pageHeaders.ghcup.photo }}'); background-position:{{ pageHeaders.ghcup.photoPosition or 'center' }};"{% endif %}>
-  <div class="container">
-    <h1>The GH Cup</h1>
-    <p>Our flagship annual moot court competition.</p>
-  </div>
-</section>
+{{ m.pageHeader(pageHeaders.ghcup, "The GH Cup", "Our flagship annual moot court competition.") }}
 
 <section>
   <div class="container">
@@ -46,7 +43,10 @@ permalink: /ghcup/
       <div class="line"></div>
     </div>
     <div class="content-block">
-      <p>{{ ghcup.about | replace("\n\n", "</p><p>") | safe }}</p>
+      {#- The `paragraphs` filter escapes first and adds the <p> tags after,
+         so multi-paragraph text still works without marking editor input
+         as safe HTML. The old `replace(...) | safe` did the opposite. #}
+      {{ ghcup.about | paragraphs | safe }}
       <h3>How It Works</h3>
       <ul>
         {%- for step in ghcup.howItWorks %}
@@ -66,9 +66,13 @@ permalink: /ghcup/
       <div class="line"></div>
     </div>
     <div class="photo-gallery">
+      {#- data-* attributes rather than interpolating into the onclick string —
+         same reasoning as the note in events.njk. minimoot.njk already did
+         this correctly; this page was the one still building JavaScript out of
+         editor-supplied text. #}
       {%- for shot in ghcup.gallery %}
-      <div class="photo-card" onclick="openLightbox('{{ shot.image }}', '{{ shot.caption }}')">
-        <img src="{{ shot.image }}" alt="{{ shot.caption }}" loading="lazy" style="object-position: {{ shot.photoPosition or 'center' }};">
+      <div class="photo-card" data-img="{{ shot.image }}" data-caption="{{ shot.caption }}" onclick="openLightbox(this.dataset.img, this.dataset.caption)">
+        <img src="{{ shot.image }}" alt="{{ shot.caption }}" loading="lazy" data-sizes="(max-width: 640px) 100vw, (max-width: 1200px) 33vw, 373px" style="object-position: {{ shot.photoPosition | cssPosition }};">
         {%- if shot.caption %}
         <div class="photo-overlay">
           <h4>{{ shot.caption }}</h4>
@@ -90,10 +94,12 @@ permalink: /ghcup/
     </div>
     <div class="winners-timeline">
       {%- for winner in collections.ghcupWinners %}
+      {%- set wpos = winner.data.photoPosition | cssPosition %}
+      {%- set wzoom = winner.data.photoZoom | cssZoom %}
       <div class="winner-card {% if not winner.data.photo %}winner-card--no-photo{% endif %}">
         {% if winner.data.photo %}
         <div class="winner-photo">
-          <img src="{{ winner.data.photo }}" alt="{{ winner.data.year }} GH Cup" style="object-fit: {{ winner.data.photoSize or 'cover' }}; object-position: {{ winner.data.photoPosition or 'center' }};{% if winner.data.photoZoom and winner.data.photoZoom != 1 %} transform: scale({{ winner.data.photoZoom }}); transform-origin: {{ winner.data.photoPosition or 'center' }};{% endif %}">
+          <img src="{{ winner.data.photo }}" alt="{{ winner.data.year }} GH Cup" loading="lazy" data-sizes="(max-width: 700px) 100vw, 240px" style="object-fit: {{ winner.data.photoSize | cssFit }}; object-position: {{ wpos }};{% if wzoom %} transform: scale({{ wzoom }}); transform-origin: {{ wpos }};{% endif %}">
         </div>
         {% endif %}
         <div class="winner-info">
@@ -130,7 +136,7 @@ permalink: /ghcup/
       {%- for video in collections.ghcupVideos %}
       <div class="video-card">
         <div class="video-embed">
-          <iframe src="https://www.youtube.com/embed/{{ video.data.url | youtubeId }}" title="{{ video.data.title or video.data.year }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+          <iframe src="https://www.youtube-nocookie.com/embed/{{ video.data.url | youtubeId }}" title="{{ video.data.title or video.data.year }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
         </div>
         <div class="video-info">
           <div class="winner-year">{{ video.data.year }}</div>
@@ -156,7 +162,11 @@ permalink: /ghcup/
       <div class="sponsor-slot">Sponsor Logo</div>
       <div class="sponsor-slot">Sponsor Logo</div>
     </div>
-    <p style="text-align:center; margin-top:32px; color:var(--text-light);">Interested in sponsoring? <a href="/contact/" style="color:var(--peach); font-weight:600;">Get in touch</a></p>
+    {#- --peach-ink, not --peach: this link sits on the cream section
+       background, where peach measures about 1.9:1 and fails WCAG AA. The
+       rule is written down in styles.css above .cal-add; this inline style
+       was quietly breaking it. #}
+    <p style="text-align:center; margin-top:32px; color:var(--text-light);">Interested in sponsoring? <a href="/contact/" style="color:var(--peach-ink); font-weight:600;">Get in touch</a></p>
   </div>
 </section>
 

@@ -3,14 +3,11 @@ layout: base.njk
 pageTitle: Accessibility
 activePage: accessibility
 permalink: /accessibility/
+pageDescription: "Our accessibility commitment, where this site currently stands against WCAG 2.1 AA, and how to report a barrier."
 ---
+{% import "macros.njk" as m %}
 
-<section class="page-header">
-  <div class="container">
-    <h1>Accessibility</h1>
-    <p>Our commitment to making this website usable by everyone.</p>
-  </div>
-</section>
+{{ m.pageHeader(null, "Accessibility", "Our commitment to making this website usable by everyone.") }}
 
 <section>
   <div class="container">
@@ -28,19 +25,22 @@ permalink: /accessibility/
       <ul>
         <li>A "skip to main content" link so keyboard users can bypass the navigation on every page.</li>
         <li>A clearly visible focus indicator showing where you are when navigating by keyboard.</li>
+        <li>Expandable sections — the FAQ and the "Add to Calendar" menu — built from native HTML controls, so assistive technology announces whether each one is open or closed, and a collapsed section's content is genuinely hidden rather than only visually hidden.</li>
+        <li>A navigation menu button that reports its own open and closed state, and that closes on the Escape key with focus returned to where you left it.</li>
         <li>Text alternatives on images that convey information.</li>
-        <li>Colour combinations checked against the WCAG minimum contrast ratios for text.</li>
+        <li>Colour combinations measured against the WCAG minimum contrast ratios — 4.5:1 for normal text and 3:1 for interface components that convey state.</li>
         <li>Semantic page structure (headings, landmarks, lists) so assistive technology can navigate the content.</li>
         <li>Layouts that reflow without horizontal scrolling down to small phone screens, and that work when text is enlarged.</li>
-        <li>Reduced-motion support, so animated elements are suppressed for anyone whose device requests that.</li>
+        <li>Reduced-motion support: if your device asks for reduced motion, animation and transitions across the whole site are suppressed, including smooth scrolling and the hover effects on cards and photographs.</li>
       </ul>
 
       <h3>3. Known limitations</h3>
       <p>We would rather name these than let you discover them:</p>
       <ul>
         <li><strong>Photographs and uploaded documents.</strong> Our photo galleries and any PDFs or documents we post are added by student volunteers. Some images may have brief or missing descriptions, and some documents may not be fully tagged for screen readers. If you need any document in a different format, ask us and we will provide it.</li>
-        <li><strong>Third-party content.</strong> Some features — such as embedded videos, and forms hosted by an outside service — are provided by third parties whose accessibility we do not control.</li>
-        <li><strong>No formal audit.</strong> Our assessment is based on our own review, not an independent evaluation.</li>
+        <li><strong>The executive team carousel.</strong> The team section on our About page scrolls sideways. It is reachable by keyboard and can be moved with the arrow keys, but the thin progress bar beneath it can only be dragged with a mouse or finger. Nothing is only available through that bar — every exec's profile is reachable without it.</li>
+        <li><strong>Third-party content.</strong> Embedded videos are provided by YouTube, whose player accessibility we do not control.</li>
+        <li><strong>No formal audit.</strong> Our assessment is based on our own review and our own testing, not an independent evaluation.</li>
       </ul>
 
       <h3>4. Tell us about a barrier</h3>
@@ -58,7 +58,7 @@ permalink: /accessibility/
       <p>This site is maintained by students who graduate and hand it on. We review accessibility when we make significant changes to the site, and we treat reported barriers as issues to fix rather than requests to consider.</p>
 
       <h3>7. Legislative context</h3>
-      <p>Ontario's <em>Accessibility for Ontarians with Disabilities Act</em> (AODA) and its Integrated Accessibility Standards Regulation set web accessibility requirements for certain organisations, measured against WCAG. Obligations under the AODA depend on an organisation's type and size, and as a small student club our specific obligations may differ from those of the University. Regardless of what is strictly required of us, we aim to meet WCAG 2.1 Level AA because it is the right standard for a society that says it is open to everyone.</p>
+      <p>Ontario's <em>Accessibility for Ontarians with Disabilities Act</em> (AODA) and its Integrated Accessibility Standards Regulation set web accessibility requirements measured against WCAG. Those requirements apply to designated public sector organisations and to larger private and non-profit organisations; as a small student club we are very likely outside their scope, and we are not claiming otherwise. We aim to meet WCAG 2.1 Level AA regardless of what is strictly required of us, because it is the right standard for a society that says it is open to everyone.</p>
       <p>This statement describes our approach to accessibility. It is not legal advice and does not limit any rights you may have.</p>
 
       <h3>8. About this statement</h3>

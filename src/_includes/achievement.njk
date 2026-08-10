@@ -2,7 +2,7 @@
 layout: base.njk
 ---
 
-<section class="page-header page-header--photo"{% if photo %} style="background-image:url('{{ photo }}'); background-position:{{ photoPosition or 'center' }};"{% endif %}>
+<section class="page-header page-header--photo"{% if photo %} style="background-image:url('{{ photo }}'); background-position:{{ photoPosition | cssPosition }};"{% endif %}>
   <div class="container">
     <div class="detail-back"><a href="/achievements/">&#8592; All Achievements</a></div>
     <h1>{{ competition }}</h1>
@@ -104,12 +104,12 @@ layout: base.njk
         <div class="detail-gallery">
           {%- if photo %}
           <div class="detail-photo" data-img="{{ photo }}" data-caption="{{ competition }} {{ year }}" onclick="openLightbox(this.dataset.img, this.dataset.caption)">
-            <img src="{{ photo }}" alt="{{ competition }} {{ year }}" loading="lazy" style="object-position: {{ photoPosition or 'center' }};">
+            <img src="{{ photo }}" alt="{{ competition }} {{ year }}" loading="lazy" data-sizes="(max-width: 900px) 100vw, 340px" style="object-position: {{ photoPosition | cssPosition }};">
           </div>
           {%- endif %}
           {%- for extra in extraPhotos %}
           <div class="detail-photo" data-img="{{ extra.image }}" data-caption="{{ extra.caption or (competition + ' ' + year) }}" onclick="openLightbox(this.dataset.img, this.dataset.caption)">
-            <img src="{{ extra.image }}" alt="{{ extra.caption or competition }}" loading="lazy">
+            <img src="{{ extra.image }}" alt="{{ extra.caption or competition }}" loading="lazy" data-sizes="(max-width: 900px) 100vw, 340px">
           </div>
           {%- endfor %}
         </div>

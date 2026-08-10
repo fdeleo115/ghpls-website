@@ -1,11 +1,347 @@
 # Handoff — GHPLS Website
 
-_Written: June 2026 · Updated: August 8 2026 · For whoever (human or AI) picks this up next._
+_Written: June 2026 · Updated: August 10 2026 · For whoever (human or AI) picks this up next._
 
-> **Section order:** newest first. The "ninth pass" below is the most recent
-> work; sections after it are earlier the same day or before. Their internal
-> cross-references ("see section 0") still point at each other, not at this
-> section.
+> **Section order:** newest first. The "eleventh pass" below is the most
+> recent work; sections after it are earlier the same day or before. Their
+> internal cross-references ("see section 0") still point at each other, not
+> at this section.
+
+## Eleventh pass, Aug 10 2026 — full code + legal audit, then a follow-up pass
+
+Two sessions back to back: a from-scratch audit of the whole site (code and
+legal), then everything in it fixed, then three follow-up requests. Every fix
+below was verified — built, and where it touches something the browser can
+observe, checked live in a browser or against a running `wrangler dev`, not
+just read back from the source. Where that mattered enough to be worth saying
+twice, it's called out.
+
+### 0. `run_worker_first` — the site had been serving NO security headers since the Cloudflare move
+
+**This is the one thing in this pass worth reading even if nothing else is.**
+`worker.js` sets `Content-Security-Policy`, `X-Frame-Options`,
+`Strict-Transport-Security` and the rest — and they were correct, and they were
+never being applied to a single real page. Workers Static Assets serves a
+matching file **directly** and only invokes the Worker when nothing matches.
+Every real URL on the site matches a file, so the Worker never ran for `/`,
+`/about/`, or anywhere else — only for URLs that didn't exist. The migration
+carried the headers over from `netlify.toml` faithfully; it just carried them
+into code that never executed. Nothing about the live site looked wrong from
+the outside.
+
+Reading `worker.js` could not have caught this at any level of care — the
+defect is in the platform's request-dispatch behaviour, not in the file. It was
+only caught by starting `wrangler dev` and running `curl -sD- -o /dev/null
+<url> | grep -i content-security` against an actual response. **That command
+is worth running after any change near `wrangler.toml` or `worker.js`** — if it
+prints nothing, the headers are off.
+
+Fix: `run_worker_first = true` in `wrangler.toml`. Do not remove that line.
+There's a `> **These headers were not actually live...**` blockquote in
+`SECURITY.md` explaining this for a non-technical reader; keep it in sync if
+this ever changes again.
+
+### 1. GitHub OAuth token leak (critical) — `functions/api/callback.js`, `functions/api/auth.js`
+
+The CMS login callback posted the access token to `window.opener` with a
+wildcard target origin, and separately echoed it back to the origin of any
+inbound `message` event. Neither hole needs the attacker to forge the OAuth
+flow — they just start the real one: open `/api/auth` in a popup, let an
+already-authorised exec sail through GitHub's silent re-auth, and the callback
+hands the token to whichever window opened it. The CSRF `state` cookie doesn't
+help, because the state genuinely matches.
+
+Fixed by posting only to `url.origin` (this site, fixed, never derived from an
+inbound message), scoping the OAuth request down from `repo,user` to
+**`public_repo`** (a leaked token now reaches only this one public repo, not an
+exec's private/coursework repos), adding `no-store` + a strict single-page CSP
+to the token response, and switching the CSRF cookie to `__Host-` prefix.
+Long comments in both files explain the attack — read them before touching
+either postMessage call.
+
+### 2. CSP: video host, self-hosted fonts (see §12) — `worker.js`
+
+Public CSP had no `frame-src`, so it fell back to `default-src 'self'` and
+would have silently blocked the first GH Cup / Mini Moot final video any exec
+adds (both collections exist in `admin/config.yml`; neither had an entry yet,
+so nobody had hit this). Added `frame-src 'self' https://www.youtube-nocookie.com`
+and switched the embed in `ghcup.njk`/`minimoot.njk` to `youtube-nocookie.com`
+— same player, no tracking cookie until play is pressed.
+
+Verified live against a running Worker: an injected iframe to
+`youtube-nocookie.com` loads, an injected iframe/image to `evil.example.com`
+fires a `securitypolicyviolation` event and is blocked. The CSP is genuinely
+enforcing, not just present.
+
+### 3. SEO: sitemap, robots.txt, meta tags — `src/sitemap.njk` (rewritten, now a template), `src/robots.njk` (new, replaces static `src/robots.txt`), `src/_includes/base.njk`, `src/_includes/macros.njk` (new)
+
+- Both files pointed at `guelphhumberprelawsociety.netlify.app` — a domain the
+  site left months ago. Both now read `site.url` (new field in
+  `src/_data/site.json`, also editable from the CMS under Site Settings —
+  **if the site ever moves domains again, change it there and the sitemap,
+  robots.txt, canonical tags and OG tags all follow**).
+- `robots.txt` was disallowing `/assets/uploads/`, which also covers
+  `/assets/uploads/resized/` — every responsive image variant on the site was
+  blocked from image search. Fixed.
+- Sitemap is now generated from the collections (29 URLs: every achievement
+  page and every exec profile included) instead of a hand-maintained list of
+  10 that had already drifted (missing `/minimoot/`, `/accessibility/`, every
+  detail page).
+- Every page now emits `<meta name="description">`, `<link rel="canonical">`,
+  and Open Graph / Twitter Card tags, computed in `base.njk` from a
+  `pageDescription` front-matter field (added to every page) with fallbacks.
+  Previously: none of this existed anywhere, so a link shared to Instagram —
+  the society's own main channel — rendered as a bare URL.
+- The eight page-header `<section>` blocks (200 characters each, copy-pasted
+  into eight templates) are now one macro, `pageHeader()` in
+  `src/_includes/macros.njk`. They all shared the same unsanitised
+  `photoPosition` interpolation (see §7); fixing it once here means it can't
+  drift again the way it had.
+
+### 4. "Upcoming Events" now actually means upcoming — `.eleventy.js`
+
+The `events` collection had no date filter at all — an event stayed listed as
+upcoming forever. Added a cutoff at the start of today (UTC, matching the
+calendar-day handling documented further down in this file — see the tenth
+pass). Verified with throwaway fixture entries: a 2025-dated event is excluded,
+an event dated *today* is kept (still upcoming for the whole of that day) and
+still gets its `.ics` file.
+
+### 5. Lightbox script-injection in two templates — `src/pages/events.njk`, `src/pages/ghcup.njk`
+
+Two of the site's lightboxes (past-event extra photos, GH Cup gallery) still
+built `onclick="openLightbox('{{ x }}', '{{ y }}')"` by string interpolation.
+Nunjucks HTML-escapes `'` to `&#39;`, which the HTML parser decodes straight
+back to `'` before the JS is parsed — so a caption containing an apostrophe
+closed the string literal early and broke the button, and a crafted one would
+have executed. Converted both to the `data-img`/`data-caption` + `dataset`
+pattern the other lightboxes already used correctly.
+
+**Regression-tested**, not just read: added a temporary past-event entry with
+caption `Ireland's trip: "quoted" & <script>alert(1)</script>`, clicked it in a
+real browser, confirmed no throw, no script execution, and the caption renders
+as inert text (`cap.querySelectorAll('script').length === 0`). Removed the
+fixture afterward.
+
+### 6. Accessibility — `src/styles.css`, `src/pages/about.njk`, `src/_includes/base.njk`
+
+- **Five WCAG AA contrast failures**, all the same bug repeated: `--peach`
+  (1.9:1 on white/cream) used where `--peach-ink` (4.84:1) was needed. The rule
+  was already written down in a comment above `.cal-add` in `styles.css` — the
+  violations just hadn't been checked against it. Fixed:
+  `.schedule-info .time`, `.past-event-date`, `.contact-links a:hover`, the
+  FAQ's `+`/`×` indicator, and an inline `style="color:var(--peach)"` on the GH
+  Cup sponsor link.
+- **FAQ rebuilt on native `<details>`/`<summary>`** instead of a `<button>`
+  toggling a class. The old version never set `aria-expanded`, so a screen
+  reader announced "button" and nothing about state — and `.faq-answer` was
+  hidden with `max-height:0; overflow:hidden`, which hides content visually
+  while leaving it fully in the accessibility tree, so a screen-reader user
+  heard every answer read out at once. `<details>` gets both for free.
+- **Nav hamburger now reports its own state.** `aria-expanded`/`aria-controls`
+  added, kept in sync with the open class through one function
+  (`setOpen(bool)`) so they can't drift apart, Escape closes the menu and
+  returns focus to the button.
+- **Reduced motion is now genuinely blanket**, not three specific rules. It
+  used to miss `scroll-behavior: smooth` on `html` and ~30 hover
+  transforms/transitions across the site — the accessibility statement's claim
+  that "animated elements are suppressed" was false. Fixed with a
+  `*, *::before, *::after { transition-duration: 0.01ms !important; ... }`
+  reset inside the existing media query (near-zero rather than `none`, so
+  `transitionend` still fires for anything listening).
+- All of the above verified live: FAQ toggles via native `open` attribute and
+  `answerHidden` tracks it correctly; nav `aria-expanded` flips `false → true →
+  false` across two clicks with the class in sync; the FAQ indicator measures
+  4.84:1 computed in-browser.
+
+### 7. CSS injection via CMS fields — new filters in `.eleventy.js`: `cssPosition`, `cssFit`, `cssZoom`; applied across every template that interpolates a photo field into `style="..."`
+
+`photoPosition`/`photoSize`/`photoZoom` came straight from the CMS into
+`style="object-position: {{ photoPosition }}"` with only HTML-escaping, which
+does nothing against a CSS-level payload (no quotes or brackets needed — a
+`photoPosition` of `center; background:url(https://evil/track.gif)` was
+HTML-safe and would have added a third-party request). Editor-only, so this
+was defence-in-depth rather than a live hole, but the CMS's entire point is
+that non-developers type into it. `cssPosition`/`cssFit` validate against a
+known pattern/closed set and fall back to a safe default; `cssZoom` clamps to a
+sane numeric range. Applied everywhere a photo field reaches a `style`
+attribute — grep for `| cssPosition` to find every site.
+
+### 8. Content integrity: 9 renamed files + 301 redirects, one CMS slug fix — `worker.js` (REDIRECTS map), `admin/config.yml`
+
+A file's name is its URL, and several had drifted from what they actually
+contain:
+
+- `src/team/mooting-director.md` → `kate-hilton.md` (it held the **President**,
+  Kate Hilton — the URL said "mooting-director"). Similarly `president.md` →
+  `francesco-deleo.md`, `secretary.md` → `tala-taha.md`, `vp.md` →
+  `muhammad-ali.md`. All four predate the CMS's `slug: "{{name}}"` config,
+  which only applies going forward.
+- Four achievement files whose slug year disagreed with the entry's `year`
+  field (corrected after the slug was generated at creation) —
+  `highland-cup-2026.md` actually said `year: 2024` and rendered "Highland Cup
+  2024" at a URL claiming 2026. Renamed to match. **Added a build-time check**
+  (`warnOnSlugYearMismatch` in `.eleventy.js`, next to the existing near-miss-
+  name check) so a future mismatch surfaces as a build warning instead of
+  silently shipping.
+- The GH Cup winner entry whose filename was the *entire entry object*
+  slugified (200 characters, starting `map-photosize-cover-...`) — caused by
+  `slug: "{{slug}}"` on a collection with no `title` field. Fixed the config to
+  `slug: "ghcup-{{year}}"` (matching what `minimoot-winners` already used) and
+  renamed the existing file to `ghcup-2025.md`.
+- Every renamed URL gets a 301 in the `REDIRECTS` map at the top of
+  `worker.js`, matched with or without a trailing slash, so any link already
+  shared — an Instagram bio, a group chat — still resolves. These can be
+  deleted once traffic to the old paths stops, but cost nothing sitting there.
+
+### 9. Mobile performance
+
+The core mistake was one wrong default: every `<img>` on the site told the
+browser it might need the full viewport width, so a 179px-diameter headshot
+circle downloaded the 1280px copy. Fixed with per-context `data-sizes` on every
+image (about.njk, achievements.njk, events.njk, ghcup.njk, minimoot.njk,
+photos.njk, the two detail includes), lazy-loading everywhere except the first
+achievement card, and `<picture>` + WebP with a JPEG fallback.
+
+**`<picture>` was previously avoided on purpose** — an old comment explained
+that wrapping every image breaks `height: 100%`-style rules because the
+percentage resolves against the new `<picture>` box instead of the original
+styled parent. That's still true in general, and is answered by one line:
+`picture { display: contents }` in `styles.css`. A `display: contents` element
+generates no box, so the `<img>`'s containing block is the original parent
+again. **Do not remove that CSS rule without reverting the `<picture>` wrapping
+in `.eleventy.js` at the same time** — the comment above it in `.eleventy.js`
+says the same thing from the other side.
+
+**A regression was caught and fixed within this same pass, worth flagging so
+it isn't reintroduced:** an early version also emitted `width`/`height`
+attributes on every `<img>` for layout-shift prevention. Verified live in a
+browser and found the 179px circular exec headshots rendering **813px tall** —
+`width`/`height` attributes become presentational hints, and a presentational
+hint loses to an author CSS rule for the *same* property but not to
+`aspect-ratio`, which only derives a height when height is `auto`. Since every
+image container on this site already reserves its own box via a fixed height
+or `aspect-ratio`, there was nothing for the attributes to gain anyway.
+Removed them; the comment in `.eleventy.js` explains why they must not come
+back.
+
+Page-header banners (background-images, can't use `srcset`) now swap between
+three breakpoint-specific copies via CSS custom properties (`--bg-sm/md/lg`)
+emitted by the same transform, rather than always serving the 1920px original.
+
+**Cold-build time regression, caught before it shipped:** the image pipeline
+originally wrote variants straight into `_site/`, staleness-checked against the
+source file's mtime. That's invisible on a machine where `_site/` persists
+between builds and catastrophic in CI, where the checkout is always fresh —
+every deploy was regenerating ~200 image files from scratch, measured at **8.6
+minutes**. Moved generation to a `.image-cache/` directory outside `_site`
+(gitignored), published from there into `_site/` on every build, and added a
+GitHub Actions cache step (`.github/workflows/deploy.yml`, keyed on a hash of
+`assets/uploads/**`) so CI reuses it too. Local rebuild dropped to **3.5
+seconds**. Also added `workflow_dispatch` (manual redeploy without an empty
+commit) and a `concurrency` group (a newer deploy cancels an older one still
+running, so two CMS publishes in a row can't race to be last).
+
+Also stopped shipping the ~25MB of untouched camera originals in the deploy —
+`copyUnprocessed()` in `.eleventy.js` now skips any upload that has generated
+variants and copies through only what doesn't (PDFs, anything too small to
+resize). Deploy size: 36MB → 21MB even after adding WebP.
+
+Measured, not estimated: `/about/`'s above-the-fold image weight went from
+384KB to 40KB; full-page image weight from 716KB to 144KB.
+
+### 10. Legal pages rewritten to match reality — `src/pages/privacy.njk`, `terms.njk`, `accessibility.njk`
+
+Not legal advice, but each page previously made claims the code contradicted
+or described data flows that didn't exist. Privacy: reframed PIPEDA as
+voluntary-adherence rather than governing (a non-profit club almost certainly
+isn't in PIPEDA's "commercial activity" scope), added a §4 naming every actual
+third party handling data (Cloudflare, GitHub, YouTube — see §12 re: fonts),
+removed the Google Drive/Sheets claim that only applied if a Google Form was
+configured (neither is), added retention periods, a breach-notification
+commitment, a section on names/results being published as a matter of
+competition record with an opt-out, and replaced the COPPA-derived "under 13"
+line with a general no-children commitment plus an explicit note on photo
+consent for minors. Terms: corrected the logo/IP overclaim (the crest
+incorporates the University's name; the Society doesn't own that), added
+changes/severability/takedown-request clauses. Accessibility: claims now
+describe what's actually true post-fix (contrast measured, native disclosure
+controls, blanket reduced-motion) instead of overclaiming, and named the exec
+carousel's drag-only progress bar as a known limitation. All three had stale
+"last updated" dates relative to when they were actually last edited; fixed.
+
+### 11. Dependencies — `package.json`
+
+`npm audit`: 11 advisories (3 moderate, 8 high, all inside `wrangler`/
+`miniflare`) → **0**. Bumped `wrangler` 3→4, `sharp` 0.33→0.35, `@11ty/eleventy`
+2→3 (verified: all 30 pages still build and render correctly under 3.x — no
+template or filter syntax changed on this site). None of this reaches
+visitors; `npm audit --omit=dev` was already 0 before and after.
+
+### 12. Follow-up, same day: unify a role title, self-host fonts, confirm the exec-carousel swipe hint survived
+
+Three small requests after the pass above landed:
+
+- **Ava Gonsalves's title corrected** from "Vice President of **Mooting**
+  Training" to "Vice President of **Moot** Training" — confirmed against
+  Francesco Deleo's existing title, they're the same role.
+- **Fonts are now self-hosted** instead of loaded from
+  `fonts.googleapis.com`/`fonts.gstatic.com` — this was the site's last
+  third-party request on an ordinary page load (every visitor's IP reached
+  Google just to draw text), and it was also slower: a second render-blocking
+  stylesheet fetch, from a different origin, before the browser could even
+  start on the font bytes.
+
+  Eight `.woff2` files now live in `assets/fonts/` (both families × normal/
+  italic × `latin`/`latin-ext` subset, matching what Google Fonts itself
+  splits a Latin-script site into) and are referenced by `@font-face` rules at
+  the top of `src/styles.css` — **read the comment there before touching
+  anything font-related**, it has the exact command to regenerate the set if a
+  weight or style is ever added. `base.njk` preloads only the two "latin
+  normal" files (Inter body text, Playfair headings — used on every page);
+  italic and `latin-ext` load on demand, verified live: a page with no `<em>`
+  fetches 2 files, `/privacy/` (which uses `<em>`) fetches a third,
+  `italic-latin`, and nothing else. `document.fonts` confirms all 8 faces are
+  registered but only the ones actually used per page report `status:
+  "loaded"`.
+
+  Passthrough copy needed a second line —
+  `eleventyConfig.addPassthroughCopy("assets/fonts")` — because
+  `addPassthroughCopy("assets/*.*")` (added earlier in this same pass, to stop
+  shipping raw camera originals) only matches files directly inside `assets/`
+  and was silently skipping the new subdirectory. Caught by checking `_site/`
+  after a build, not by assuming the glob covered it.
+
+  `worker.js`'s two CSPs no longer list `fonts.googleapis.com`/
+  `fonts.gstatic.com` at all — `font-src 'self'` already covers everything now.
+  Verified against a running Worker, not just read: both response headers
+  print no google references, and the font files themselves come back with
+  the right `Content-Type: font/woff2`. Font files get a 30-day cache
+  (**not** the `immutable` 1-year treatment the resized images get — a font
+  file's name doesn't change if it's later regenerated with a different
+  weight range, unlike an image's, so `immutable` risked a silently stale font
+  for up to a year with nothing to invalidate it).
+
+  The admin CMS's live-preview pane (`admin/cms-extras.js`) used to load
+  Google Fonts a second time, separately from the site's own `styles.css` —
+  redundant now that `styles.css` self-hosts the same families and the preview
+  already loads that stylesheet. Removed the second `registerPreviewStyle`
+  call; left a comment for whoever touches this next, since a future
+  reintroduction of a Google Fonts URL there would need the admin CSP's
+  `font-src`/`style-src` widened again to match.
+
+  Privacy policy's §4 (who else is involved) updated to drop the Google Fonts
+  line — it's no longer true — rather than leave a disclosure for a request
+  the site no longer makes.
+
+- **The exec-carousel swipe hint was never touched.** Checked, not assumed:
+  `src/pages/about.njk` still has `<span>Drag, scroll, or swipe to meet the
+  rest of the team</span>`, the animated arrow, the one-time auto-nudge
+  `setTimeout`, and the `prefers-reduced-motion` opt-out on it, byte-for-byte
+  as before this whole pass started. It was flagged in §6's accessibility
+  statement rewrite as a *known limitation* (the thin progress bar under the
+  carousel is drag-only, mouse/touch, not keyboard) — that's a documentation
+  addition, not a functional change to the hint itself.
 
 ## Tenth pass, Aug 9 2026 — Mini Moot banner, Contact page, admin on phones, Add to Calendar
 

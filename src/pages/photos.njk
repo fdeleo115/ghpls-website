@@ -3,14 +3,11 @@ layout: base.njk
 pageTitle: Photo Gallery
 activePage: photos
 permalink: /photos/
+pageDescription: "Photographs from Guelph-Humber Pre-Law Society events, moot competitions, and trips."
 ---
+{% import "macros.njk" as m %}
 
-<section class="page-header{% if pageHeaders.photos.photo %} page-header--photo{% endif %}"{% if pageHeaders.photos.photo %} style="background-image:url('{{ pageHeaders.photos.photo }}'); background-position:{{ pageHeaders.photos.photoPosition or 'center' }};"{% endif %}>
-  <div class="container">
-    <h1>Guelph-Humber Pre-Law Society Gallery</h1>
-    <p>Highlights from our events, competitions, and community.</p>
-  </div>
-</section>
+{{ m.pageHeader(pageHeaders.photos, "Guelph-Humber Pre-Law Society Gallery", "Highlights from our events, competitions, and community.") }}
 
 <section>
   <div class="container">
@@ -21,7 +18,9 @@ permalink: /photos/
            data-title="{{ photo.data.title }}"
            data-desc="{{ photo.data.description }}"
            onclick="openLightbox(this.dataset.img, this.dataset.title, this.dataset.desc)">
-        <img src="{{ photo.data.image }}" alt="{{ photo.data.title }}" loading="lazy" style="object-position: {{ photo.data.photoPosition or 'center' }};">
+        {#- Three-column grid in a 1152px column, so ~373px per cell; full
+           width once the grid collapses on a phone. #}
+        <img src="{{ photo.data.image }}" alt="{{ photo.data.title }}" loading="lazy" data-sizes="(max-width: 640px) 100vw, (max-width: 1200px) 33vw, 373px" style="object-position: {{ photo.data.photoPosition | cssPosition }};">
         <div class="photo-overlay">
           <h4>{{ photo.data.title }}</h4>
           {% if photo.data.description %}<p>{{ photo.data.description }}</p>{% endif %}

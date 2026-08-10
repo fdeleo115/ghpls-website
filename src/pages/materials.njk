@@ -3,14 +3,11 @@ layout: base.njk
 pageTitle: Materials
 activePage: materials
 permalink: /materials/
+pageDescription: "Free guides and resources to help you prepare for moot competitions and develop your legal advocacy skills."
 ---
+{% import "macros.njk" as m %}
 
-<section class="page-header{% if pageHeaders.materials.photo %} page-header--photo{% endif %}"{% if pageHeaders.materials.photo %} style="background-image:url('{{ pageHeaders.materials.photo }}'); background-position:{{ pageHeaders.materials.photoPosition or 'center' }};"{% endif %}>
-  <div class="container">
-    <h1>Public Materials</h1>
-    <p>Resources to help you prepare for competitions and develop your legal advocacy skills.</p>
-  </div>
-</section>
+{{ m.pageHeader(pageHeaders.materials, "Public Materials", "Resources to help you prepare for competitions and develop your legal advocacy skills.") }}
 
 <section>
   <div class="container">

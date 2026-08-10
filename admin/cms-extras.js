@@ -547,16 +547,24 @@
   } catch (e) {}
 
   // === "how it looks on the site" — the editor's right-hand preview pane ===
-  // Loads the site's actual stylesheet + fonts into the preview iframe and
-  // renders the site's real markup/classes, so card widths, photo heights,
-  // aspect ratios and the navy header overlay all come from the one source of
-  // truth (src/styles.css) instead of being re-guessed here.
-
+  // Loads the site's actual stylesheet into the preview iframe and renders the
+  // site's real markup/classes, so card widths, photo heights, aspect ratios
+  // and the navy header overlay all come from the one source of truth
+  // (src/styles.css) instead of being re-guessed here.
+  //
+  // A second registerPreviewStyle call used to load Google Fonts separately.
+  // That was needed when styles.css only referenced font-family names and
+  // expected something else to have already loaded the actual font files.
+  // Now that styles.css carries its own @font-face rules pointing at
+  // /assets/fonts/ (same-origin, since /admin/ is served from this site), the
+  // single call above already brings the fonts with it — a second fetch of
+  // the same families from a different source would be redundant at best and
+  // is exactly the kind of stale duplicate that's easy to miss when a site's
+  // font strategy changes later. If you ever reintroduce a Google Fonts URL
+  // here, also add it back to ADMIN_CSP in worker.js — the CSP no longer
+  // allows fonts.googleapis.com/fonts.gstatic.com.
   try {
     CMS.registerPreviewStyle("/styles.css");
-    CMS.registerPreviewStyle(
-      "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
-    );
   } catch (e) {}
 
   function paneWrap(children) {

@@ -3,14 +3,11 @@ layout: base.njk
 pageTitle: Events
 activePage: events
 permalink: /events/
+pageDescription: "Upcoming workshops, panels and socials from the Guelph-Humber Pre-Law Society, with RSVP and calendar links."
 ---
+{% import "macros.njk" as m %}
 
-<section class="page-header{% if pageHeaders.events.photo %} page-header--photo{% endif %}"{% if pageHeaders.events.photo %} style="background-image:url('{{ pageHeaders.events.photo }}'); background-position:{{ pageHeaders.events.photoPosition or 'center' }};"{% endif %}>
-  <div class="container">
-    <h1>Events</h1>
-    <p>Stay up to date with our upcoming events and workshops.</p>
-  </div>
-</section>
+{{ m.pageHeader(pageHeaders.events, "Events", "Stay up to date with our upcoming events and workshops.") }}
 
 <section>
   <div class="container">
@@ -23,7 +20,7 @@ permalink: /events/
       <div class="schedule-item {% if event.data.photo %}schedule-item--has-photo{% endif %}">
         {% if event.data.photo %}
         <div class="schedule-photo">
-          <img src="{{ event.data.photo }}" alt="{{ event.data.title }}" style="object-fit: {{ event.data.photoSize or 'cover' }}; object-position: {{ event.data.photoPosition or 'center' }};">
+          <img src="{{ event.data.photo }}" alt="{{ event.data.title }}" data-sizes="(max-width: 848px) 100vw, 800px" style="object-fit: {{ event.data.photoSize | cssFit }}; object-position: {{ event.data.photoPosition | cssPosition }};">
         </div>
         {% endif %}
         <div class="schedule-date">
@@ -97,7 +94,7 @@ permalink: /events/
       {%- for event in collections.pastEvents %}
       <div class="past-event-card">
         {% if event.data.photo %}
-        <img src="{{ event.data.photo }}" alt="{{ event.data.title }}" class="past-event-img" style="object-fit: {{ event.data.photoSize or 'cover' }}; object-position: {{ event.data.photoPosition or 'center' }};">
+        <img src="{{ event.data.photo }}" alt="{{ event.data.title }}" class="past-event-img" data-sizes="(max-width: 700px) 100vw, (max-width: 1200px) 50vw, 564px" style="object-fit: {{ event.data.photoSize | cssFit }}; object-position: {{ event.data.photoPosition | cssPosition }};">
         {% endif %}
         <div class="past-event-info">
           <div class="past-event-date">{{ event.data.date | dateFormat }}</div>
@@ -106,9 +103,18 @@ permalink: /events/
         </div>
         {% if event.data.extraPhotos %}
         <div class="past-event-extras">
+          {#- data-* attributes, NOT interpolation into the onclick string.
+             Building JavaScript by string concatenation in an attribute is
+             unsafe here even though Nunjucks escapes the value: it escapes for
+             HTML, so an apostrophe becomes &#39;, and the HTML parser turns
+             that back into a bare ' before the JavaScript is parsed — closing
+             the string literal early. A caption reading "Ireland's trip" broke
+             the button outright, and a crafted one would have run script.
+             Every other lightbox on the site already reads from dataset; these
+             two were simply missed. #}
           {%- for extra in event.data.extraPhotos %}
-          <div class="extra-photo" onclick="openLightbox('{{ extra.image }}', '{{ extra.caption or event.data.title }}')">
-            <img src="{{ extra.image }}" alt="{{ extra.caption or event.data.title }}" loading="lazy">
+          <div class="extra-photo" data-img="{{ extra.image }}" data-caption="{{ extra.caption or event.data.title }}" onclick="openLightbox(this.dataset.img, this.dataset.caption)">
+            <img src="{{ extra.image }}" alt="{{ extra.caption or event.data.title }}" loading="lazy" data-sizes="80px">
           </div>
           {%- endfor %}
         </div>

@@ -15,3 +15,11 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
+
+# Generated image variants — a build cache, not source. Safe to delete;
+# rebuilding it just takes a few minutes.
+.image-cache/
+
+# Local wrangler dev-server state (miniflare's SQLite cache/observability
+# files) — created by `wrangler dev`, never something to commit.
+.wrangler/

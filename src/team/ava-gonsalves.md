@@ -1,6 +1,6 @@
 ---
 name: Ava Gonsalves
-role: Vice President of Mooting Training
+role: Vice President of Moot Training
 gradYear: 2027
 competitions:
   - competition: HFK Cup

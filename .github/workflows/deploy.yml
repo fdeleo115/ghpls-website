@@ -4,10 +4,24 @@ on:
   push:
     branches:
       - main
+  # Lets a maintainer redeploy from the Actions tab without pushing a commit —
+  # useful when a deploy fails for a reason that has nothing to do with the
+  # content, which otherwise means inventing an empty commit.
+  workflow_dispatch:
+
+# A CMS publish is one commit, and execs often publish several edits in a row.
+# Without this, each one starts its own deploy and they race to be last. Here
+# a newer run cancels an older in-flight one, so the deploy that lands is
+# always the newest content.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,6 +30,32 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      # ---------------------------------------------------------------------
+      # Restore the generated image variants.
+      #
+      # The build resizes every uploaded photo into two formats at up to four
+      # widths. That is several hundred image encodes and takes the best part
+      # of ten minutes — and without this cache it happened on EVERY deploy,
+      # including a deploy that only changed a sentence of text, because a CI
+      # checkout is always fresh and the freshness check had nothing to compare
+      # against.
+      #
+      # The key includes a hash of the uploads folder, so adding or replacing a
+      # photo produces a new key and the new photo gets processed. The
+      # restore-keys line then falls back to the most recent previous cache, so
+      # that build reuses every variant it already had and only encodes what
+      # actually changed.
+      # ---------------------------------------------------------------------
+      - name: Restore image cache
+        uses: actions/cache@v4
+        with:
+          path: .image-cache
+          key: images-${{ hashFiles('assets/uploads/**') }}
+          restore-keys: |
+            images-
 
       - name: Install dependencies
         run: npm ci

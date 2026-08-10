@@ -7,30 +7,76 @@ const sharp = require("sharp");
 //
 // Execs upload photos straight off a phone or a DSLR through the CMS — the
 // originals run 3–5000px wide and 2–3MB each, and the site was serving those
-// untouched into 339px-wide boxes on a phone. This generates a set of smaller
-// JPEGs at build time and rewrites the HTML to offer them via srcset.
+// untouched into 339px-wide boxes on a phone. This generates smaller JPEG and
+// WebP copies at build time and rewrites the HTML to offer them.
 //
-// Deliberately srcset-on-<img> rather than <picture> + WebP: wrapping every
-// image in a <picture> element inserts a box between the img and its styled
-// parent, which breaks rules like `.member-headshot img { height: 100% }`.
-// Keeping the original <img> in place means zero layout risk, and resizing
-// alone already removes ~95% of the bytes. WebP would be a further ~25% on
-// top and is the natural next step if it's ever wanted.
+// WHY <picture> IS SAFE NOW (it was avoided here before, for a real reason)
+// ------------------------------------------------------------------------
+// The previous version used srcset-on-<img> only, and explicitly rejected
+// <picture> because wrapping every image inserts a box between the <img> and
+// its styled parent — which breaks rules like `.member-headshot img { height:
+// 100% }`, since the percentage then resolves against the <picture> rather
+// than the styled container.
+//
+// That objection was correct, and it is answered by one line of CSS:
+// `picture { display: contents }` in styles.css. A `display: contents` element
+// generates no box at all, so the <img>'s containing block is once again its
+// original parent and every existing height/aspect rule keeps working exactly
+// as before. Do not remove that CSS rule without also reverting this to a
+// plain <img>.
+//
+// Getting <picture> back buys WebP with a real JPEG fallback: browsers that
+// don't understand WebP simply ignore the <source> and use the <img>. That is
+// worth roughly another 25–30% off every photo on top of the resizing, and it
+// is the single biggest remaining win on a phone.
 //
 // Nothing changes for the execs: they keep uploading full-size photos and the
-// originals stay untouched in assets/uploads/ (the CMS media library still
-// works normally). Only the built output in _site/ gains the resized copies.
+// originals stay untouched in assets/uploads/. Only the built output gains the
+// generated copies.
 // ---------------------------------------------------------------------------
 const IMG_WIDTHS = [480, 800, 1280, 1920];
 const UPLOADS_SRC = path.join(__dirname, "assets", "uploads");
+
+// ---------------------------------------------------------------------------
+// Generated images are written to a cache directory OUTSIDE _site, then copied
+// in. This matters more than it looks.
+//
+// Variants used to be written straight into _site, and the "is it stale?" check
+// compared them against the source file's timestamp. That works beautifully on
+// a machine where _site survives between builds — and not at all in CI, where
+// the checkout is fresh every time, _site does not exist, and every single
+// variant is therefore regenerated from scratch. With two formats at four
+// widths across three dozen photos that is several hundred image encodes, and
+// it turns a deploy into an eight-minute job for content that has not changed.
+//
+// Keeping the cache in its own directory means CI can restore it between runs
+// (see .github/workflows/deploy.yml), and a local `rm -rf _site` no longer
+// costs ten minutes either.
+// ---------------------------------------------------------------------------
+const IMG_CACHE = path.join(__dirname, ".image-cache");
 const RESIZED_OUT = path.join(__dirname, "_site", "assets", "uploads", "resized");
-// Maps "/assets/uploads/photo.jpeg" -> [{ w, url }, …] for the HTML transform.
+
+// Maps "/assets/uploads/photo.jpeg" -> {
+//   jpeg: [{ w, url }, …], webp: [{ w, url }, …], width, height
+// }
 const imageVariants = new Map();
+
+// The default `sizes` for an image whose template hasn't said anything more
+// specific. It assumes the worst case — full viewport width on a phone — which
+// is right for banners and card photos and badly wrong for small images.
+//
+// This default was, on its own, the main cause of the site feeling slow on a
+// phone: it told the browser that an exec headshot rendered in a 190px circle
+// needed a full-viewport-width file, so on a 3x phone screen the browser
+// dutifully fetched the 1280px copy of all eight of them. Templates now pass a
+// real measurement via `data-sizes` (see the `sizes` values in about.njk,
+// achievements.njk and friends), and anything that doesn't falls back to this.
+const DEFAULT_SIZES = "(max-width: 640px) 100vw, (max-width: 1200px) 50vw, 600px";
 
 function buildResizedImages() {
   imageVariants.clear();
   if (!fs.existsSync(UPLOADS_SRC)) return;
-  fs.mkdirSync(RESIZED_OUT, { recursive: true });
+  fs.mkdirSync(IMG_CACHE, { recursive: true });
 
   const files = fs.readdirSync(UPLOADS_SRC).filter((f) => /\.(jpe?g|png)$/i.test(f));
   return Promise.all(
@@ -47,26 +93,62 @@ function buildResizedImages() {
         return;
       }
 
+      // A photo shot in portrait carries EXIF orientation, and `.rotate()`
+      // below applies it — so the dimensions that matter downstream are the
+      // ones AFTER rotation. Reading meta.width directly would report a
+      // portrait photo as landscape and emit a width/height pair with the
+      // aspect ratio on its side, reserving a wrongly-shaped box and causing
+      // exactly the layout shift these attributes exist to prevent.
+      const swapped = meta.orientation && meta.orientation >= 5;
+      const srcW = swapped ? meta.height : meta.width;
+      const srcH = swapped ? meta.width : meta.height;
+
       const base = file.replace(/\.[^.]+$/, "").replace(/[^a-z0-9._-]/gi, "-");
-      const variants = [];
+      const jpeg = [];
+      const webp = [];
       for (const w of IMG_WIDTHS) {
         // Never upscale — a 900px headshot gains nothing from a 1920px copy.
-        if (meta.width && meta.width <= w) continue;
-        const outName = `${base}-${w}.jpg`;
-        const outPath = path.join(RESIZED_OUT, outName);
+        if (srcW && srcW <= w) continue;
+
+        const jpegName = `${base}-${w}.jpg`;
+        const webpName = `${base}-${w}.webp`;
+        const jpegPath = path.join(IMG_CACHE, jpegName);
+        const webpPath = path.join(IMG_CACHE, webpName);
+
         // Rebuild only when the source is newer, so `--serve` rebuilds and
         // repeat CI builds stay fast.
-        const stale = !fs.existsSync(outPath) || fs.statSync(outPath).mtimeMs < srcStat.mtimeMs;
-        if (stale) {
+        const stale = (p) => !fs.existsSync(p) || fs.statSync(p).mtimeMs < srcStat.mtimeMs;
+
+        if (stale(jpegPath)) {
           await sharp(srcPath)
             .rotate() // honour EXIF orientation, which resizing otherwise drops
             .resize({ width: w, withoutEnlargement: true })
             .jpeg({ quality: 82, progressive: true, mozjpeg: true })
-            .toFile(outPath);
+            .toFile(jpegPath);
         }
-        variants.push({ w, url: `/assets/uploads/resized/${outName}` });
+        if (stale(webpPath)) {
+          await sharp(srcPath)
+            .rotate()
+            .resize({ width: w, withoutEnlargement: true })
+            .webp({ quality: 78 })
+            .toFile(webpPath);
+        }
+
+        jpeg.push({ w, url: `/assets/uploads/resized/${jpegName}` });
+        webp.push({ w, url: `/assets/uploads/resized/${webpName}` });
       }
-      if (variants.length) imageVariants.set(`/assets/uploads/${file}`, variants);
+
+      if (jpeg.length) {
+        const largest = jpeg[jpeg.length - 1].w;
+        imageVariants.set(`/assets/uploads/${file}`, {
+          jpeg,
+          webp,
+          // Intrinsic size of the file we point `src` at, so width/height
+          // describe the actual fallback image.
+          width: largest,
+          height: srcW && srcH ? Math.round((srcH / srcW) * largest) : null,
+        });
+      }
     })
   );
 }
@@ -82,57 +164,224 @@ function lookupVariants(src) {
   }
 }
 
+function srcsetFor(list) {
+  return list.map((v) => `${v.url} ${v.w}w`).join(", ");
+}
+
+// ---------------------------------------------------------------------------
+// Copies uploads that the image pipeline did NOT process.
+//
+// The whole assets/ folder used to be copied wholesale, which shipped ~25MB of
+// untouched camera originals alongside the generated copies that are the only
+// things the site actually links to. Skipping an original once it has variants
+// removes that dead weight from every deploy.
+//
+// The "did not process" half is the important half, and is why this is a
+// filter rather than a blanket skip: assets/uploads is also the CMS's media
+// folder for NON-images. A PDF study guide attached to a Materials item lives
+// right next to the photos, has no variants, and must still be published — as
+// must any photo too small to have been resized. Anything unrecognised is
+// copied untouched, so the failure mode is a file that ships needlessly rather
+// than a download link that 404s.
+// ---------------------------------------------------------------------------
+function publishImages() {
+  if (!fs.existsSync(IMG_CACHE)) return;
+  fs.mkdirSync(RESIZED_OUT, { recursive: true });
+  // Only the variants this build actually produced are published, so a photo
+  // deleted from the CMS stops being served even though its old files are
+  // still sitting in the cache.
+  const wanted = new Set();
+  for (const v of imageVariants.values()) {
+    for (const x of v.jpeg.concat(v.webp)) wanted.add(path.basename(x.url));
+  }
+  for (const file of wanted) {
+    const from = path.join(IMG_CACHE, file);
+    const to = path.join(RESIZED_OUT, file);
+    if (!fs.existsSync(from)) continue;
+    if (fs.existsSync(to) && fs.statSync(to).mtimeMs >= fs.statSync(from).mtimeMs) continue;
+    fs.copyFileSync(from, to);
+  }
+}
+
+function copyUnprocessed() {
+  if (!fs.existsSync(UPLOADS_SRC)) return;
+  const outDir = path.join(__dirname, "_site", "assets", "uploads");
+  fs.mkdirSync(outDir, { recursive: true });
+
+  let copied = 0;
+  let skipped = 0;
+  for (const file of fs.readdirSync(UPLOADS_SRC)) {
+    const srcPath = path.join(UPLOADS_SRC, file);
+    if (!fs.statSync(srcPath).isFile()) continue;
+    if (imageVariants.has(`/assets/uploads/${file}`)) {
+      skipped++;
+      continue;
+    }
+    const outPath = path.join(outDir, file);
+    const stale =
+      !fs.existsSync(outPath) ||
+      fs.statSync(outPath).mtimeMs < fs.statSync(srcPath).mtimeMs;
+    if (stale) fs.copyFileSync(srcPath, outPath);
+    copied++;
+  }
+  if (skipped) {
+    console.log(
+      `[images] ${skipped} original${skipped === 1 ? "" : "s"} left out of the build ` +
+        `(resized copies are what the site links to); ${copied} other upload${copied === 1 ? "" : "s"} copied as-is.`
+    );
+  }
+}
+
+function attr(tag, name) {
+  const m = tag.match(new RegExp(`\\s${name}=["']([^"']*)["']`, "i"));
+  return m ? m[1] : null;
+}
+
 module.exports = function (eleventyConfig) {
   eleventyConfig.on("eleventy.before", buildResizedImages);
+  eleventyConfig.on("eleventy.after", publishImages);
+  eleventyConfig.on("eleventy.after", copyUnprocessed);
 
-  // Adds srcset/sizes to every <img> pointing at an upload, and repoints inline
-  // background-image URLs (the page-header banners) at a sensibly sized copy.
+  // Wraps every <img> pointing at an upload in a <picture> offering WebP, adds
+  // srcset/sizes/width/height/loading, and turns inline background-image URLs
+  // (the page-header banners) into breakpoint-aware custom properties.
   eleventyConfig.addTransform("responsiveImages", function (content, outputPath) {
     if (!outputPath || !outputPath.endsWith(".html") || imageVariants.size === 0) return content;
 
     content = content.replace(/<img\b[^>]*>/gi, (tag) => {
       if (/\ssrcset=/i.test(tag)) return tag;
-      const srcMatch = tag.match(/\ssrc=["']([^"']+)["']/i);
-      if (!srcMatch) return tag;
-      const variants = lookupVariants(srcMatch[1]);
-      if (!variants || !variants.length) return tag;
+      const src = attr(tag, "src");
+      if (!src) return tag;
+      const v = lookupVariants(src);
+      if (!v || !v.jpeg.length) return tag;
 
-      const srcset = variants.map((v) => `${v.url} ${v.w}w`).join(", ");
-      // No layout information is available here, so `sizes` assumes the common
-      // case: full viewport width on a phone, and never wider than the 1200px
-      // content column on a desktop.
-      const sizes = "(max-width: 640px) 100vw, (max-width: 1200px) 50vw, 600px";
-      // Point src at the largest variant so browsers ignoring srcset still get
-      // a resized file rather than the multi-megabyte original.
-      const largest = variants[variants.length - 1].url;
-      return tag
-        .replace(/\ssrc=["'][^"']+["']/i, ` src="${largest}"`)
-        .replace(/<img\b/i, `<img srcset="${srcset}" sizes="${sizes}"`);
+      // A template that knows how big the image really renders says so with
+      // data-sizes. See DEFAULT_SIZES for why this matters so much.
+      const sizes = attr(tag, "data-sizes") || DEFAULT_SIZES;
+
+      let out = tag;
+
+      // Point src at the largest variant so a browser ignoring srcset entirely
+      // still gets a resized file rather than the multi-megabyte original.
+      out = out.replace(/\ssrc=["'][^"']+["']/i, ` src="${v.jpeg[v.jpeg.length - 1].url}"`);
+
+      const extras = [`srcset="${srcsetFor(v.jpeg)}"`, `sizes="${sizes}"`];
+
+      // NO width/height attributes here — this was tried and reverted, so
+      // don't add them back without reading this.
+      //
+      // They normally help: intrinsic dimensions let the browser reserve the
+      // right-shaped box before the bytes arrive. But they are not inert. The
+      // attributes become presentational hints (`height: 1707px`), and a
+      // presentational hint only loses to an AUTHOR rule that sets the same
+      // property. Every photo on this site is sized by its container instead —
+      // `.exec-card-photo img` uses `width: 100%; aspect-ratio: 1` and never
+      // mentions height — and `aspect-ratio` only derives a height when the
+      // height is auto. The hint therefore won, and the 179px circular
+      // headshots rendered 813px tall.
+      //
+      // There is nothing to gain here anyway: every image container in
+      // styles.css already declares a fixed height or an aspect-ratio, so the
+      // box is reserved by CSS before the image loads and there is no layout
+      // shift for the attributes to prevent.
+
+      // Deferring offscreen images is most of the mobile win on /about/ and
+      // /achievements/, which were loading ten and eleven photos eagerly.
+      // A template can opt out with data-eager for a genuine hero image —
+      // lazy-loading the thing at the top of the page delays the very content
+      // the visitor is waiting for.
+      if (!/\sloading=/i.test(tag) && !/\sdata-eager\b/i.test(tag)) {
+        extras.push('loading="lazy"');
+      }
+      if (!/\sdecoding=/i.test(tag)) extras.push('decoding="async"');
+
+      out = out.replace(/<img\b/i, `<img ${extras.join(" ")}`);
+
+      // WebP first: the browser takes the first <source> it understands, and
+      // falls straight through to the <img> if it understands none of them.
+      return (
+        `<picture><source type="image/webp" srcset="${srcsetFor(v.webp)}" sizes="${sizes}">` +
+        out +
+        `</picture>`
+      );
     });
 
     // The lightbox reads its full-size image out of data-img. A 1920px copy is
     // already more than the overlay can display (max-height: 80vh), so there's
     // no reason to push the multi-megapixel original down the wire on tap.
     content = content.replace(/\sdata-img=["']([^"']+)["']/gi, (whole, url) => {
-      const variants = lookupVariants(url);
-      if (!variants || !variants.length) return whole;
-      return ` data-img="${variants[variants.length - 1].url}"`;
+      const v = lookupVariants(url);
+      if (!v || !v.jpeg.length) return whole;
+      return ` data-img="${v.jpeg[v.jpeg.length - 1].url}"`;
     });
 
+    // ---------------------------------------------------------------------
+    // Page-header banners.
+    //
+    // These are CSS background images, so srcset does not apply to them — and
+    // the previous code simply pointed every one at the 1920px copy. That is a
+    // ~370KB file, it is the largest element on the page, and on a phone it
+    // was being downloaded at five times the width it would ever be shown at.
+    //
+    // A background image can't carry `sizes`, but it CAN be swapped at a
+    // breakpoint. Each banner emits three custom properties, and styles.css
+    // picks between them with two media queries. The fallbacks in the
+    // var() chain matter: a photo that is only 900px wide has no --bg-lg, and
+    // without `var(--bg-lg, var(--bg-md, …))` the whole declaration would be
+    // invalid at that breakpoint and the banner would show no photo at all.
+    // ---------------------------------------------------------------------
     content = content.replace(
       /background-image:\s*url\((['"]?)([^'")]+)\1\)/gi,
       (whole, quote, url) => {
-        const variants = lookupVariants(url);
-        if (!variants || !variants.length) return whole;
-        // Banners run the full width of the viewport, so take the widest copy.
-        return `background-image:url(${quote}${variants[variants.length - 1].url}${quote})`;
+        const v = lookupVariants(url);
+        if (!v || !v.jpeg.length) return whole;
+        const at = (w) => {
+          const hit = v.jpeg.find((x) => x.w === w);
+          return hit ? hit.url : null;
+        };
+        const sm = at(480) || at(800) || v.jpeg[0].url;
+        const md = at(1280) || at(800) || sm;
+        const lg = v.jpeg[v.jpeg.length - 1].url;
+        return (
+          `--bg-sm:url('${sm}'); --bg-md:url('${md}'); --bg-lg:url('${lg}'); ` +
+          `background-image:var(--bg-sm)`
+        );
       }
     );
+
+    // ---------------------------------------------------------------------
+    // Catch-all: any remaining reference to an original upload.
+    //
+    // The rules above each know about one specific place an image path shows
+    // up — src, data-img, background-image — and each was added when that
+    // place was noticed. Paths turn up in other places too: og:image and
+    // twitter:image meta tags, and any inline handler an editor's template
+    // happens to build. Those were still pointing at the untouched original,
+    // which matters more than it used to, because originals are no longer
+    // published at all: a missed reference is now a 404 rather than merely a
+    // slow download.
+    //
+    // Rewriting by path rather than by context means a new use site is
+    // covered the day it is added instead of the day somebody notices. A path
+    // with no variants — a PDF in the same folder, a photo too small to
+    // resize — isn't in the map and is left exactly as it is.
+    // ---------------------------------------------------------------------
+    content = content.replace(/\/assets\/uploads\/(?!resized\/)[^"'\s)<>]+/g, (url) => {
+      const v = lookupVariants(url);
+      if (!v || !v.jpeg.length) return url;
+      return v.jpeg[v.jpeg.length - 1].url;
+    });
 
     return content;
   });
 
-  eleventyConfig.addPassthroughCopy("assets");
+  // Top-level assets (the logo) and the self-hosted font files copy as-is.
+  // assets/uploads is handled by the image pipeline above rather than copied
+  // wholesale — see copyUnprocessed(). "assets/*.*" alone only matches files
+  // directly inside assets/ and would silently skip everything one level
+  // down, which is exactly where assets/fonts/*.woff2 live.
+  eleventyConfig.addPassthroughCopy("assets/*.*");
+  eleventyConfig.addPassthroughCopy("assets/fonts");
   eleventyConfig.addPassthroughCopy("admin");
   eleventyConfig.addPassthroughCopy("src/styles.css");
   eleventyConfig.addPassthroughCopy("src/robots.txt");
@@ -184,8 +433,31 @@ module.exports = function (eleventyConfig) {
     });
   }
 
+  // An entry's URL is its filename, and the filename is generated from the
+  // fields at the moment the entry is CREATED. Correct the year afterwards —
+  // which execs do, because the year is often the thing they got wrong — and
+  // the slug keeps the old one forever. The result is a page at
+  // /achievements/highland-cup-2026/ with "Highland Cup 2024" printed on it,
+  // which is invisible to whoever made the edit and wrong for everyone who
+  // shares the link. Nothing else in the build can catch this, so it is
+  // reported here.
+  function warnOnSlugYearMismatch(collectionApi) {
+    collectionApi.getFilteredByGlob("src/achievements/*.md").forEach((a) => {
+      const year = String(a.data.year || "").trim();
+      if (!/^\d{4}$/.test(year)) return;
+      const inSlug = String(a.fileSlug).match(/(\d{4})(?:-\d+)?$/);
+      if (!inSlug || inSlug[1] === year) return;
+      console.warn(
+        `[ghpls] ${a.inputPath}: this entry says year ${year} but its address is ` +
+          `/achievements/${a.fileSlug}/ — rename the file to match, or visitors ` +
+          `get a link that disagrees with the page.`
+      );
+    });
+  }
+
   eleventyConfig.addCollection("achievements", function (collectionApi) {
     warnOnNearMissNames(collectionApi);
+    warnOnSlugYearMismatch(collectionApi);
     return collectionApi.getFilteredByGlob("src/achievements/*.md").sort((a, b) => {
       // Sort by explicit date when present, otherwise fall back to year.
       const da = a.data.date ? new Date(a.data.date).getTime() : new Date(a.data.year || 0, 0).getTime();
@@ -200,10 +472,41 @@ module.exports = function (eleventyConfig) {
     });
   });
 
+  // ---------------------------------------------------------------------------
+  // "Upcoming Events" has to mean upcoming.
+  //
+  // This collection was previously unfiltered, so an event stayed under the
+  // heading "Upcoming Events" forever — the page would have been advertising
+  // an October 2026 workshop as upcoming in 2028, and the only way to clear it
+  // was for somebody to notice and delete the entry by hand. Nobody was ever
+  // going to notice, because the people who run the site already know the
+  // event happened.
+  //
+  // The cutoff is the START of today in UTC, not "now": an event today is still
+  // upcoming for the whole of that day, which is what someone checking the site
+  // on the morning of an event expects to see. UTC matches the calendar-day
+  // handling documented further down — dates from the CMS are days, not
+  // instants — and matches the timezone CI builds run in.
+  // ---------------------------------------------------------------------------
+  function startOfTodayUTC() {
+    const now = new Date();
+    return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  }
+
   eleventyConfig.addCollection("events", function (collectionApi) {
-    const events = collectionApi.getFilteredByGlob("src/events/*.md").sort((a, b) => {
-      return new Date(a.data.date) - new Date(b.data.date);
-    });
+    const cutoff = startOfTodayUTC();
+    const events = collectionApi
+      .getFilteredByGlob("src/events/*.md")
+      .filter((e) => {
+        const d = new Date(e.data.date);
+        // An entry with an unreadable date is kept rather than silently
+        // dropped — a visible wrong date gets fixed, a vanished event doesn't.
+        if (isNaN(d.getTime())) return true;
+        return d.getTime() >= cutoff;
+      })
+      .sort((a, b) => {
+        return new Date(a.data.date) - new Date(b.data.date);
+      });
     // An event whose Time text can't be parsed still gets a calendar button —
     // it just becomes an all-day entry. That is a quiet downgrade, so say so
     // at build time; otherwise the only symptom is a calendar entry with no
@@ -301,6 +604,84 @@ module.exports = function (eleventyConfig) {
     const p = calendarParts(date);
     if (!p) return "";
     return p.d;
+  });
+
+  // YYYY-MM-DD, for <lastmod> in the sitemap and <time datetime> attributes.
+  eleventyConfig.addFilter("isoDate", function (date) {
+    const p = calendarParts(date);
+    if (!p) return "";
+    return `${p.y}-${pad(p.m + 1)}-${pad(p.d)}`;
+  });
+
+  // ---------------------------------------------------------------------------
+  // CSS values that come from the CMS.
+  //
+  // Focal points are written straight into a style attribute
+  // (`object-position: {{ photoPosition }}`). Nunjucks escapes the value for
+  // HTML, which stops an editor breaking OUT of the attribute — but it does
+  // nothing about the value being read as CSS, and CSS needs no quotes or angle
+  // brackets to be dangerous. A photoPosition of
+  //
+  //     center; background: url(https://example.com/track.gif)
+  //
+  // is HTML-safe, survives escaping unchanged, and adds a third-party request
+  // to the page. (The CSP would block that particular one, but relying on a
+  // second control to cover a hole in the first is how holes stay open.)
+  //
+  // Only editors can set these values, so this is defence in depth rather than
+  // a live hole — but the whole point of the CMS is that people who are not
+  // developers type into it, including a future exec who pastes something odd.
+  // Anything that isn't recognisably a position falls back to `center`.
+  // ---------------------------------------------------------------------------
+  const CSS_POSITION_RE =
+    /^(?:(?:-?\d+(?:\.\d+)?(?:%|px)?|left|right|top|bottom|center)\s*){1,2}$/i;
+
+  eleventyConfig.addFilter("cssPosition", function (value, fallback) {
+    const v = String(value == null ? "" : value).trim();
+    if (!v) return fallback || "center";
+    return CSS_POSITION_RE.test(v) ? v : fallback || "center";
+  });
+
+  // object-fit is a short closed set, so it is checked against that set rather
+  // than a pattern.
+  const CSS_FITS = ["cover", "contain", "fill", "none", "scale-down"];
+  eleventyConfig.addFilter("cssFit", function (value, fallback) {
+    const v = String(value == null ? "" : value).trim().toLowerCase();
+    return CSS_FITS.indexOf(v) !== -1 ? v : fallback || "cover";
+  });
+
+  // A zoom factor is a number, and an unreasonable one is a typo.
+  eleventyConfig.addFilter("cssZoom", function (value) {
+    const n = parseFloat(value);
+    if (isNaN(n) || n <= 1) return null;
+    return Math.min(n, 4).toFixed(3).replace(/\.?0+$/, "");
+  });
+
+  // ---------------------------------------------------------------------------
+  // Blank-line-separated prose from a CMS textarea, rendered as paragraphs.
+  //
+  // This replaces `{{ text | replace("\n\n", "</p><p>") | safe }}`, which had
+  // to mark the whole value safe — handing every editor the ability to put raw
+  // HTML on the page, and turning any stray "<" they typed into broken markup.
+  // Here the text is escaped first and the tags are added afterwards, so the
+  // paragraphs work and the content stays inert.
+  // ---------------------------------------------------------------------------
+  eleventyConfig.addFilter("paragraphs", function (text) {
+    const s = String(text == null ? "" : text);
+    if (!s.trim()) return "";
+    const escape = (t) =>
+      t
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    return s
+      .split(/\r?\n\s*\r?\n/)
+      .map((para) => para.trim())
+      .filter(Boolean)
+      .map((para) => `<p>${escape(para).replace(/\r?\n/g, "<br>")}</p>`)
+      .join("");
   });
 
   // ---------------------------------------------------------------------------
