@@ -2,10 +2,87 @@
 
 _Written: June 2026 · Updated: August 10 2026 · For whoever (human or AI) picks this up next._
 
-> **Section order:** newest first. The "eleventh pass" below is the most
+> **Section order:** newest first. The "twelfth pass" below is the most
 > recent work; sections after it are earlier the same day or before. Their
 > internal cross-references ("see section 0") still point at each other, not
 > at this section.
+
+## Twelfth pass, Aug 10 2026 — the eleventh pass's §0 fix didn't actually ship; here's why, and how it was caught
+
+**Read this if you're about to trust "verified against a running `wrangler
+dev`" as proof something works on the real deployed site. It isn't, and this
+is the story of why.**
+
+The previous section (Eleventh pass, §0) describes fixing
+`run_worker_first` — the setting that makes every request actually go through
+`worker.js` instead of bypassing it for any URL that matches a real file —
+and says it was verified. It was verified against `wrangler dev --local`, and
+it genuinely did work there. It was pushed, deployed, and **did not take
+effect on the live site.** The deploy succeeded, `wrangler.toml` was correct,
+and the security headers were still missing from every real page.
+
+**What was actually wrong:** `.github/workflows/deploy.yml` pinned
+`node-version: 20`. `wrangler` 4.x requires Node ≥ 22. `cloudflare/
+wrangler-action` detects that mismatch and silently falls back to a
+*different, older, bundled* wrangler — **3.90.0** was what actually ran, not
+the 4.120.0 pinned in `package.json` — with no error and no warning printed
+anywhere in the deploy log. Wrangler 3.x doesn't apply `run_worker_first` the
+same way 4.x does, so every request that matched a real static asset kept
+bypassing the Worker exactly as before the "fix," while a 404 or a
+freshly-added redirect source looked completely fine, because those always
+reach the Worker either way regardless of this setting. **That's precisely
+why local `wrangler dev` testing didn't catch it**: the locally-installed
+wrangler (whatever version `npx` resolves to on the machine actually doing the
+work) has no reason to hit the same Node-version gate CI does, so it doesn't
+reproduce the fallback at all.
+
+**How it was caught:** by not trusting the deploy and instead running `curl
+-sD- -o /dev/null <live-url> | grep -i content-security` against the actual
+production URL after every deploy. First pass at that showed no CSP header on
+`/` and `/about/`. The obvious wrong conclusion at that point would have been
+"Cloudflare's edge cache is just serving something stale" — plausible, and
+partly true (see below) — but the way to actually tell the difference between
+"cached" and "never worked" is to test a URL that **cannot possibly have a
+cached response**, because it didn't exist before this exact deploy:
+`/assets/fonts/inter-normal-latin.woff2`, one of the new self-hosted font
+files. It came back with the *default* asset cache-control, not the custom
+one `worker.js` sets for that path — proof the Worker's header-setting code
+genuinely wasn't running for that request, not just proof of a stale cache.
+
+Fixed by bumping `node-version` to `22` in the workflow (see the comment
+there — it names the exact log line to check,
+`npx --no-install wrangler --version`, if this is ever in doubt again).
+Redeployed, and this time confirmed against a URL that had **never been
+requested by anyone, ever** —
+`/assets/fonts/playfair-display-italic-latin-ext.woff2`, untouched by even my
+own earlier testing — which came back `cf-cache-status: MISS` with every
+header correct: full CSP, `Strict-Transport-Security`, `Permissions-Policy`,
+`X-Frame-Options`, and the font's own 30-day cache-control. Then swept all 12
+public pages (`/`, `/about/`, `/achievements/`, `/ghcup/`, `/minimoot/`,
+`/events/`, `/photos/`, `/contact/`, `/materials/`, `/privacy/`, `/terms/`,
+`/accessibility/`) — CSP present on all 12, some still `HIT` from Cloudflare
+having already cached the *new*, correct response by the time of the sweep,
+none showing the old headerless version.
+
+**The general lesson, worth keeping even after this specific bug is old
+news:** "verified locally" and "verified in production" are different claims,
+and the gap between them is exactly the kind of environment-specific
+behaviour (a CI runner's Node version, here) that only shows up by actually
+checking the live URL. `wrangler dev` proves the *code* is correct. It does
+not prove the *deploy pipeline* delivers that code. When the two diverge, the
+site can look identically broken before and after a "successful" fix — same
+missing headers, same 200 status, same everything an incurious check would
+compare — which is exactly the shape of bug that survives a re-read of the
+source and only breaks under an actual request against the actual URL.
+
+Also folded into this pass: six commits had landed on `main` via the live CMS
+while the Eleventh pass work was in progress (a new event, two photos, a team
+member update) — `git fetch` + `git rebase origin/main` before the final
+push, no conflicts, clean rebuild against the merged content confirmed
+nothing regressed (in particular, the new event correctly passed the
+upcoming-events date filter and the near-miss-name / slug-year build checks
+added in the Eleventh pass, all added *before* this content existed, all
+still correct against it).
 
 ## Eleventh pass, Aug 10 2026 — full code + legal audit, then a follow-up pass
 
@@ -17,6 +94,12 @@ just read back from the source. Where that mattered enough to be worth saying
 twice, it's called out.
 
 ### 0. `run_worker_first` — the site had been serving NO security headers since the Cloudflare move
+
+> **This section's fix did not actually take effect when first deployed —
+> the config below was correct, but CI silently ran an old wrangler that
+> ignored it. See the Twelfth pass, above, for the root cause and how it was
+> caught. That section is the important one; treat this one as the first
+> half of the story, not the whole thing.**
 
 **This is the one thing in this pass worth reading even if nothing else is.**
 `worker.js` sets `Content-Security-Policy`, `X-Frame-Options`,
