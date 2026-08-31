@@ -2,9 +2,8 @@
 name: Francesco Deleo
 role: Vice President of Moot Training
 gradYear: 2028
-bio: I'm excited to fulfil my role as the vice president of moot training. I’ve
-  been a member of the Pre-Law Society for the past two years and look forward
-  to contributing further to the team.
+bio: I’ve been a member of the Pre-Law Society for the past two years and look
+  forward to contributing further to the team.
 qanda: []
 competitions:
   - competition: HSFK Cup
