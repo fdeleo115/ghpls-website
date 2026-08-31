@@ -33,5 +33,5 @@ extraPhotos:
   - image: /assets/uploads/dsc_7275.jpeg
   - image: /assets/uploads/img_4681.jpeg
   - image: /assets/uploads/dsc_4681.jpeg
-  - image: /assets/uploads/dd3731a4-1ccd-412b-8186-e155c1bbbd4a.jpeg
+  - image: /assets/uploads/c7b2a9bd-20b8-4154-abe3-47a8e166e9b8.jpeg
 ---
