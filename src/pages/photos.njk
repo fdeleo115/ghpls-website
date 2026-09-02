@@ -22,7 +22,7 @@ pageDescription: "Photographs from Guelph-Humber Pre-Law Society events, moot co
            width once the grid collapses on a phone. #}
         <img src="{{ photo.data.image }}" alt="{{ photo.data.title }}" loading="lazy" data-sizes="(max-width: 640px) 100vw, (max-width: 1200px) 33vw, 373px" style="object-position: {{ photo.data.photoPosition | cssPosition }};">
         <div class="photo-overlay">
-          <h4>{{ photo.data.title }}</h4>
+          <h2>{{ photo.data.title }}</h2>
           {% if photo.data.description %}<p>{{ photo.data.description }}</p>{% endif %}
           {% if photo.data.date %}<span>{{ photo.data.date | dateFormat }}</span>{% endif %}
         </div>
@@ -37,9 +37,13 @@ pageDescription: "Photographs from Guelph-Humber Pre-Law Society events, moot co
 
 <div id="lightbox" class="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-  <img id="lightbox-img" src="" alt="">
+  {#- No src attribute. `src=""` resolves against the current document, so every
+    page carrying a lightbox fired a second, pointless request for ITSELF on
+    load — and reported a broken image to anything inspecting document.images.
+    The open handler sets .src; until then the element should ask for nothing. #}
+  <img id="lightbox-img" alt="">
   <div class="lightbox-caption">
-    <h4 id="lightbox-title"></h4>
+    <h2 id="lightbox-title"></h2>
     <p id="lightbox-desc"></p>
   </div>
 </div>

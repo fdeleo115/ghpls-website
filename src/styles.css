@@ -109,7 +109,23 @@
   --text: #1a1a2e;
   --text-light: #6b7280;
   /* Darker peach for small text on light backgrounds — --peach itself is
-     correct on navy (2.0:1 on white, well under the 4.5:1 floor). */
+     correct on navy (2.0:1 on white, well under the 4.5:1 floor).
+
+     THE RULE, because this bug has now been fixed twice and missed twice:
+     --peach is a NAVY-GROUND token. If the thing behind the text is white or
+     --cream, the token is --peach-ink (4.84:1). This applies to icons and
+     other graphics too, which need 3:1 — --peach fails that on light as well.
+
+     Fixing the instances you happen to notice is what let this survive the
+     first sweep. Fix it by enumerating instead:
+
+       grep -nE "color: ?var\(--peach\)" src/styles.css
+
+     and classify EVERY hit by the background it actually lands on. As of the
+     Sept 2026 audit every remaining hit is on navy — nav, both heroes,
+     .portal-icon, .ghcup-hero, .schedule-date (background: var(--navy)),
+     .exec-card-avatar, .detail-back (inside .page-header) and the footer.
+     Anything new in that list on a light ground is a regression. */
   --peach-ink: #a85f2a;
 }
 
@@ -356,7 +372,7 @@ nav ul li a:hover, nav ul li a.active { color: var(--peach); }
   background: rgba(232,168,124,0.18); color: var(--peach);
 }
 .portal-icon svg { width: 26px; height: 26px; }
-.portal-card h3 { color: var(--white); font-size: 1.15rem; margin-bottom: 4px; }
+.portal-card h2 { color: var(--white); font-size: 1.15rem; margin-bottom: 4px; }
 .portal-card p { color: rgba(255,255,255,0.65); font-size: 0.85rem; line-height: 1.4; }
 
 /* BUTTONS */
@@ -481,7 +497,7 @@ section { padding: 100px 0; }
   background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
   border-radius: 16px; padding: 64px; text-align: center; color: var(--white); margin-bottom: 48px;
 }
-.ghcup-hero h3 { color: var(--peach); font-size: 2rem; margin-bottom: 16px; }
+.ghcup-hero h2 { color: var(--peach); font-size: 2rem; margin-bottom: 16px; }
 .ghcup-hero p { color: rgba(255,255,255,0.8); max-width: 700px; margin: 0 auto 32px; font-size: 1.05rem; }
 
 .ghcup-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
@@ -489,7 +505,7 @@ section { padding: 100px 0; }
   text-align: center; padding: 32px 24px; background: var(--white);
   border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);
 }
-.ghcup-feature h4 { margin-bottom: 8px; font-size: 1.1rem; }
+.ghcup-feature h3 { margin-bottom: 8px; font-size: 1.1rem; }
 .ghcup-feature p { color: var(--text-light); font-size: 0.9rem; }
 
 /* MINI MOOT
@@ -538,7 +554,7 @@ section { padding: 100px 0; }
 }
 .schedule-date .month { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--peach); }
 .schedule-date .day { font-size: 1.8rem; font-weight: 700; line-height: 1.2; }
-.schedule-info h4 { font-size: 1.15rem; margin-bottom: 4px; }
+.schedule-info h3 { font-size: 1.15rem; margin-bottom: 4px; }
 .schedule-info p { color: var(--text-light); font-size: 0.9rem; }
 /* --peach-ink, not --peach: this sits on a white card. See the contrast note
    above .cal-add. Peach on white is 1.9:1 and fails WCAG AA outright, and the
@@ -602,7 +618,7 @@ section { padding: 100px 0; }
 .past-event-info { padding: 24px; }
 /* --peach-ink: white card background. */
 .past-event-date { font-size: 0.8rem; color: var(--peach-ink); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-.past-event-info h4 { margin-bottom: 8px; }
+.past-event-info h3 { margin-bottom: 8px; font-size: 1rem; }
 .past-event-info p { color: var(--text-light); font-size: 0.9rem; }
 
 /* PHOTO GALLERY */
@@ -622,7 +638,7 @@ section { padding: 100px 0; }
   opacity: 0; transition: opacity 0.3s;
 }
 .photo-card:hover .photo-overlay { opacity: 1; }
-.photo-overlay h4 { font-size: 0.95rem; color: var(--white); margin-bottom: 2px; }
+.photo-overlay h2, .photo-overlay h3 { font-size: 0.95rem; color: var(--white); margin-bottom: 2px; }
 .photo-overlay p { font-size: 0.78rem; color: rgba(255,255,255,0.85); line-height: 1.4; margin: 2px 0 4px; }
 .photo-overlay span { font-size: 0.75rem; color: var(--peach-light); }
 
@@ -643,7 +659,7 @@ section { padding: 100px 0; }
   color: white; font-size: 2rem; background: none; border: none; cursor: pointer;
 }
 .lightbox-caption { text-align: center; max-width: 640px; margin-top: 16px; padding: 0 20px; }
-.lightbox-caption h4 { color: #fff; font-size: 1.2rem; margin-bottom: 6px; }
+.lightbox-caption h2 { color: #fff; font-size: 1.2rem; margin-bottom: 6px; }
 .lightbox-caption p { color: rgba(255,255,255,0.82); font-size: 0.98rem; line-height: 1.65; }
 
 /* MATERIALS */
@@ -654,9 +670,34 @@ section { padding: 100px 0; }
 }
 .material-card:hover { transform: translateY(-4px); }
 .material-card .file-icon { margin-bottom: 16px; }
-.material-card h4 { margin-bottom: 8px; }
+.material-card h2 { margin-bottom: 8px; font-size: 1rem; }
 .material-card p { color: var(--text-light); font-size: 0.85rem; margin-bottom: 16px; }
 .material-card .btn { padding: 10px 24px; font-size: 0.85rem; }
+
+/* 404 PAGE
+   Its own card style rather than .portal-card, which is white-on-navy and only
+   works over the home hero. These sit on the plain white body, so they take a
+   cream ground with navy text — 12.6:1 — and a peach-ink hairline that darkens
+   on hover. Colours come from the tokens, so the --peach-ink rule at the top of
+   this file covers them too. */
+.notfound-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  max-width: 900px; margin: 0 auto;
+}
+.notfound-card {
+  display: block; background: var(--cream); border: 1px solid rgba(168,95,42,0.22);
+  border-radius: 12px; padding: 22px 20px; text-align: center;
+  transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+}
+.notfound-card:hover {
+  transform: translateY(-3px); border-color: var(--peach-ink);
+  box-shadow: 0 10px 26px rgba(26,39,68,0.10);
+}
+.notfound-card h2 { font-size: 1.1rem; margin-bottom: 4px; color: var(--navy); }
+.notfound-card p { color: var(--text-light); font-size: 0.85rem; line-height: 1.4; margin: 0; }
+
+@media (max-width: 900px) { .notfound-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .notfound-grid { grid-template-columns: 1fr; } }
 
 /* EXEC TEAM CAROUSEL — native scroll-snap rail, drag-to-scroll, no buttons */
 /* Widened past the page's usual 1200px .container so more than 3 cards show
@@ -728,7 +769,7 @@ section { padding: 100px 0; }
   margin-top: 16px; color: var(--text-light); font-size: 0.85rem;
   transition: opacity 0.4s ease, margin-top 0.4s ease;
 }
-.exec-scroll-hint svg { width: 16px; height: 16px; color: var(--peach); animation: exec-hint-nudge 1.6s ease-in-out infinite; }
+.exec-scroll-hint svg { width: 16px; height: 16px; color: var(--peach-ink); animation: exec-hint-nudge 1.6s ease-in-out infinite; }
 .exec-carousel.is-discovered .exec-scroll-hint {
   opacity: 0; margin-top: 0; height: 0; overflow: hidden; pointer-events: none;
 }
@@ -811,7 +852,7 @@ section { padding: 100px 0; }
 
 /* CONTACT */
 .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
-.contact-info h3 { font-size: 1.5rem; margin-bottom: 16px; }
+.contact-info h2 { font-size: 1.5rem; margin-bottom: 16px; }
 .contact-info p { color: var(--text-light); margin-bottom: 24px; }
 .contact-links a {
   display: flex; align-items: center; gap: 12px; padding: 12px 0;
@@ -825,7 +866,7 @@ section { padding: 100px 0; }
   background: var(--cream); border: 1px solid rgba(26,39,68,0.08);
   border-radius: 12px; padding: 28px;
 }
-.contact-cta h3 { margin-top: 0; font-size: 1.5rem; margin-bottom: 16px; }
+.contact-cta h2 { margin-top: 0; font-size: 1.5rem; margin-bottom: 16px; }
 .contact-cta p { color: var(--text-light); margin-bottom: 8px; }
 .contact-cta .btn { display: inline-block; }
 .contact-cta .contact-links a:last-child { padding-bottom: 0; }
@@ -834,7 +875,7 @@ section { padding: 100px 0; }
 .win-card--link { display: block; color: inherit; }
 .win-card--link:hover { box-shadow: 0 12px 34px rgba(0,0,0,0.12); }
 .win-card-more {
-  display: inline-block; margin-top: 14px; color: var(--peach);
+  display: inline-block; margin-top: 14px; color: var(--peach-ink);
   font-weight: 600; font-size: 0.9rem; letter-spacing: 0.3px;
 }
 .win-card--link:hover .win-card-more { text-decoration: underline; }
@@ -867,11 +908,11 @@ section { padding: 100px 0; }
 .detail-result .names { color: var(--text); font-size: 1.15rem; font-weight: 500; }
 
 .detail-case { margin-bottom: 36px; }
-.detail-case h3 { margin-bottom: 10px; }
+.detail-case h2 { margin-bottom: 10px; font-size: 1.17em; }
 .detail-case p { color: var(--text-light); font-size: 1.05rem; }
 
 .detail-competitors { margin-bottom: 36px; }
-.detail-competitors h3 { margin-bottom: 14px; }
+.detail-competitors h2 { margin-bottom: 14px; font-size: 1.17em; }
 .detail-competitors-list { display: flex; flex-wrap: wrap; gap: 10px; }
 .detail-competitors-list li {
   background: var(--cream); color: var(--navy); font-weight: 500; font-size: 0.92rem;
@@ -880,11 +921,11 @@ section { padding: 100px 0; }
 
 .detail-desc { margin: 0 auto 36px; }
 .detail-highlights { margin-bottom: 36px; }
-.detail-highlights h3 { margin-bottom: 14px; }
+.detail-highlights h2 { margin-bottom: 14px; font-size: 1.17em; }
 .detail-highlights ul { list-style: disc; padding-left: 22px; color: var(--text-light); }
 .detail-highlights li { margin-bottom: 8px; }
 
-.detail-articles h3 { margin-bottom: 14px; }
+.detail-articles h2 { margin-bottom: 14px; font-size: 1.17em; }
 .detail-articles ul { display: flex; flex-direction: column; gap: 10px; }
 .detail-articles li a {
   color: var(--navy); font-weight: 600; font-size: 1rem; transition: color 0.2s;
@@ -997,7 +1038,7 @@ section { padding: 100px 0; }
 .winner-info { padding: 32px 32px 32px 0; flex: 1; }
 .winner-card--no-photo .winner-info { padding: 32px; }
 .winner-year {
-  font-size: 0.85rem; color: var(--peach); font-weight: 700;
+  font-size: 0.85rem; color: var(--peach-ink); font-weight: 700;
   text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
 }
 .winner-info h3 { font-size: 1.4rem; margin-bottom: 16px; }
@@ -1034,31 +1075,36 @@ section { padding: 100px 0; }
 
 /* LEGAL PAGES */
 .legal { max-width: 760px; }
-.legal h3 { margin: 32px 0 12px; font-size: 1.25rem; }
+.legal h2 { margin: 32px 0 12px; font-size: 1.25rem; }
 .legal p, .legal li { color: var(--text-light); }
 .legal ul { list-style: disc; padding-left: 24px; margin-bottom: 16px; }
 .legal ul li { margin-bottom: 8px; }
-.legal a { color: var(--peach); font-weight: 600; }
-.legal-updated { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--peach); font-weight: 700; margin-bottom: 24px; }
+.legal a { color: var(--peach-ink); font-weight: 600; }
+.legal-updated { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--peach-ink); font-weight: 700; margin-bottom: 24px; }
 .legal-disclaimer { margin-top: 40px; padding: 16px 20px; background: var(--cream); border-radius: 8px; font-size: 0.9rem; }
 
 /* FOOTER LEGAL */
 .footer-legal-links { margin-bottom: 12px; }
 .footer-legal-links a { color: var(--peach-light); font-weight: 500; }
 .footer-legal-links a:hover { color: var(--peach); }
-.footer-legal-links span { margin: 0 8px; color: rgba(255,255,255,0.4); }
+/* The separator between the legal links. 0.4 alpha measured 3.6:1 on the navy
+   footer — arguably exempt as pure decoration, but it is still a text node, and
+   0.55 (5.5:1) puts it past the threshold without making it louder than the
+   links it sits between. aria-hidden keeps it out of the screen-reader stream
+   either way, since "Privacy middot Terms" is not useful to hear. */
+.footer-legal-links span { margin: 0 8px; color: rgba(255,255,255,0.55); }
 .footer-disclaimer { font-size: 0.78rem; color: rgba(255,255,255,0.5); }
 
 /* EMPTY STATE */
 .empty-state { text-align: center; color: var(--text-light); font-size: 1.05rem; padding: 40px 0; }
-.empty-state a { color: var(--peach); font-weight: 600; }
+.empty-state a { color: var(--peach-ink); font-weight: 600; }
 
 /* FOOTER */
 footer { background: var(--navy); color: rgba(255,255,255,0.7); padding: 60px 0 30px; }
 .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 48px; margin-bottom: 40px; }
 .footer-brand img { width: 50px; height: 50px; border-radius: 50%; margin-bottom: 16px; }
 .footer-brand p { font-size: 0.9rem; max-width: 300px; }
-footer h4 { color: var(--peach); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+footer h2 { color: var(--peach); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
 footer ul li { margin-bottom: 8px; }
 footer ul li a { color: rgba(255,255,255,0.7); font-size: 0.9rem; transition: color 0.2s; }
 footer ul li a:hover { color: var(--peach); }
@@ -1131,7 +1177,7 @@ footer ul li a:hover { color: var(--peach); }
   .home-hero-crest { margin-bottom: 4px; }
   .home-hero-cta .btn { display: block; width: 100%; }
   .portal-card { padding: 20px 14px; }
-  .portal-card h3 { font-size: 1.05rem; }
+  .portal-card h2 { font-size: 1.05rem; }
 
   .win-card .competition { font-size: 1.15rem; }
   .winner-info h3 { font-size: 1.2rem; }

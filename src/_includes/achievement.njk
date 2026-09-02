@@ -2,7 +2,9 @@
 layout: base.njk
 ---
 
-<section class="page-header page-header--photo"{% if photo %} style="background-image:url('{{ photo }}'); background-position:{{ photoPosition | cssPosition }};"{% endif %}>
+{#- cssUrl — see the note in macros.njk. #}
+{%- set bannerPhoto = photo | cssUrl %}
+<section class="page-header page-header--photo"{% if bannerPhoto %} style="background-image:url('{{ bannerPhoto }}'); background-position:{{ photoPosition | cssPosition }};"{% endif %}>
   <div class="container">
     <div class="detail-back"><a href="/achievements/">&#8592; All Achievements</a></div>
     <h1>{{ competition }}</h1>
@@ -25,14 +27,14 @@ layout: base.njk
 
         {%- if caseTitle or caseSummary %}
         <div class="detail-case">
-          {%- if caseTitle %}<h3>{{ caseTitle }}</h3>{%- endif %}
+          {%- if caseTitle %}<h2>{{ caseTitle }}</h2>{%- endif %}
           {%- if caseSummary %}<p>{{ caseSummary }}</p>{%- endif %}
         </div>
         {%- endif %}
 
         {%- if competitors and competitors.length > 0 %}
         <div class="detail-competitors">
-          <h3>Who Competed</h3>
+          <h2>Who Competed</h2>
           <ul class="detail-competitors-list">
             {%- for c in competitors %}
             <li>{{ c.name }}</li>
@@ -49,7 +51,7 @@ layout: base.njk
 
         {%- if highlights %}
         <div class="detail-highlights">
-          <h3>Highlights</h3>
+          <h2>Highlights</h2>
           <ul>
             {%- for h in highlights %}
             <li>{{ h }}</li>
@@ -60,7 +62,7 @@ layout: base.njk
 
         {%- if articles and articles.length > 0 %}
         <div class="detail-articles">
-          <h3>In the News</h3>
+          <h2>In the News</h2>
           <ul>
             {%- for article in articles %}
             <li>
@@ -121,7 +123,11 @@ layout: base.njk
 
 <div id="lightbox" class="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-  <img id="lightbox-img" src="" alt="">
+  {#- No src attribute. `src=""` resolves against the current document, so every
+    page carrying a lightbox fired a second, pointless request for ITSELF on
+    load — and reported a broken image to anything inspecting document.images.
+    The open handler sets .src; until then the element should ask for nothing. #}
+  <img id="lightbox-img" alt="">
   <div id="lightbox-caption" class="lightbox-caption"></div>
 </div>
 <script>

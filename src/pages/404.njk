@@ -1,0 +1,85 @@
+---
+layout: base.njk
+pageTitle: Page Not Found
+permalink: /404.html
+pageDescription: "That page doesn't exist on the Guelph-Humber Pre-Law Society website. Here's how to find what you were looking for."
+eleventyExcludeFromCollections: true
+---
+{#- ---------------------------------------------------------------------------
+   The 404 page.
+
+   Two things make this file work, and both are easy to break:
+
+   1. `permalink: /404.html` — a FILE, not a directory. worker.js fetches this
+      exact path when the asset lookup misses, so renaming it means unknown
+      URLs go back to returning a completely blank body.
+
+   2. `eleventyExcludeFromCollections: true` — without it this page joins the
+      collections that feed sitemap.njk, and the site would advertise its own
+      error page to search engines as if it were real content.
+
+   No `activePage` is set on purpose: nothing in the nav should light up, since
+   the visitor is not on any of those pages.
+
+   Every link below is a real route. Do not add one for a page that does not
+   exist yet — a 404 that sends you to another 404 is worse than the blank one
+   this replaced.
+--------------------------------------------------------------------------- #}
+{% import "macros.njk" as m %}
+
+{{ m.pageHeader(null, "Page Not Found", "That link didn't lead anywhere — but the page you want is probably one of these.") }}
+
+<section>
+  <div class="container">
+    <div class="content-block">
+      <p>The address you followed doesn't exist on this site. That usually means a link
+      was mistyped, or it points at an older version of a page that has since moved.
+      Nothing is broken on your end.</p>
+      <p>If you arrived from a link somewhere else — an Instagram bio, a group chat, a
+      message from one of us — we'd genuinely like to know, so we can fix it at the
+      source. <a href="/contact/">Tell us where you found it.</a></p>
+    </div>
+
+    {#- Deliberately NOT .portal-card: those are white text on a translucent
+       panel and only legible over the home page's navy hero. On this white
+       section they would render as very nearly nothing. #}
+    <div class="notfound-grid">
+      <a href="/" class="notfound-card">
+        <h2>Home</h2>
+        <p>Start from the beginning</p>
+      </a>
+      <a href="/about/" class="notfound-card">
+        <h2>About</h2>
+        <p>Our mission, team &amp; FAQ</p>
+      </a>
+      <a href="/achievements/" class="notfound-card">
+        <h2>Achievements</h2>
+        <p>Our moot competition results</p>
+      </a>
+      <a href="/ghcup/" class="notfound-card">
+        <h2>The GH Cup</h2>
+        <p>Our flagship moot competition</p>
+      </a>
+      <a href="/minimoot/" class="notfound-card">
+        <h2>The Mini Moot</h2>
+        <p>Our in-house competition</p>
+      </a>
+      <a href="/events/" class="notfound-card">
+        <h2>Events</h2>
+        <p>Workshops, panels &amp; socials</p>
+      </a>
+      <a href="/photos/" class="notfound-card">
+        <h2>Photo Gallery</h2>
+        <p>View our society's gallery</p>
+      </a>
+      <a href="/materials/" class="notfound-card">
+        <h2>Materials</h2>
+        <p>Guides &amp; resources</p>
+      </a>
+      <a href="/contact/" class="notfound-card">
+        <h2>Contact</h2>
+        <p>Get involved &amp; reach out</p>
+      </a>
+    </div>
+  </div>
+</section>

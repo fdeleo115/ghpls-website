@@ -19,6 +19,10 @@ eleventyExcludeFromCollections: true
 User-agent: *
 Allow: /
 Disallow: /admin/
+# The error page is a real, fetchable URL that returns 200 when requested
+# directly (worker.js serves its body with a 404 status for genuine misses).
+# Nothing links to it, but keeping it out of the index avoids a "soft 404".
+Disallow: /404
 
 # NOTE: /assets/uploads/ is deliberately NOT disallowed.
 #

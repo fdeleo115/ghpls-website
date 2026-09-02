@@ -12,7 +12,11 @@
    gradient header, which is the correct fallback rather than an error.
 --------------------------------------------------------------------------- #}
 {% macro pageHeader(header, title, subtitle) %}
-{%- set photo = header.photo if header else null %}
+{#- cssUrl, not the raw value: the path goes inside url('...') in a style
+    attribute, and HTML-escaping does not protect a CSS context. Filtering here
+    means `photo` below is either a real upload path or empty, so the same
+    variable can gate both the class and the attribute. #}
+{%- set photo = (header.photo if header else null) | cssUrl %}
 <section class="page-header{% if photo %} page-header--photo{% endif %}"{% if photo %} style="background-image:url('{{ photo }}'); background-position:{{ header.photoPosition | cssPosition }};"{% endif %}>
   <div class="container">
     <h1>{{ title }}</h1>

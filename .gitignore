@@ -23,3 +23,7 @@ Thumbs.db
 # Local wrangler dev-server state (miniflare's SQLite cache/observability
 # files) — created by `wrangler dev`, never something to commit.
 .wrangler/
+
+# Ship-check audit reports — a map of the site's weak points. Public repo, so
+# these stay local rather than being published alongside the code.
+.ship-check/

@@ -24,21 +24,21 @@ pageDescription: "The Mini Moot is our in-house moot court competition, open onl
        Don't reintroduce a second photo field on this page. #}
     <div class="ghcup-hero minimoot-hero">
       {% if minimoot.eligibility %}<p class="eligibility-badge">{{ minimoot.eligibility }}</p>{% endif %}
-      <h3>{{ minimoot.headline }}</h3>
+      <h2>{{ minimoot.headline }}</h2>
       <p>{{ minimoot.description }}</p>
       <a href="/contact/" class="btn btn-primary">Ask us about competing</a>
     </div>
     <div class="ghcup-features">
       <div class="ghcup-feature">
-        <h4>Start Here</h4>
+        <h3>Start Here</h3>
         <p>Built for first-time advocates. If you have never mooted before, this is the competition to begin with — most of our competitors started with no experience at all.</p>
       </div>
       <div class="ghcup-feature">
-        <h4>Get Coached</h4>
+        <h3>Get Coached</h3>
         <p>Preparation sessions run by the Society walk you through skeleton arguments, oral structure, and answering questions from the bench before you ever stand up.</p>
       </div>
       <div class="ghcup-feature">
-        <h4>Go Further</h4>
+        <h3>Go Further</h3>
         <p>The Mini Moot is where teams that go on to represent Guelph-Humber at competitions across Ontario are found and developed.</p>
       </div>
     </div>
@@ -84,7 +84,7 @@ pageDescription: "The Mini Moot is our in-house moot court competition, open onl
         <img src="{{ shot.image }}" alt="{{ shot.caption }}" loading="lazy" data-sizes="(max-width: 640px) 100vw, (max-width: 1200px) 33vw, 373px" style="object-position: {{ shot.photoPosition | cssPosition }};">
         {%- if shot.caption %}
         <div class="photo-overlay">
-          <h4>{{ shot.caption }}</h4>
+          <h3>{{ shot.caption }}</h3>
         </div>
         {%- endif %}
       </div>
@@ -161,7 +161,11 @@ pageDescription: "The Mini Moot is our in-house moot court competition, open onl
 
 <div id="lightbox" class="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-  <img id="lightbox-img" src="" alt="">
+  {#- No src attribute. `src=""` resolves against the current document, so every
+    page carrying a lightbox fired a second, pointless request for ITSELF on
+    load — and reported a broken image to anything inspecting document.images.
+    The open handler sets .src; until then the element should ask for nothing. #}
+  <img id="lightbox-img" alt="">
   <div id="lightbox-caption" class="lightbox-caption"></div>
 </div>
 <script>

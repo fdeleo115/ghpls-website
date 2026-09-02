@@ -17,7 +17,28 @@
   <link rel="stylesheet" href="/admin/cms-mobile.css">
 </head>
 <body>
-  <script src="https://unpkg.com/decap-cms@3.1.1/dist/decap-cms.js"></script>
+  <!-- Decap CMS, loaded from a CDN with Subresource Integrity.
+
+       The `integrity` hash is not optional decoration. This page is the one
+       that ends up holding a live GitHub token with public_repo write scope,
+       and that repo is also the deploy source for the live site — so a
+       tampered bundle here reads the token and pushes to production. Pinning
+       @3.1.1 stops a malicious *release*; only the hash stops a compromised
+       or hijacked CDN response.
+
+       IF YOU CHANGE THE VERSION you MUST regenerate the hash, or the browser
+       will refuse to run the script and /admin/ will render a blank page with
+       only a console error to explain it:
+
+         curl -sL https://unpkg.com/decap-cms@<version>/dist/decap-cms.js \
+           | openssl dgst -sha384 -binary | openssl base64 -A
+
+       crossorigin="anonymous" is required for SRI to be checkable on a
+       cross-origin script; without it the browser cannot read the response to
+       verify it and blocks the script outright. -->
+  <script src="https://unpkg.com/decap-cms@3.1.1/dist/decap-cms.js"
+          integrity="sha384-ApY6bckrbZDGgTyAmIjKAIXUpNXsmBm2vu/jWOYopj+FSU7PIy5XyFaPMtP0nT+R"
+          crossorigin="anonymous"></script>
   <!-- GHPLS: drag-to-position focal point + live site preview (same-origin) -->
   <script src="/admin/cms-extras.js"></script>
 </body>

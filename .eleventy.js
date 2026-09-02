@@ -375,6 +375,29 @@ module.exports = function (eleventyConfig) {
     return content;
   });
 
+  // ---------------------------------------------------------------------------
+  // Markdown: raw HTML off.
+  //
+  // Eleventy's default markdown-it config sets `html: true`, and the layouts
+  // render entry bodies with `{{ content | safe }}`. Combined with the site
+  // CSP's `script-src 'unsafe-inline'`, a <script> typed into an achievement or
+  // exec bio in the CMS would execute on the live site.
+  //
+  // Editors are repo collaborators who could edit these templates directly, so
+  // this was never privilege escalation — it was a sharp edge pointed at people
+  // who write prose for a living, where a pasted snippet from a Google Doc
+  // becomes live markup. With this off, anything that looks like a tag renders
+  // as visible text instead, which is the right failure for a content field.
+  //
+  // Verified before flipping: no markdown body on this site used raw HTML, so
+  // nothing rendered differently. If a future page genuinely needs embedded
+  // markup, give it a template rather than turning this back on.
+  //
+  // amendLibrary (rather than setLibrary + a fresh markdownIt) keeps every other
+  // default Eleventy configures, so this changes one flag and nothing else.
+  // ---------------------------------------------------------------------------
+  eleventyConfig.amendLibrary("md", (mdLib) => mdLib.set({ html: false }));
+
   // Top-level assets (the logo) and the self-hosted font files copy as-is.
   // assets/uploads is handled by the image pipeline above rather than copied
   // wholesale — see copyUnprocessed(). "assets/*.*" alone only matches files
@@ -655,6 +678,33 @@ module.exports = function (eleventyConfig) {
     const n = parseFloat(value);
     if (isNaN(n) || n <= 1) return null;
     return Math.min(n, 4).toFixed(3).replace(/\.?0+$/, "");
+  });
+
+  // The image PATH beside the focal point, for the three page-header templates
+  // that write `background-image: url('{{ photo }}')`.
+  //
+  // The sweep that added cssPosition/cssFit/cssZoom fixed the position sitting
+  // next to this value and left the URL itself raw — which is the identical
+  // hole, because the escaping story is identical. Nunjucks turns `'` into
+  // `&#39;`, and the HTML parser turns it straight back into `'` before the CSS
+  // parser ever sees the attribute. So a photo path of
+  //
+  //     x'); background: url(https://example.com/track.gif
+  //
+  // closes the url() early and appends a declaration of the attacker's choice.
+  //
+  // Uploads always land under /assets/uploads/, so that is the whole shape of a
+  // legitimate value and anything else gets dropped rather than sanitised —
+  // returning "" makes the caller's `{% if photo %}` fail closed to the plain
+  // no-photo header, which is a correct-looking page rather than a broken one.
+  const CSS_URL_RE = /^\/assets\/uploads\/[A-Za-z0-9._~\-\/]+$/;
+  eleventyConfig.addFilter("cssUrl", function (value) {
+    const v = String(value == null ? "" : value).trim();
+    if (!v) return "";
+    // `..` would still match the character class above; reject path traversal
+    // explicitly rather than trying to express it in the pattern.
+    if (v.indexOf("..") !== -1) return "";
+    return CSS_URL_RE.test(v) ? v : "";
   });
 
   // ---------------------------------------------------------------------------

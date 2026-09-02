@@ -152,7 +152,52 @@ export default {
       return callbackHandler({ request, env, ctx });
     }
 
-    const response = await env.ASSETS.fetch(request);
+    let response = await env.ASSETS.fetch(request);
+
+    // ---------------------------------------------------------------------
+    // Custom 404.
+    //
+    // Workers Static Assets has no notion of an error page: a path that
+    // matches no file comes back as a 404 with a COMPLETELY EMPTY BODY. A
+    // visitor who mistypes a URL, follows a stale link from an Instagram bio,
+    // or hits one of the legacy paths that predates the REDIRECTS map above
+    // got a blank white screen with no branding and no way back.
+    //
+    // Two things here are deliberate:
+    //
+    //   * The status stays 404. Serving the error page with a 200 ("soft
+    //     404") tells search engines the broken URL is a real page and gets
+    //     it indexed as duplicate content.
+    //
+    //   * It only fires when the client actually wants HTML. Without the
+    //     Accept check, a missing image or a stale .ics link would be handed
+    //     8KB of markup labelled as an image, which is worse than the empty
+    //     body for anything that isn't a browser tab.
+    //
+    // If the 404 page itself is somehow missing, we fall through to the
+    // original empty response rather than turning a 404 into a 500.
+    // ---------------------------------------------------------------------
+    if (response.status === 404 && (request.headers.get("Accept") || "").includes("text/html")) {
+      // Both spellings, in this order, on purpose. The page is BUILT as
+      // /404.html, but Static Assets' default `html_handling`
+      // ("auto-trailing-slash") canonicalises that to /404 and answers the
+      // .html form with a 307. Asking for /404 first gets the body directly;
+      // asking for /404.html only works because something follows that
+      // redirect for us, which is not a behaviour worth depending on. The
+      // second entry is the fallback if `html_handling` is ever set to "none",
+      // where the reverse is true.
+      for (const path of ["/404", "/404.html"]) {
+        const notFound = await env.ASSETS.fetch(new URL(path, url.origin));
+        if (notFound.ok) {
+          response = new Response(notFound.body, {
+            status: 404,
+            headers: { "Content-Type": "text/html; charset=utf-8" },
+          });
+          break;
+        }
+      }
+    }
+
     const newResponse = new Response(response.body, response);
 
     for (const [k, v] of Object.entries(SECURITY_HEADERS)) {

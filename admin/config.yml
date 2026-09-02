@@ -645,4 +645,11 @@ collections:
             fields:
               - { label: "Title", name: "title", widget: "string" }
               - { label: "Description", name: "description", widget: "text" }
-              - { label: "File (PDF or document)", name: "file", widget: "file", required: false }
+              # If you paste a Google Docs link here, use the DOWNLOAD form of it,
+              # not the address bar. Open the doc, copy its URL, and replace the
+              # trailing "/edit..." with "/export?format=pdf". An "/edit" link
+              # sends readers into the editing view of the document, which is both
+              # the wrong experience and a risk if the doc is ever shared as
+              # "anyone with the link can edit".
+              - { label: "File (PDF or document)", name: "file", widget: "file", required: false,
+                  hint: "Upload a PDF, or paste a link. For a Google Doc, end the link with /export?format=pdf instead of /edit so it downloads cleanly." }

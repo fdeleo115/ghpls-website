@@ -2,7 +2,9 @@
 layout: base.njk
 ---
 
-{%- set bannerPhoto = headerPhoto or photo %}
+{#- cssUrl — see the note in macros.njk; this banner takes the same
+    unescapable-in-CSS path that the page-header macro does. #}
+{%- set bannerPhoto = (headerPhoto or photo) | cssUrl %}
 {%- set bannerPosition = (headerPhoto and headerPhotoPosition) or photoPosition or 'center' %}
 <section class="page-header{% if bannerPhoto %} page-header--photo{% endif %}"{% if bannerPhoto %} style="background-image:url('{{ bannerPhoto }}'); background-position:{{ bannerPosition | cssPosition }};"{% endif %}>
   <div class="container">
@@ -35,7 +37,7 @@ layout: base.njk
         {%- endif %}
 
         <div class="detail-competitors">
-          <h3>Competitions Attended</h3>
+          <h2>Competitions Attended</h2>
           {%- if record.competitions.length > 0 %}
           <ul class="detail-chip-list">
             {#- Hand-entered competitions may not correspond to an achievement
@@ -55,7 +57,7 @@ layout: base.njk
 
         {%- if record.teamPlacements.length > 0 %}
         <div class="detail-highlights">
-          <h3>Team Placements</h3>
+          <h2>Team Placements</h2>
           <div class="detail-results">
             {%- for p in record.teamPlacements %}
             <div class="detail-result">
@@ -73,7 +75,7 @@ layout: base.njk
 
         {%- if record.individualAchievements.length > 0 %}
         <div class="detail-highlights">
-          <h3>Individual Achievements</h3>
+          <h2>Individual Achievements</h2>
           <div class="detail-results">
             {%- for p in record.individualAchievements %}
             <div class="detail-result">
@@ -91,7 +93,7 @@ layout: base.njk
 
         {%- if qanda and qanda.length > 0 %}
         <div class="detail-highlights member-qanda">
-          <h3>A Few Questions</h3>
+          <h2>A Few Questions</h2>
           {%- for qa in qanda %}
           <div class="qanda-item">
             <p class="qanda-q">{{ qa.question }}</p>
@@ -148,7 +150,11 @@ layout: base.njk
 
 <div id="lightbox" class="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-  <img id="lightbox-img" src="" alt="">
+  {#- No src attribute. `src=""` resolves against the current document, so every
+    page carrying a lightbox fired a second, pointless request for ITSELF on
+    load — and reported a broken image to anything inspecting document.images.
+    The open handler sets .src; until then the element should ask for nothing. #}
+  <img id="lightbox-img" alt="">
   <div id="lightbox-caption" class="lightbox-caption"></div>
 </div>
 <script>

@@ -28,7 +28,7 @@ pageDescription: "Upcoming workshops, panels and socials from the Guelph-Humber 
           <div class="day">{{ event.data.date | dayNum }}</div>
         </div>
         <div class="schedule-info">
-          <h4>{{ event.data.title }}</h4>
+          <h3>{{ event.data.title }}</h3>
           <p>{{ event.data.description }}</p>
           {% if event.data.time %}<div class="time">{{ event.data.time }}</div>{% endif %}
           {% if event.data.location %}<div class="location">{{ event.data.location }}</div>{% endif %}
@@ -98,7 +98,7 @@ pageDescription: "Upcoming workshops, panels and socials from the Guelph-Humber 
         {% endif %}
         <div class="past-event-info">
           <div class="past-event-date">{{ event.data.date | dateFormat }}</div>
-          <h4>{{ event.data.title }}</h4>
+          <h3>{{ event.data.title }}</h3>
           <p>{{ event.data.description }}</p>
         </div>
         {% if event.data.extraPhotos %}
@@ -130,7 +130,11 @@ pageDescription: "Upcoming workshops, panels and socials from the Guelph-Humber 
 
 <div id="lightbox" class="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-  <img id="lightbox-img" src="" alt="">
+  {#- No src attribute. `src=""` resolves against the current document, so every
+    page carrying a lightbox fired a second, pointless request for ITSELF on
+    load — and reported a broken image to anything inspecting document.images.
+    The open handler sets .src; until then the element should ask for nothing. #}
+  <img id="lightbox-img" alt="">
   <div id="lightbox-caption" class="lightbox-caption"></div>
 </div>
 <script>
