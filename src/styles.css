@@ -119,13 +119,18 @@
      Fixing the instances you happen to notice is what let this survive the
      first sweep. Fix it by enumerating instead:
 
-       grep -nE "color: ?var\(--peach\)" src/styles.css
+       grep -nE '(^|[;{[:space:]])color: ?var\(--peach\)' src/styles.css
 
-     and classify EVERY hit by the background it actually lands on. As of the
-     Sept 2026 audit every remaining hit is on navy — nav, both heroes,
-     .portal-icon, .ghcup-hero, .schedule-date (background: var(--navy)),
-     .exec-card-avatar, .detail-back (inside .page-header) and the footer.
-     Anything new in that list on a light ground is a regression. */
+     The leading character class matters: a bare "color:" also matches
+     "outline-color:" and "border-color:", which are NOT text and are held to
+     3:1 rather than 4.5:1. This pattern returns text colour only — 14 lines as
+     of the Sept 2026 audit, every one of them on navy (nav, both heroes,
+     .portal-icon, .btn-outline:hover, .ghcup-hero, .schedule-date which sets
+     background: var(--navy), .exec-card-avatar, .detail-back inside
+     .page-header, and the footer).
+
+     Classify EVERY hit by the background it actually lands on. Anything new in
+     that list sitting on white or --cream is a regression. */
   --peach-ink: #a85f2a;
 }
 

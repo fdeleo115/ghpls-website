@@ -1,11 +1,329 @@
 # Handoff — GHPLS Website
 
-_Written: June 2026 · Updated: August 10 2026 · For whoever (human or AI) picks this up next._
+_Written: June 2026 · Updated: September 1 2026 · For whoever (human or AI) picks this up next._
 
-> **Section order:** newest first. The "twelfth pass" below is the most
-> recent work; sections after it are earlier the same day or before. Their
-> internal cross-references ("see section 0") still point at each other, not
-> at this section.
+> **Section order:** newest first. The "thirteenth pass" below is the most
+> recent work; every section after it is older. Their internal
+> cross-references ("see section 0") point within their own pass, not at
+> this one.
+
+## Thirteenth pass, Sept 1 2026 — full pre-ship audit (security, legal, accessibility, performance), then everything in it fixed and deployed
+
+Ran a from-scratch pre-launch audit of the whole site and the live Worker, then
+fixed every finding that lives in this repository. 14 findings; 13 fixed and
+deployed in commit `e7c1ed4`, one handed to the owner. **Nothing here was
+believed until it was checked against the production URL** — see the verification
+note at the end, which follows the twelfth pass's rule.
+
+The headline result is boring in a good way: no critical findings. The security
+work from the eleventh and twelfth passes is holding — CSP and every security
+header present on all 12 public pages, no secrets anywhere in the full
+168-commit history, `npm audit` clean, no source files reachable, the OAuth token fix genuinely closed,
+zero third-party requests on a normal page load. What follows is the delta.
+
+### 0. The one worth reading: a CMS collection whose folder had never existed was invisible to every sweep
+
+**"GH Cup Final Videos" would have published a blank page at a live URL the
+first time an exec used it.**
+
+Everything was wired: the collection in `admin/config.yml`, the Eleventy
+collection in `.eleventy.js`, the Final Videos section in `src/pages/ghcup.njk`.
+The only missing piece was `src/ghcup-videos/` itself — the directory did not
+exist, so neither did the `ghcup-videos.json` directory data file that sets
+`permalink: false`, the way `src/minimoot-videos/minimoot-videos.json` does for
+its twin.
+
+Consequence: the moment an exec added the first video through `/admin/`, Decap
+would write `src/ghcup-videos/ghcup-final-2025.md`, and the next build would
+emit `/ghcup-videos/ghcup-final-2025/` as a **0-byte page with no layout and no
+nav** — a real, crawlable URL serving an empty document. Reproduced with a
+throwaway fixture entry to confirm it, then fixed and re-confirmed.
+
+**Why this matters beyond the one file.** The fifth pass swept exactly this
+defect class ("collection items with no layout assigned") and fixed it for four
+collections. It missed this one, and the reason is worth internalising: that
+sweep looked at the directories that existed. This collection's directory did
+not exist, because nobody had ever created an entry in it. **Grep finds what
+exists; the CMS config declares what is *permitted* to exist, and the gap
+between those two lists is not empty space — it is a code path that will run for
+the first time in production, in front of a user, with nobody having ever
+watched it.**
+
+If you add a collection to `admin/config.yml`, create its folder and its
+`<name>.json` in the same commit. To audit the whole set at once, read the
+`folder:` keys out of the config and diff them against the filesystem rather
+than listing `src/`:
+
+```
+grep -E '^\s+folder:' admin/config.yml
+```
+
+Every folder collection must end up in one of two correct states: it generates
+pages (a `layout` + `permalink` in its directory data file, like
+`src/achievements` and `src/team`), or it does not (`{"permalink": false}`, like
+every other one). A collection in neither state is this bug.
+
+**Bonus that fell out of the fixture:** while a real video existed on the page,
+`/ghcup/` was loaded in a browser and the `youtube-nocookie.com` iframe rendered
+with **zero `securitypolicyviolation` events**. The `frame-src` directive the
+eleventh pass §2 added had never once been exercised against real content,
+because no video had ever been added. It works.
+
+### 1. The contrast bug survived two sweeps; the rule now lives in the CSS
+
+`--peach` (`#e8a87c`) is a **navy-ground token**. On white it measures 2.03:1,
+against a 4.5:1 floor. The eleventh pass §6 found this and fixed five
+instances. Six more survived, including the worst one: **every link in the body
+of `/privacy/`, `/terms/` and `/accessibility/`** — on the very page that claims
+in text that the colours were measured against the WCAG minimums.
+
+All six now use `--peach-ink` (`#a85f2a`, 4.84:1). But the durable part of this
+fix is the comment block above the token definition in `src/styles.css`, which
+carries the rule *and* the command that enumerates it:
+
+```
+grep -nE '(^|[;{[:space:]])color: ?var\(--peach\)' src/styles.css
+```
+
+That leading character class is not decoration: a bare `color:` also matches
+`outline-color:` and `border-color:`, which are not text and are held to 3:1
+rather than 4.5:1. This pattern returns text colour only — **14 lines** as of
+this pass, every one of them on navy (nav, both heroes, `.portal-icon`,
+`.btn-outline:hover`, `.ghcup-hero`, `.schedule-date` which sets
+`background: var(--navy)`, `.exec-card-avatar`, `.detail-back` which sits
+inside `.page-header`, and the footer).
+
+Classify **every** hit by the background it actually lands on. Anything new in
+that list sitting on white or `--cream` is a regression.
+
+**The general lesson, which is why this is section 1 and not a footnote:** when
+a defect is one mistake repeated N times, it gets *reported* as N findings but
+must be *fixed* as one sweep. "I fixed the ones I found" and "I checked every
+place this could occur" produce an identical diff when the search was complete,
+and silently different ones when it wasn't. Demand the enumeration, not the fix
+list.
+
+Also worth knowing: measuring contrast by reading the stylesheet does not work
+on this site, because the effective background usually comes from an ancestor's
+gradient or photo rather than the element's own `background-color`. A first
+attempt at an automated sweep reported 24 failures on the home page, every one
+of them a false positive — white text on a navy gradient, scored as white on
+white. Resolve `background-image` before `background-color` when walking
+ancestors, average gradient colour stops, and put text over raster photos in a
+separate "cannot assess" bucket instead of guessing.
+
+### 2. The old Netlify site was not a stale copy — it was a live, auto-deploying mirror (now deleted)
+
+The eighth pass's to-do described `guelphhumberprelawsociety.netlify.app` as
+"serving a stale copy". That was wrong in the direction that mattered. It was
+serving `/minimoot/`, `/accessibility/`, the self-hosted font files and the
+newest event's `.ics` — all of which postdate the Cloudflare move. **It was
+still connected to this GitHub repo and rebuilding on every push.**
+
+And because `netlify.toml` was deleted in commit `17eaa39`, that mirror served
+the entire site with **no CSP, no X-Frame-Options, no Permissions-Policy and no
+nosniff**. Every security header the eleventh and twelfth passes were spent
+getting right was absent on a complete, current, publicly reachable copy of the
+same site, reachable by anyone who had the old link. Its `/admin/` was live and
+framable too.
+
+The owner has since deleted the Netlify site, which closes this.
+
+**The lesson to keep:** a migration removes a platform from the codebase long
+before it removes the platform from the internet. Security controls are
+per-deployment, not per-repository — so an abandoned deployment that still
+builds from the same source inherits every content fix and none of the
+platform-specific hardening, which makes it strictly *worse* than the site it
+replaced. Nothing in this repo could have revealed it. It was found by probing a
+hostname mentioned in passing in this very file.
+
+If the site ever moves hosts again, the migration is not finished until the old
+deployment returns 404.
+
+### 3. New: a custom 404 page — and the `/404` vs `/404.html` trap inside `worker.js`
+
+Unknown URLs used to return a 404 with a **completely empty body** — a blank
+white screen for anyone who mistyped a URL or followed a dead link from an
+Instagram bio. Workers Static Assets has no notion of an error page.
+
+Added `src/pages/404.njk` (`permalink: /404.html`) and wiring in `worker.js`.
+Three things there are load-bearing:
+
+- **The status stays 404.** Serving the page with a 200 is a "soft 404" and gets
+  the broken URL indexed as duplicate content.
+- **It only fires when the client accepts `text/html`.** Without that check, a
+  missing image or a stale `.ics` link would be handed 8KB of markup labelled as
+  an image — worse than the empty body for anything that isn't a browser tab.
+- **It asks for `/404` first and `/404.html` second.** The page is *built* as
+  `/404.html`, but Static Assets' default `html_handling`
+  ("auto-trailing-slash") canonicalises that to `/404` and answers the `.html`
+  form with a **307**. Asking only for `/404.html` appeared to work, but only
+  because something followed that redirect for us — which is not a behaviour to
+  depend on. The second entry is the fallback if `html_handling` is ever set to
+  `"none"`, where the reverse is true.
+
+`404.njk` also carries `eleventyExcludeFromCollections: true`, without which the
+error page joins the collections feeding `sitemap.njk` and the site advertises
+its own 404 to Google. `robots.njk` disallows `/404` for the same reason, since
+the page returns 200 when requested directly.
+
+### 4. Subresource Integrity on the Decap bundle — and the trap if you bump the version
+
+`admin/index.html` now loads `decap-cms@3.1.1` with an `integrity` hash and
+`crossorigin="anonymous"`. Pinning the version stops a malicious *release*; only
+the hash stops a compromised or hijacked CDN response — and that page is the one
+that ends up holding a GitHub token with `public_repo` write scope on this repo,
+which is also the deploy source for the live site.
+
+**If you change the version you MUST regenerate the hash**, or the browser
+refuses to run the script and `/admin/` renders as a blank page with nothing but
+a console error to explain it. The command is in a comment right above the tag:
+
+```
+curl -sL https://unpkg.com/decap-cms@<version>/dist/decap-cms.js \
+  | openssl dgst -sha384 -binary | openssl base64 -A
+```
+
+This was the single riskiest edit in the pass — a wrong hash locks the exec team
+out of the CMS — so it was verified in a real browser both locally and against
+production: `window.CMS` defined, config loads, "Login with GitHub" renders, no
+config error.
+
+### 5. Markdown no longer renders raw HTML
+
+Eleventy defaults markdown-it to `html: true`, and the layouts render entry
+bodies with `{{ content | safe }}`. Combined with `script-src 'unsafe-inline'`
+in the site CSP, a `<script>` pasted into a CMS field would have executed on the
+live site. Now `eleventyConfig.amendLibrary("md", md => md.set({ html: false }))`.
+
+Verified before flipping that **no markdown body on this site used raw HTML**, so
+nothing rendered differently. Worth knowing: there is exactly **one** `markdown`
+widget in the entire CMS — "Description" on Achievements. Exec biographies use a
+`text` widget, so they were never affected.
+
+This was never privilege escalation — editors are collaborators who could edit
+templates directly. It was a sharp edge pointed at people who write prose, where
+a snippet pasted from a Google Doc becomes live markup. If a future page
+genuinely needs embedded HTML, give it a template rather than turning this back
+on.
+
+### 6. `cssUrl` — finishing the sweep the eleventh pass §7 started
+
+§7 added `cssPosition`/`cssFit`/`cssZoom` for CMS values interpolated into
+`style="..."`, and left the **image path itself** raw in the three page-header
+templates:
+
+```
+style="background-image:url('{{ photo }}'); background-position:{{ ... | cssPosition }}"
+```
+
+The escaping story is identical — Nunjucks turns `'` into `&#39;`, and the HTML
+parser turns it back into `'` before the CSS parser sees the attribute — so a
+photo path could close the `url()` early and append a declaration. The focal
+point sitting *next to it on the same line* was filtered; the URL was not.
+
+New `cssUrl` filter accepts only `^/assets/uploads/[A-Za-z0-9._~\-\/]+$`,
+rejects `..` explicitly, and returns `""` otherwise so the caller's `{% if %}`
+fails closed to the plain navy header. Applied in `macros.njk`, `member.njk` and
+`achievement.njk`. Confirmed all 25 banner photos still render, and that the
+responsive `--bg-sm/md/lg` transform still applies on top of it.
+
+### 7. Heading levels — and why you must measure before you retag
+
+Headings skipped levels on **29 of 30 pages** (`h1`→`h3`, `h2`→`h4`), which
+breaks heading-based screen-reader navigation. Fixed across 12 templates and 17
+CSS selectors; the site now has zero skips and exactly one `h1` per page.
+
+**The trap, if you ever do this again:** an HTML tag carries a font size from the
+user-agent stylesheet, and several rules here set only `margin-bottom` and
+inherited that size silently. Changing `<h4>` to `<h3>` in those cases is not a
+semantic-only change — it enlarges the text, with nothing in the diff to say so.
+The computed `fontSize` of every affected selector was captured in a browser
+*before* the edit and pinned explicitly on the new selectors afterwards. A
+refactor described as "semantic only" is only semantic if something checked.
+
+One heading is deliberately left alone: `<h2 id="lightbox-title">` in
+`photos.njk` is empty in the static HTML and filled by JS. A static scan flags it
+as an empty heading, but `.lightbox` computes to `display: none` when closed, so
+it is excluded from the accessibility tree entirely. **If the lightbox is ever
+hidden with `opacity` or `visibility` instead of `display`, that becomes a real
+finding.**
+
+### 8. Six lightbox images were requesting the page itself
+
+`<img id="lightbox-img" src="" alt="">` appeared in six templates. An empty
+`src` resolves against the current document, so **every page carrying a lightbox
+fired a second, entirely pointless request for itself on load**, and reported a
+broken image to anything inspecting `document.images`. The `src` attribute is
+now absent; the open handler sets `.src` as it always did.
+
+This one was not in the audit at all — it surfaced while verifying an unrelated
+fix. Worth remembering that verification is not just confirmation of what you
+already believe: it is the first time the system is actually exercised, and
+exercise finds things that reading cannot.
+
+### 9. Smaller items
+
+- **Materials links** pointed at Google Docs `/edit` URLs. Now
+  `/export?format=pdf`, which sends `Content-Disposition: attachment` and makes
+  the button's "Download" label true. `download` is inert cross-origin, so it is
+  emitted only for same-origin uploads; external links get `rel="noopener"`. Both
+  buttons now carry distinct `aria-label`s instead of announcing as the single
+  word "Download" twice. A hint on the CMS field tells the next editor not to
+  paste an `/edit` link back in.
+- **Privacy policy** said the site sets no cookies. The editor login sets one
+  short-lived `__Host-csrf_state` cookie. Narrowed the claim to match reality
+  rather than leaving an absolute statement the code contradicts; date bumped to
+  September 2026. Terms and Accessibility are unchanged, so their dates were
+  deliberately left at August.
+- **`nav`** now has an `aria-label`; the home `<h1>` has an explicit
+  `aria-label`, because `<br>` contributes nothing to the accessible name and it
+  was announcing as "Guelph-HumberPre-Law Society".
+- **Deps:** `sharp` 0.35.3 → 0.35.4, `wrangler` 4.120.0 → 4.128.0. `npm audit`: 0.
+
+### How this was verified — and the wrangler check you should repeat
+
+The twelfth pass's rule was followed exactly. After the GitHub Action went
+green, the deploy log was read for the version that **actually ran**:
+
+```
+[command] npx --no-install wrangler --version
+ ⛅️ wrangler 4.128.0
+```
+
+4.128.0 on Node 22, matching `package.json` — the silent fallback to a bundled
+3.x did **not** recur despite this pass bumping wrangler, which is precisely the
+change that triggered it last time. **Repeat this check on any future wrangler
+bump; a green tick is what lied the first time.**
+
+Then, against production rather than a local server: full CSP and every security
+header on `/404` — a path that **did not exist before this deploy**, so no result
+here rests on a cached response; 200 with CSP on all 12 public pages and
+`/admin/`; the custom 404 returning 404 with 8,248 bytes while a missing image
+still returns 0; `.legal a` measuring 4.84:1 live; zero contrast failures and
+zero heading skips; Materials links resolving to `/export?format=pdf`; `/admin/`
+booting Decap with `integrity` intact; and zero third-party requests.
+
+### Still open after this pass
+
+1. **Confirm the two GH Cup Google Docs are shared as *Viewer*, not *Editor*.**
+   They are world-readable, which is intended — but the write role cannot be
+   determined without attempting a write, which was not done. If either is set to
+   "Anyone with the link can edit", anyone who ever had the old link can rewrite
+   the competition rules and the judges' rubric. Drive → Share on each doc.
+2. **Nobody has logged into `/admin/` since the tenth pass.** The panel boots and
+   its code was audited, but the focal-point crop tool, image upload and the
+   publish flow are still unverified against a real GitHub session — and this
+   pass changed `admin/config.yml` and `admin/index.html`. Both parse and boot,
+   but a real save is a different code path. Have an exec publish one trivial
+   edit to close this out.
+3. Everything carried over from the twelfth pass's list that isn't code work —
+   exec bios, GH Cup gallery photos, real material PDFs, remaining "TBD" winner
+   names.
+
+The audit report, with every finding's evidence and verification step, is at
+`.ship-check/report-2026-09-01.md`. It is gitignored on purpose: this repo is
+public, and the report is a map of where the weak points were.
 
 ## Twelfth pass, Aug 10 2026 — the eleventh pass's §0 fix didn't actually ship; here's why, and how it was caught
 
