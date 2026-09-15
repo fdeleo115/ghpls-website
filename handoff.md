@@ -1,11 +1,189 @@
 # Handoff — GHPLS Website
 
-_Written: June 2026 · Updated: September 1 2026 · For whoever (human or AI) picks this up next._
+_Written: June 2026 · Updated: September 15 2026 · For whoever (human or AI) picks this up next._
 
-> **Section order:** newest first. The "thirteenth pass" below is the most
+> **Section order:** newest first. The "fourteenth pass" below is the most
 > recent work; every section after it is older. Their internal
 > cross-references ("see section 0") point within their own pass, not at
 > this one.
+
+## Fourteenth pass, Sept 15 2026 — Student Life's pre-publication review, all items actioned
+
+**The site passed its approval review.** Student Life read the live site and
+came back with a list of changes plus one sentence that matters more than the
+list: once these are in, the site can be published and Student Life will link
+to it from the GHPLS subpage on the main Guelph-Humber website. That is the
+gate this whole project has been building toward. Everything below is that list,
+worked through in full.
+
+Read §1 before touching the GH Cup page, and §2 before touching the FAQ — both
+contain a constraint that is not obvious from the code and that a future pass
+would otherwise undo in good faith.
+
+### 1. The Sponsors & Partners section is commented out, NOT deleted — and it must stay that way until someone gets approval
+
+Student Life asked for the Sponsors & Partners section to come off the GH Cup
+page. The reason is **approval, not design**, and this is the part worth
+understanding before you touch it:
+
+> A sponsorship package for a Guelph-Humber event has to be approved by Student
+> Life **and** by the Guelph-Humber Marketing, Communications, and Public Affairs
+> department before the Society solicits or announces sponsors.
+
+The section carried an "Interested in sponsoring? Get in touch" invitation.
+That is soliciting. So it is off the live site.
+
+**It is preserved as a Nunjucks comment in `src/pages/ghcup.njk`, with the
+restoration steps written above it**, because the section will come back once a
+package is approved and rebuilding it from scratch is wasted work. The
+`.sponsors-row` / `.sponsor-slot` rules are still in `styles.css` with a comment
+saying why they look unused.
+
+**A comment, deliberately — not an `{% if showSponsors %}` flag.** A flag is one
+mis-click in the CMS away from publishing an unapproved solicitation on a page
+the University links to, and nobody would notice until the wrong person saw it.
+Uncommenting is a code change that goes through a commit; a toggle is not. If a
+future pass is tempted to "tidy this up" into a CMS switch: don't. The awkwardness
+is the safety feature.
+
+### 2. FAQ answers can now contain real links — via a filter, NOT `| safe`
+
+Student Life's feedback, twice over: *"I encourage you to hyperlink to The GH Cup
+page instead of providing written instruction. This feedback goes for all
+questions that are directed to other subpages"*, and separately, hyperlink the
+Instagram and LinkedIn in the "how do I stay up to date" answer.
+
+The problem: an FAQ answer is a CMS textarea, and marking a CMS field `| safe` is
+exactly what the `paragraphs` filter was written to avoid (see the eleventh
+pass). So links could not simply be pasted in as HTML.
+
+**The fix — `inlineLinks`, a new filter in `.eleventy.js`.** It escapes the whole
+string first, then turns exactly one pattern back into markup:
+
+```
+[The GH Cup page](/ghcup/)
+```
+
+Nothing else is markup. An editor who types `<b>` sees the characters `<b>` on
+the page. Link targets are allow-listed to three shapes — a site-relative
+`/path/`, an `https://` URL (which gets `target="_blank" rel="noopener"` and a
+visually-hidden "opens in a new tab", matching the rest of the site), and
+`mailto:`. **`javascript:`, protocol-relative `//host`, and plain `http://` all
+render as the literal text the editor typed**, so a bad link is a visible typo
+rather than a live hazard. Verified against each of those cases plus
+`[<img onerror=alert(1)>](/ghcup/)` before shipping.
+
+`paragraphs` was refactored onto the same two helpers, so GH Cup / Mini Moot
+body text gained the same link syntax for free. Checked first that no existing
+CMS text contained a `[x](y)` pattern that would suddenly become a link.
+
+The CMS hint on the Answer field explains the syntax in plain language and names
+the five internal paths, so an exec does not need to know what markdown is.
+
+**One thing that nearly shipped broken, and is worth remembering:** the links
+rendered as *completely invisible* text on first build. `styles.css` sets
+`a { text-decoration: none; color: inherit }` globally, which has always been
+fine because every other link on this site is a button, a card, or a nav item
+that reads as clickable from its surroundings. An anchor dropped into body copy
+inherits `--text-light` and no underline — identical to the prose around it.
+`.faq-answer a` / `.content-block a` now style it (peach-ink, 600, underlined).
+**Keep the underline**: WCAG 1.4.1 forbids colour as the only marker of a link
+inside a block of text, and peach-ink against text-light is a slight difference
+anyway. If you add prose links anywhere new, check them against this — the
+global reset will bite again.
+
+### 3. Achievements are grouped by SCHOOL year, with a filter that degrades gracefully
+
+*"If possible, you may want to categorize by year because I could see this page
+getting quite robust otherwise."* Already true — five seasons, nine competitions.
+
+**School year, not calendar year, is the only grouping that holds together.** A
+season runs Western Cup in October through HSFK Cup the following June;
+splitting at December 31st would file one team's season under two headings. The
+cutoff is **September 1st** (`SCHOOL_YEAR_START_MONTH` in `.eleventy.js`), which
+also puts the Humber Cup in late July at the *end* of the season it was actually
+competed in — where the people who were there expect to find it. Current result:
+2025/2026 has 6, 2024/2025 has 3.
+
+The `achievementYears` collection does the grouping because Nunjucks has no
+`groupby` and the page needs the list twice (once for the buttons, once for the
+sections). An entry with no readable date falls back to `year - 1`; an entry
+with neither gets its own "Date not set" group at the end rather than being
+silently filed under a wrong year or dropped.
+
+**The filter is progressive enhancement and the order matters.** The page is
+*built* as one section per year, each with its own heading — so with JavaScript
+off, a visitor still gets the categorised page Student Life asked for. The chips
+only hide and show groups that are already in the HTML. The toolbar itself is
+`hidden` in the markup and unhidden by script, because a row of filter buttons
+that do nothing is worse than no filter; the script also bails when there is
+only one year, since a single-option filter is clutter.
+
+Two details that would be easy to lose in a later edit:
+
+- `.year-group[hidden] { display: none !important }` is load-bearing. `.year-group`
+  carries its own `display`, and an author `display:` beats the browser's
+  built-in rule for the `hidden` attribute. Without that line the buttons appear
+  to do nothing at all.
+- The eager-load hint moved from `loop.index == 1` to `loop.first and isFirstGroup`.
+  Inside the new inner loop the old condition would eagerly load the top card of
+  *every* year. Nunjucks has no `loop.parent` (that is Jinja2), so the outer
+  loop's position is carried down in a `{% set %}`. Verified: exactly one
+  `data-eager` in the built page.
+
+### 4. The rest of the list
+
+- **"Do not mention a specific program and instead state that all programs can
+  join."** The answer used to list Justice Studies, Business, Media, Psychology,
+  and FCSS. It now says every program can join and no degree is required, and
+  names none. Note the neighbouring question ("Do I need to be in a law-related
+  program to join?") covers adjacent ground — the two are angled differently on
+  purpose, but if a future pass trims the FAQ, these are the pair to look at.
+- **Typos in the Pre-Law / Moot Team question.** "diffrence" → "difference",
+  "Pre Law" → "Pre-Law", the full stop at the end of a question → a question
+  mark, "Guelph Humber" → "Guelph-Humber", and the doubled spaces removed.
+- **"Recognized not recognised."** Fixed in the FAQ, and — since the point is
+  consistency — in `terms.njk` and `privacy.njk`, which had the same spelling.
+  Site-wide scan found no other `-ise` / `-isation` spellings.
+- **Law School Tours.** Already gone: an exec deleted it through the CMS
+  (`df4ea8a`) before this pass started. It came down in the `git pull --rebase`
+  at the top of the session — which is the fifth time that rule in §4 of the
+  original handoff has paid for itself. Student Life also asked, in passing,
+  whether the Society is contacting law schools on Guelph-Humber's behalf; that
+  is a question for the owner to answer directly, not a site change.
+- **pre-law vs pre law.** One hyphenation throughout: **pre-law**. The only
+  offender outside the FAQ was the Orientation Marketplace event description
+  ("Guelph Humber Pre Law Society"), fixed in `src/events/orientation-marketplace.md`.
+  A scan of the built HTML now finds zero unhyphenated "pre law" or
+  "Guelph Humber" anywhere.
+
+### 5. Left alone on purpose
+
+The Contact page says people can get in touch about *"partnering with us"*, and
+its `pageDescription` says the same. Student Life did not flag it, and it is a
+general invitation rather than an event sponsorship package — but it is adjacent
+enough to §1 that the owner should decide rather than have it quietly reworded.
+**Flagged to the owner, not changed.**
+
+### 6. Verified, not assumed
+
+Following the twelfth pass's rule. Built clean, then checked in a real browser at
+1280px and at 375px:
+
+- Every FAQ link renders as an anchor; no literal `[x](y)` survives anywhere in
+  the built page; the hostile inputs above all render inert.
+- Achievements: chips switch groups, `aria-pressed` tracks the active chip, the
+  `role="status"` line announces the change for screen readers, exactly one
+  `data-eager`, no horizontal overflow at 375px.
+- GH Cup page: zero occurrences of "sponsor" in the rendered HTML; sections now
+  end at Previous Winners; no console errors.
+- Events page: no Law School Tours.
+- The only "sponsor" left in the whole built site is in `terms.njk`, in the
+  disclaimer about what to do *if* the Society ever takes sponsorship money.
+  That one is correct where it is.
+
+**Not yet deployed at the time of writing** — committed locally, and the owner
+is replying to Student Life to confirm the changes are done.
 
 ## Thirteenth pass, Sept 1 2026 — full pre-ship audit (security, legal, accessibility, performance), then everything in it fixed and deployed
 

@@ -483,8 +483,8 @@ collections:
           - { label: "Short Title (nav bar)", name: "shortTitle", widget: "string" }
           - { label: "Website address", name: "url", widget: "string", hint: "The full address this site is published at, with https:// and no slash on the end. This one value fills in the sitemap, robots.txt, and the link previews people see when they share a page — so if the site ever moves to a new domain, change it HERE and everything follows. Getting it wrong doesn't break the site, it just makes Google and social previews point at the wrong place." }
           - { label: "Site Description", name: "description", widget: "text", hint: "Shows on the homepage and footer" }
-          - { label: "Instagram URL", name: "instagram", widget: "string" }
-          - { label: "LinkedIn URL", name: "linkedin", widget: "string" }
+          - { label: "Instagram URL", name: "instagram", widget: "string", hint: "Changing this updates every Instagram link the site generates. The two FAQ answers on the About page spell the address out in full, so if this ever changes, search the About Page FAQ for the old address too." }
+          - { label: "LinkedIn URL", name: "linkedin", widget: "string", hint: "Changing this updates every LinkedIn link the site generates. The \"How do I stay up to date\" FAQ answer on the About page spells the address out in full, so update that one by hand as well." }
           - { label: "Contact Email", name: "email", widget: "string", required: false }
           - { label: "RSVP Google Form link", name: "rsvpFormUrl", widget: "string", required: false, hint: "Paste the 'Send > link' URL of your RSVP Google Form. Leave blank and the RSVP button emails you instead, so it never breaks." }
           - { label: "RSVP form — event field ID", name: "rsvpFormEventField", widget: "string", required: false, hint: "Optional. Lets the form open with the event name already filled in. In your Google Form choose 'Get pre-filled link', type ANYTHING into the event question, click Get link, and copy the entry.123456789 part of the URL here." }
@@ -504,7 +504,7 @@ collections:
             hint: "Add, edit, or reorder frequently asked questions"
             fields:
               - { label: "Question", name: "question", widget: "string" }
-              - { label: "Answer", name: "answer", widget: "text" }
+              - { label: "Answer", name: "answer", widget: "text", hint: "To link to another page, write the words you want people to click in square brackets and the address right after it in round brackets, like this: [The GH Cup page](/ghcup/). Use /ghcup/, /events/, /achievements/, /materials/ or /contact/ for pages on this site, or paste a full https:// address for Instagram, LinkedIn, or anywhere else. If a question tells someone to go and look at another page, link it instead — Student Life asked for that specifically. Everything else you type appears exactly as typed." }
 
       - label: "GH Cup Page"
         name: "ghcup-page"

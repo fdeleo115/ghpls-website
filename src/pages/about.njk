@@ -206,7 +206,10 @@ pageDescription: "Meet the executive team behind the Guelph-Humber Pre-Law Socie
       {%- for item in about.faq %}
       <details class="faq-item">
         <summary class="faq-question">{{ item.question }}</summary>
-        <div class="faq-answer"><p>{{ item.answer }}</p></div>
+        {#- inlineLinks, not `| safe`: the answer is escaped first and only
+           `[label](target)` is turned back into an anchor. See the filter in
+           .eleventy.js for the allow-list of targets. #}
+        <div class="faq-answer"><p>{{ item.answer | inlineLinks | safe }}</p></div>
       </details>
       {%- endfor %}
     </div>

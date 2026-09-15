@@ -489,6 +489,76 @@ module.exports = function (eleventyConfig) {
     });
   });
 
+  // ---------------------------------------------------------------------------
+  // Achievements grouped into SCHOOL years, newest first.
+  //
+  // Student Life's review flagged that the Achievements page will get long — it
+  // already carries five seasons of results — and asked for it to be broken up
+  // by year. School year, not calendar year, is the only grouping that holds
+  // together: a single season runs Western Cup in October through HSFK Cup in
+  // June, and splitting it at December 31st would file one team's season under
+  // two different headings.
+  //
+  // The cutoff is September 1st. Anything from September onward belongs to the
+  // year that is starting; anything before it belongs to the year that is
+  // ending. That puts the Humber Cup (late July) at the END of the season it
+  // was actually competed in, which is where the people who were there expect
+  // to find it.
+  //
+  // Grouping happens here rather than in the template because Nunjucks has no
+  // groupby, and because the page needs the group list twice — once for the
+  // filter buttons and once for the sections themselves.
+  // ---------------------------------------------------------------------------
+  const SCHOOL_YEAR_START_MONTH = 9; // September
+
+  function schoolYearOf(item) {
+    const raw = item.data.date ? new Date(item.data.date) : null;
+    if (raw && !isNaN(raw.getTime())) {
+      // getUTCMonth() is 0-based; the dates the CMS writes carry a Z offset.
+      const startYear =
+        raw.getUTCMonth() + 1 >= SCHOOL_YEAR_START_MONTH
+          ? raw.getUTCFullYear()
+          : raw.getUTCFullYear() - 1;
+      return startYear;
+    }
+    // No usable date. `year` on these entries is the calendar year the
+    // competition was won, so assume the more common case: a competition in the
+    // back half of a season, i.e. the school year that started the autumn before.
+    const y = Number(item.data.year);
+    return Number.isFinite(y) && y > 0 ? y - 1 : null;
+  }
+
+  eleventyConfig.addCollection("achievementYears", function (collectionApi) {
+    const sorted = collectionApi
+      .getFilteredByGlob("src/achievements/*.md")
+      .sort((a, b) => {
+        const da = a.data.date ? new Date(a.data.date).getTime() : new Date(a.data.year || 0, 0).getTime();
+        const db = b.data.date ? new Date(b.data.date).getTime() : new Date(b.data.year || 0, 0).getTime();
+        return db - da;
+      });
+
+    const groups = new Map();
+    sorted.forEach((item) => {
+      const start = schoolYearOf(item);
+      // An entry with neither a readable date nor a year still has to appear
+      // somewhere — dropping it would hide a real result. It goes in its own
+      // group at the end rather than being silently filed under a wrong year.
+      const key = start === null ? "undated" : String(start);
+      if (!groups.has(key)) {
+        groups.set(key, {
+          key,
+          slug: start === null ? "undated" : `${start}-${start + 1}`,
+          label: start === null ? "Date not set" : `${start}/${start + 1}`,
+          start: start === null ? -Infinity : start,
+          items: [],
+        });
+      }
+      groups.get(key).items.push(item);
+    });
+
+    return [...groups.values()].sort((a, b) => b.start - a.start);
+  });
+
   eleventyConfig.addCollection("ghcupVideos", function (collectionApi) {
     return collectionApi.getFilteredByGlob("src/ghcup-videos/*.md").sort((a, b) => {
       return (b.data.year || 0) - (a.data.year || 0);
@@ -716,21 +786,73 @@ module.exports = function (eleventyConfig) {
   // Here the text is escaped first and the tags are added afterwards, so the
   // paragraphs work and the content stays inert.
   // ---------------------------------------------------------------------------
+  const escapeHtml = (t) =>
+    String(t == null ? "" : t)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
+  // ---------------------------------------------------------------------------
+  // `[label](target)` in a CMS field, and nothing else, becomes a link.
+  //
+  // Student Life's review asked that answers pointing at another part of the
+  // site LINK there instead of telling the reader to go and find it. That means
+  // CMS prose needs real anchors in the middle of a sentence — but a CMS field
+  // is exactly the place `| safe` must never be used, which is the whole reason
+  // the paragraphs filter below escapes first.
+  //
+  // So the order here is: escape EVERYTHING, then turn one single pattern back
+  // into markup. An editor who types `<b>` sees the characters `<b>` on the
+  // page. An editor who types `[The GH Cup](/ghcup/)` gets a link. There is no
+  // third case, and no amount of clever input reaches the browser as HTML.
+  //
+  // Targets are allow-listed, deliberately narrowly:
+  //   /somewhere/   a page on this site
+  //   https://…     another site — opens in a new tab, per the rest of the site
+  //   mailto:…      an email address
+  // Anything else (a bare word, `javascript:`, a protocol-relative `//host`)
+  // is left as the literal text the editor typed. A mistyped link is then a
+  // visible mistake someone fixes, rather than a silent one that works.
+  //
+  // Note the escaping has already run when the pattern is matched, so `&` in a
+  // query string arrives here as `&amp;` — which is the correct spelling inside
+  // an href attribute anyway.
+  // ---------------------------------------------------------------------------
+  const LINK_RE = /\[([^\]]+)\]\(([^)\s]+)\)/g;
+
+  const renderLinks = (escaped) =>
+    escaped.replace(LINK_RE, (whole, label, target) => {
+      // A single leading slash only: `//evil.example` is protocol-relative and
+      // would leave the site.
+      if (/^\/(?!\/)/.test(target)) return `<a href="${target}">${label}</a>`;
+      if (/^mailto:[^\s]+@[^\s]+$/.test(target)) return `<a href="${target}">${label}</a>`;
+      if (/^https:\/\/[^\s]+$/.test(target)) {
+        return (
+          `<a href="${target}" target="_blank" rel="noopener">${label}` +
+          `<span class="visually-hidden"> (opens in a new tab)</span></a>`
+        );
+      }
+      return whole;
+    });
+
+  // One line of CMS prose with links in it — no paragraph wrapper, because the
+  // template that uses it (the About page FAQ) supplies its own <p>.
+  eleventyConfig.addFilter("inlineLinks", function (text) {
+    const s = String(text == null ? "" : text);
+    if (!s.trim()) return "";
+    return renderLinks(escapeHtml(s));
+  });
+
   eleventyConfig.addFilter("paragraphs", function (text) {
     const s = String(text == null ? "" : text);
     if (!s.trim()) return "";
-    const escape = (t) =>
-      t
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
     return s
       .split(/\r?\n\s*\r?\n/)
       .map((para) => para.trim())
       .filter(Boolean)
-      .map((para) => `<p>${escape(para).replace(/\r?\n/g, "<br>")}</p>`)
+      .map((para) => `<p>${renderLinks(escapeHtml(para)).replace(/\r?\n/g, "<br>")}</p>`)
       .join("");
   });
 

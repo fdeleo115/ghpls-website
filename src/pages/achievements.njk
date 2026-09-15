@@ -11,33 +11,111 @@ pageDescription: "Competition results for Guelph-Humber mooting teams, including
 
 <section>
   <div class="container">
-    <div class="wins-grid">
-      {%- for item in collections.achievements %}
-      <a href="/achievements/{{ item.fileSlug }}/" class="win-card win-card--link {% if item.data.photo %}win-card--has-photo{% endif %} {% if item.data.cardWidth == 'wide' %}win-card--wide{% endif %}">
-        {% if item.data.photo %}
-        {#- Cards sit two-up in a 1152px content column, so a normal card's
-           photo is 564px wide and a full-width one is 1152px. Below 700px they
-           stack and fill the viewport. #}
-        {%- set cardSizes = "(max-width: 700px) 100vw, 1152px" if item.data.cardWidth == 'wide' else "(max-width: 700px) 100vw, (max-width: 1200px) 50vw, 564px" %}
-        {%- set pos = item.data.photoPosition | cssPosition %}
-        {%- set zoom = item.data.photoZoom | cssZoom %}
-        <div class="win-card-photo win-card-photo--{{ item.data.photoHeight or 'medium' }}">
-          <img src="{{ item.data.photo }}" alt="{{ item.data.competition }}" data-sizes="{{ cardSizes }}"{% if loop.index == 1 %} data-eager{% endif %} style="object-fit: {{ item.data.photoSize | cssFit }}; object-position: {{ pos }};{% if zoom %} transform: scale({{ zoom }}); transform-origin: {{ pos }};{% endif %}">
-        </div>
-        {% endif %}
-        <div class="win-card-content">
-          <div class="competition">{{ item.data.competition }}</div>
-          <div class="year">{{ item.data.year }}{% if item.data.date %} · {{ item.data.date | dateFormat }}{% endif %}</div>
-          {%- for result in item.data.results %}
-          <div class="achievement">
-            <span class="badge">{{ result.award }}</span>
-            <span class="names">{{ result.recipients }}</span>
-          </div>
-          {%- endfor %}
-          <span class="win-card-more">View details &#8594;</span>
-        </div>
-      </a>
-      {%- endfor %}
+    {#- Year filter.
+
+       This is progressive enhancement, and the order matters: the page is
+       BUILT as one section per school year, each with its own heading, so a
+       visitor with no JavaScript gets the categorised page Student Life asked
+       for rather than an unfiltered pile. The buttons below only hide and show
+       groups that are already there.
+
+       That is also why the toolbar is written by script rather than sitting in
+       the markup: a row of filter buttons that do nothing is worse than no
+       filter at all, so it only exists once something can act on it. #}
+    <div id="year-filter" class="year-filter" hidden>
+      <span class="year-filter-label" id="year-filter-label">Show</span>
+      <div class="year-filter-buttons" role="group" aria-labelledby="year-filter-label">
+        <button type="button" class="year-chip is-active" data-year="all" aria-pressed="true">All years</button>
+        {%- for group in collections.achievementYears %}
+        <button type="button" class="year-chip" data-year="{{ group.slug }}" aria-pressed="false">{{ group.label }}</button>
+        {%- endfor %}
+      </div>
     </div>
+
+    {%- for group in collections.achievementYears %}
+    {#- Nunjucks has no `loop.parent`, so the outer loop's position is carried
+       down to the inner loop by hand. #}
+    {%- set isFirstGroup = loop.first %}
+    <div class="year-group" data-year="{{ group.slug }}">
+      <h2 class="year-group-heading">
+        {{ group.label }}
+        <span class="year-group-count">{{ group.items | length }} competition{% if group.items | length != 1 %}s{% endif %}</span>
+      </h2>
+      <div class="wins-grid">
+        {%- for item in group.items %}
+        <a href="/achievements/{{ item.fileSlug }}/" class="win-card win-card--link {% if item.data.photo %}win-card--has-photo{% endif %} {% if item.data.cardWidth == 'wide' %}win-card--wide{% endif %}">
+          {% if item.data.photo %}
+          {#- Cards sit two-up in a 1152px content column, so a normal card's
+             photo is 564px wide and a full-width one is 1152px. Below 700px they
+             stack and fill the viewport. #}
+          {%- set cardSizes = "(max-width: 700px) 100vw, 1152px" if item.data.cardWidth == 'wide' else "(max-width: 700px) 100vw, (max-width: 1200px) 50vw, 564px" %}
+          {%- set pos = item.data.photoPosition | cssPosition %}
+          {%- set zoom = item.data.photoZoom | cssZoom %}
+          <div class="win-card-photo win-card-photo--{{ item.data.photoHeight or 'medium' }}">
+            {#- data-eager on the FIRST card of the FIRST group only — that is the
+               one above the fold. Before the year grouping this was `loop.index
+               == 1`, which inside the inner loop would now eagerly load the top
+               card of every single year. #}
+            <img src="{{ item.data.photo }}" alt="{{ item.data.competition }}" data-sizes="{{ cardSizes }}"{% if loop.first and isFirstGroup %} data-eager{% endif %} style="object-fit: {{ item.data.photoSize | cssFit }}; object-position: {{ pos }};{% if zoom %} transform: scale({{ zoom }}); transform-origin: {{ pos }};{% endif %}">
+          </div>
+          {% endif %}
+          <div class="win-card-content">
+            <div class="competition">{{ item.data.competition }}</div>
+            <div class="year">{{ item.data.year }}{% if item.data.date %} · {{ item.data.date | dateFormat }}{% endif %}</div>
+            {%- for result in item.data.results %}
+            <div class="achievement">
+              <span class="badge">{{ result.award }}</span>
+              <span class="names">{{ result.recipients }}</span>
+            </div>
+            {%- endfor %}
+            <span class="win-card-more">View details &#8594;</span>
+          </div>
+        </a>
+        {%- endfor %}
+      </div>
+    </div>
+    {%- endfor %}
+
+    <p id="year-filter-status" class="visually-hidden" role="status" aria-live="polite"></p>
   </div>
 </section>
+
+<script>
+  (function () {
+    var filter = document.getElementById('year-filter');
+    var groups = document.querySelectorAll('.year-group');
+    if (!filter || groups.length < 2) return;
+
+    // Only one year's worth of results — a filter with a single option is
+    // clutter, so leave it hidden and let the heading do the work.
+    filter.hidden = false;
+
+    var chips = filter.querySelectorAll('.year-chip');
+    var status = document.getElementById('year-filter-status');
+
+    function show(year) {
+      var shown = 0;
+      for (var i = 0; i < groups.length; i++) {
+        var match = year === 'all' || groups[i].getAttribute('data-year') === year;
+        groups[i].hidden = !match;
+        if (match) shown++;
+      }
+      for (var j = 0; j < chips.length; j++) {
+        var on = chips[j].getAttribute('data-year') === year;
+        chips[j].classList.toggle('is-active', on);
+        chips[j].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+      if (status) {
+        status.textContent =
+          year === 'all'
+            ? 'Showing all years.'
+            : 'Showing ' + shown + ' of ' + groups.length + ' years.';
+      }
+    }
+
+    filter.addEventListener('click', function (e) {
+      var chip = e.target.closest('.year-chip');
+      if (chip) show(chip.getAttribute('data-year'));
+    });
+  })();
+</script>

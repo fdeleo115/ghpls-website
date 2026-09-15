@@ -150,6 +150,33 @@ pageDescription: "The GH Cup is our flagship moot court competition, open to und
 </section>
 {%- endif %}
 
+{#- ---------------------------------------------------------------------------
+   SPONSORS & PARTNERS — INTENTIONALLY NOT RENDERED. DO NOT SIMPLY DELETE THIS.
+
+   Student Life asked for this section to come off the live site in their
+   pre-publication review (Sept 2026). The reason is approval, not design: a
+   sponsorship package for a Guelph-Humber event has to be approved by Student
+   Life and by the Guelph-Humber Marketing, Communications, and Public Affairs
+   department BEFORE the Society solicits or announces sponsors. A public
+   "Interested in sponsoring? Get in touch" invitation is soliciting.
+
+   The markup is kept because the section will come back once a package is
+   approved, and rebuilding it from scratch is wasted work. It is preserved as
+   a comment rather than behind an `{% if %}` flag deliberately — a flag is one
+   mis-click in the CMS away from publishing an unapproved solicitation, and
+   nobody would notice until the wrong person saw the page.
+
+   TO BRING IT BACK, IN THIS ORDER:
+     1. Get the sponsorship package approved by Student Life AND by Marketing,
+        Communications, and Public Affairs. This step is not optional and is
+        not ours to skip.
+     2. Delete this comment's opening and closing markers so the section below
+        renders again.
+     3. Replace the three placeholder "Sponsor Logo" slots with real logos, and
+        check each one against the licence the sponsor gave you for its mark.
+   The .sponsors-row / .sponsor-slot styles are still in styles.css, so the
+   section will render correctly the moment it is uncommented.
+
 <section class="bg-cream">
   <div class="container">
     <div class="section-header">
@@ -162,13 +189,14 @@ pageDescription: "The GH Cup is our flagship moot court competition, open to und
       <div class="sponsor-slot">Sponsor Logo</div>
       <div class="sponsor-slot">Sponsor Logo</div>
     </div>
-    {#- --peach-ink, not --peach: this link sits on the cream section
-       background, where peach measures about 1.9:1 and fails WCAG AA. The
-       rule is written down in styles.css above .cal-add; this inline style
-       was quietly breaking it. #}
+    --peach-ink, not --peach: this link sits on the cream section background,
+    where peach measures about 1.9:1 and fails WCAG AA. The rule is written
+    down in styles.css above .cal-add; this inline style was quietly breaking it.
     <p style="text-align:center; margin-top:32px; color:var(--text-light);">Interested in sponsoring? <a href="/contact/" style="color:var(--peach-ink); font-weight:600;">Get in touch</a></p>
   </div>
 </section>
+
+   --------------------------------------------------------------------------- #}
 
 <div id="lightbox" class="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">&times;</button>

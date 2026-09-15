@@ -477,6 +477,60 @@ section { padding: 100px 0; }
 .mission-card h3 { font-size: 1.3rem; margin-bottom: 12px; }
 .mission-card p { color: var(--text-light); font-size: 0.95rem; }
 
+/* ACHIEVEMENT YEAR FILTER
+
+   The page is built as one .year-group per school year and the chips just hide
+   the groups that don't match, so everything here is presentation only — with
+   styles off, the page is still a list of results under year headings.
+
+   [hidden] is spelled out with !important because .year-group carries its own
+   display, and an author `display:` beats the browser's built-in rule for the
+   hidden attribute. Without this line the buttons appear to do nothing. */
+.year-group[hidden] { display: none !important; }
+
+.year-filter {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px;
+  margin-bottom: 48px; padding-bottom: 28px;
+  border-bottom: 1px solid rgba(26,39,68,0.1);
+}
+.year-filter-label {
+  font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--text-light);
+}
+.year-filter-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.year-chip {
+  font-family: inherit; font-size: 0.9rem; font-weight: 600;
+  padding: 9px 20px; border-radius: 999px; cursor: pointer;
+  /* --peach-ink, not --peach: these sit on the white page background, where
+     --peach measures about 1.9:1. The rule is written out above .cal-add. */
+  color: var(--peach-ink); background: var(--white);
+  border: 1.5px solid rgba(232,168,124,0.55);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.year-chip:hover { background: #fbe7d6; border-color: var(--peach); }
+.year-chip.is-active {
+  background: var(--navy); border-color: var(--navy); color: var(--white);
+}
+
+.year-group + .year-group { margin-top: 72px; }
+.year-group-heading {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 16px;
+  font-size: 1.75rem; margin-bottom: 28px; padding-bottom: 14px;
+  border-bottom: 3px solid var(--peach);
+}
+.year-group-count {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--text-light);
+}
+
+@media (max-width: 640px) {
+  .year-filter { gap: 10px; margin-bottom: 36px; }
+  .year-chip { font-size: 0.85rem; padding: 8px 16px; }
+  .year-group + .year-group { margin-top: 52px; }
+  .year-group-heading { font-size: 1.45rem; }
+}
+
 /* WINS */
 .wins-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; align-items: start; }
 .win-card--wide { grid-column: 1 / -1; }
@@ -848,7 +902,40 @@ section { padding: 100px 0; }
 .faq-item[open] .faq-question::after { transform: rotate(45deg); }
 .faq-answer p { padding-bottom: 24px; color: var(--text-light); font-size: 0.95rem; }
 
-/* SPONSORS */
+/* LINKS INSIDE CMS PROSE
+
+   `a { text-decoration: none; color: inherit }` is set globally at the top of
+   this file, which means an anchor dropped into body copy is INVISIBLE — same
+   colour, same weight, no underline. Every other link on this site is a button,
+   a card or a nav item that reads as clickable from its surroundings, so the
+   global reset was never a problem until FAQ answers started carrying inline
+   links.
+
+   These rules are what makes those links look like links. The underline is not
+   decoration: WCAG 1.4.1 says colour alone may not be the only thing marking a
+   link inside a block of text, and at --peach-ink vs --text-light the colour
+   difference is slight anyway. If you restyle this, keep an underline.
+
+   --peach-ink, not --peach: this text sits on white (see the token comment at
+   the top of the file — --peach is 2.0:1 there, --peach-ink is 4.84:1). */
+.faq-answer a,
+.content-block a {
+  color: var(--peach-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: color 0.2s;
+}
+.faq-answer a:hover,
+.content-block a:hover { color: var(--navy); text-decoration-thickness: 2px; }
+
+/* SPONSORS
+
+   Kept on purpose while unused. The Sponsors & Partners section on the GH Cup
+   page is commented out — Student Life has to approve a sponsorship package
+   before it goes back up — and these rules are what it needs when it does.
+   See the comment block in src/pages/ghcup.njk before removing them. */
 .sponsors-row { display: flex; justify-content: center; align-items: center; gap: 64px; flex-wrap: wrap; }
 .sponsor-slot {
   width: 180px; height: 100px; border: 2px dashed #d1d5db; border-radius: 12px;
