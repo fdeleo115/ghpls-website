@@ -113,10 +113,32 @@ collections:
         name: "extraPhotos"
         widget: "list"
         required: false
-        hint: "Extra photos shown on this competition's own page."
+        hint: "Extra photos shown on this competition's own page. Each one is shown in a landscape frame, so a tall photo will be cropped — use the focus dot to choose which part stays in view."
         fields:
           - { label: "Photo", name: "image", widget: "image" }
           - { label: "Caption", name: "caption", widget: "string", required: false }
+          - label: "Photo Focus (drag to position)"
+            name: "photoPosition"
+            widget: "focal-point"
+            required: false
+            default: "center"
+            image_field: "image"
+            fitField: "photoSize"
+            zoomField: "photoZoom"
+            hint: "Drag the dot onto the part of the photo that matters. The frame is landscape, so on a tall photo everything above and below the dot gets cut off."
+            shapes:
+              - label: "Competition page photo"
+                axes: [{ value: 4 }, { value: 3 }]
+          - label: "Cropping"
+            name: "photoSize"
+            widget: "select"
+            required: false
+            default: "cover"
+            hint: "\"Fill the frame\" crops the photo to fit and is right almost always. \"Fit the whole photo in\" shrinks it until all of it is visible and leaves blank space at the sides."
+            options:
+              - { label: "Fill the frame (crop to fit)", value: "cover" }
+              - { label: "Fit the whole photo in (no cropping)", value: "contain" }
+          - { label: "Zoom", name: "photoZoom", widget: "number", required: false, default: 1, value_type: "float", min: 1, max: 3, step: 0.1, hint: "1 = no zoom, 2 = zoom in 2x. Zooms towards the focus dot above." }
       - label: "Articles"
         name: "articles"
         widget: "list"
@@ -466,10 +488,36 @@ collections:
         name: "extraPhotos"
         widget: "list"
         required: false
-        hint: "Extra photos shown on this exec's own profile page"
+        hint: "Extra photos shown on this exec's own profile page. Each one is shown in a landscape frame, so a tall photo will be cropped — use the focus dot to choose which part stays in view, or switch Cropping to \"Fit the whole photo in\" if it shouldn't be cropped at all."
         fields:
           - { label: "Photo", name: "image", widget: "image" }
           - { label: "Caption", name: "caption", widget: "string", required: false }
+          - label: "Photo Focus (drag to position)"
+            name: "photoPosition"
+            widget: "focal-point"
+            required: false
+            default: "center"
+            image_field: "image"
+            # fitField/zoomField make the editor preview reflect the two
+            # settings below it, the way the Achievements focal point does.
+            # Without them the preview always draws a cropped, unzoomed frame
+            # and quietly disagrees with the page.
+            fitField: "photoSize"
+            zoomField: "photoZoom"
+            hint: "Drag the dot onto the part of the photo that matters — a face, usually. The frame is landscape, so on a tall photo everything above and below the dot gets cut off."
+            shapes:
+              - label: "Profile page photo"
+                axes: [{ value: 4 }, { value: 3 }]
+          - label: "Cropping"
+            name: "photoSize"
+            widget: "select"
+            required: false
+            default: "cover"
+            hint: "\"Fill the frame\" crops the photo to fit and is right almost always. \"Fit the whole photo in\" shrinks it until all of it is visible and leaves blank space at the sides — useful for a tall photo you don't want cut at all, like a poster or a full-length shot."
+            options:
+              - { label: "Fill the frame (crop to fit)", value: "cover" }
+              - { label: "Fit the whole photo in (no cropping)", value: "contain" }
+          - { label: "Zoom", name: "photoZoom", widget: "number", required: false, default: 1, value_type: "float", min: 1, max: 3, step: 0.1, hint: "1 = no zoom, 2 = zoom in 2x. Zooming in pushes more of the photo out of frame, and it zooms towards the focus dot above." }
 
   - name: "pages"
     label: "Page Content"

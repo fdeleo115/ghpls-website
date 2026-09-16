@@ -143,8 +143,14 @@ layout: base.njk
         {%- if extraPhotos and extraPhotos.length > 0 %}
         <div class="detail-gallery">
           {%- for extra in extraPhotos %}
+          {#- Framing comes from the CMS: focal point, cover/contain, and zoom.
+             The zoom rides in as --photo-zoom rather than an inline transform
+             so it doesn't clobber the hover rule — see .detail-photo img in
+             styles.css. The lightbox still opens the uncropped original. #}
+          {%- set pos = extra.photoPosition | cssPosition %}
+          {%- set zoom = extra.photoZoom | cssZoom %}
           <div class="detail-photo" data-img="{{ extra.image }}" data-caption="{{ extra.caption or name }}" onclick="openLightbox(this.dataset.img, this.dataset.caption)">
-            <img src="{{ extra.image }}" alt="{{ extra.caption or name }}" loading="lazy" data-sizes="(max-width: 900px) 100vw, 340px">
+            <img src="{{ extra.image }}" alt="{{ extra.caption or name }}" loading="lazy" data-sizes="(max-width: 900px) 100vw, 340px" style="object-fit: {{ extra.photoSize | cssFit }}; object-position: {{ pos }};{% if zoom %} --photo-zoom: {{ zoom }}; --photo-origin: {{ pos }};{% endif %}">
           </div>
           {%- endfor %}
         </div>

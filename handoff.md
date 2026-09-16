@@ -1,11 +1,109 @@
 # Handoff — GHPLS Website
 
-_Written: June 2026 · Updated: September 15 2026 · For whoever (human or AI) picks this up next._
+_Written: June 2026 · Updated: September 16 2026 · For whoever (human or AI) picks this up next._
 
-> **Section order:** newest first. The "fifteenth pass" below is the most
+> **Section order:** newest first. The "sixteenth pass" below is the most
 > recent work; every section after it is older. Their internal
 > cross-references ("see section 0") point within their own pass, not at
 > this one.
+
+## Sixteenth pass, Sept 16 2026 — gallery photos can be framed from the CMS; exec card links line up
+
+Two things: the "View Profile" links on the About page carousel now sit on one
+line regardless of how long a role is, and **every photo in a profile or
+competition gallery can now be framed from the CMS** — focal point, crop mode,
+and zoom — which it could not be before.
+
+### 1. Aligning the card links: why `margin-top: auto` and not a `min-height`
+
+The fifteenth pass clamped the carousel bios to three lines, which fixed most of
+the raggedness but not all of it: the roles are different lengths, so "Vice
+President of Moot Operations" wraps to two lines where "President" takes one,
+and those cards' links sat a line lower than their neighbours'.
+
+The obvious fix is `min-height: 2 lines` on `.role`. **Don't.** It fixes exactly
+today's eight roles and breaks the first time someone's title wraps to three —
+and titles here are long enough that this is a matter of time, not luck.
+
+`.exec-card` is now a flex column and `.exec-card-link` carries `margin-top:
+auto`, so the link absorbs whatever space is left over and pins itself to the
+bottom of the card. The rail already stretches every card to the same height, so
+bottom-aligning inside each one lines them all up. It is indifferent to how many
+lines the name, role or bio happen to take.
+
+Measured after the change: role heights still come in two sizes (21px and 42px,
+as they should), and the link offset within the card is **a single value across
+all eight cards** — 415px at desktop, 408px at phone width.
+
+### 2. Gallery photos are framed from the CMS now
+
+`.detail-photo` is a fixed 4:3 frame with `object-fit: cover`. Any photo that
+isn't roughly landscape got centre-cropped with no way to say what mattered in
+it — which became obvious the moment the exec profile galleries filled up with
+portrait phone photos.
+
+Three fields were added to **both** `extraPhotos` lists — the exec one under
+Executive Team and the competition one under Achievements. They are the same
+`.detail-photo` component on the page, so they behave the same way rather than
+one of them mysteriously having controls the other lacks:
+
+| field | what it does |
+|---|---|
+| `photoPosition` | focal point, the same drag-the-dot widget used everywhere else |
+| `photoSize` | `cover` (crop to fill, the default) or `contain` (fit the whole photo in) |
+| `photoZoom` | 1–3, zooming towards the focal point |
+
+The focal-point widget's `fitField` / `zoomField` options are wired up so the
+editor preview reflects the other two settings, the way the Achievements one
+does. Without them the preview draws a cropped, unzoomed frame and quietly
+disagrees with the page.
+
+**The widget works inside a `list` already** — that was solved in the seventh
+pass and is documented at the top of `admin/cms-extras.js`. Nothing new was
+needed for the nesting; `image_field: "image"` resolves against the sibling
+field in the same list item.
+
+### 3. The zoom is a custom property, and that is not a style preference
+
+A first attempt at this writes `transform: scale(1.5)` into the inline style,
+matching what `achievements.njk` does for its card photos. **Here that is a
+bug.** `.detail-photo:hover img` scales to 1.05, and an inline transform beats
+any stylesheet rule — so the photos an editor bothered to zoom would be exactly
+the ones that silently stopped responding to hover.
+
+So the number arrives as `--photo-zoom` and the transform itself stays in CSS:
+
+```css
+.detail-photo img       { transform: scale(var(--photo-zoom, 1)); }
+.detail-photo:hover img { transform: scale(calc(var(--photo-zoom, 1) * 1.05)); }
+```
+
+`--photo-origin` is set to the same focal point as `object-position`, so zooming
+pushes the image away from the edges rather than the centre — otherwise a photo
+framed on a face near the top drifts out of frame as soon as anyone zooms it.
+
+**The reduced-motion block needed the same care.** `.detail-photo:hover img` was
+in a shared `transform: none` rule, which would have thrown away the editor's
+framing on hover, not just the flourish — the photo would jump to a different
+crop. It now gets its own rule holding the base zoom.
+
+Verified in a browser: base `matrix(1.6)`, hover `matrix(1.68)`, reduced-motion
+`matrix(1.6)`, `contain` honoured, and a photo with nothing set renders
+`object-fit: cover; object-position: center` — byte-for-byte the old behaviour,
+so none of the 28 photos already on the site moved.
+
+### 4. A testing trap worth knowing about
+
+Checking `img.naturalWidth` right after setting a transform reads back the
+*mid-transition* value, because `.detail-photo img` has `transition: transform
+0.3s`. A control case with no variables at all (`scale(calc(1.6 * 1.05))`) also
+reported 1.6, which is what exposed it. Wait longer than the transition before
+reading, or you will conclude a perfectly good `calc()` is broken.
+
+Related: in the automated browser pane, `loading="lazy"` images below the fold
+are **never requested at all**, even after scrolling — the network log shows no
+request. `broken: 5` there means "not in view", not "404". Flip `img.loading =
+'eager'` before measuring. Both of these cost real time this pass.
 
 ## Fifteenth pass, Sept 15 2026 — exec profiles filled from Instagram, and the privacy policy that had to change with them
 

@@ -784,6 +784,11 @@ section { padding: 100px 0; }
   background: var(--white); border-radius: 16px; padding: 32px 24px 28px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.06); transition: transform 0.25s, box-shadow 0.25s;
   text-align: center;
+  /* Column flex so "View Profile" can be pushed to the bottom of the card —
+     see .exec-card-link. The rail already stretches every card to the same
+     height, so bottom-aligning the link inside each one lines them all up. */
+  display: flex;
+  flex-direction: column;
 }
 /* No min-height needed: the rail is a flex row, so align-items:stretch already
    levels every card to the tallest one. Cards stay compact while bios are
@@ -894,8 +899,11 @@ section { padding: 100px 0; }
   .win-card:hover,
   .past-event-card:hover,
   .photo-card:hover img,
-  .detail-photo:hover img,
   .extra-photo:hover img { transform: none; }
+  /* Not `none`: that would discard the zoom an editor set as framing, so the
+     photo would jump to a different crop on hover. Only the hover flourish is
+     removed; the framing stays. */
+  .detail-photo:hover img { transform: scale(var(--photo-zoom, 1)); }
 }
 
 @media (max-width: 640px) {
@@ -1074,8 +1082,27 @@ section { padding: 100px 0; }
 
 .detail-gallery { display: flex; flex-direction: column; gap: 14px; }
 .detail-photo { border-radius: 12px; overflow: hidden; cursor: pointer; aspect-ratio: 4/3; }
-.detail-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-.detail-photo:hover img { transform: scale(1.05); }
+/* The zoom is a CUSTOM PROPERTY, not an inline `transform`, and that is the
+   whole trick here.
+
+   A photo's zoom comes from the CMS, so it has to arrive as an inline style.
+   But an inline `transform: scale(1.5)` beats any stylesheet rule, so it would
+   silently kill the hover effect below — the photos an editor bothered to zoom
+   would be exactly the ones that stopped responding to hover. Passing the
+   number in as --photo-zoom keeps the transform itself in CSS, where the hover
+   rule can multiply it instead of fighting it.
+
+   --photo-origin is set to the same focal point as object-position so that
+   zooming pushes the image away from the edges rather than the centre;
+   otherwise a photo framed on a face at the top would drift off-frame as soon
+   as anyone zoomed it. */
+.detail-photo img {
+  width: 100%; height: 100%; object-fit: cover;
+  transform: scale(var(--photo-zoom, 1));
+  transform-origin: var(--photo-origin, center);
+  transition: transform 0.3s;
+}
+.detail-photo:hover img { transform: scale(calc(var(--photo-zoom, 1) * 1.05)); }
 
 @media (max-width: 900px) {
   .achievement-detail { grid-template-columns: 1fr; }
@@ -1122,8 +1149,19 @@ section { padding: 100px 0; }
 
 /* "View Profile" link on each exec carousel card */
 .exec-card-link {
-  display: inline-block; margin-top: 4px; color: var(--peach-ink);
+  display: inline-block; color: var(--peach-ink);
   font-weight: 600; font-size: 0.85rem; letter-spacing: 0.2px;
+  /* margin-top:auto, not a fixed value — this is what makes every card's link
+     sit on the same line as its neighbours'.
+
+     The bio clamp alone was not enough: the roles are different lengths, so
+     "Vice President of Moot Operations" wraps to two lines where "President"
+     takes one, and that pushed those cards' links down. Reserving two lines
+     for .role would fix today's eight roles and break on the first three-line
+     one. Absorbing the leftover space here is indifferent to how many lines
+     the name, role or bio above it happen to take. */
+  margin-top: auto;
+  padding-top: 4px;
 }
 .exec-card-link:hover { text-decoration: underline; }
 

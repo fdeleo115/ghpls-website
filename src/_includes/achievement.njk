@@ -110,8 +110,12 @@ layout: base.njk
           </div>
           {%- endif %}
           {%- for extra in extraPhotos %}
+          {#- Same framing fields as the exec profile gallery — this is the same
+             .detail-photo component, so it behaves the same way. #}
+          {%- set pos = extra.photoPosition | cssPosition %}
+          {%- set zoom = extra.photoZoom | cssZoom %}
           <div class="detail-photo" data-img="{{ extra.image }}" data-caption="{{ extra.caption or (competition + ' ' + year) }}" onclick="openLightbox(this.dataset.img, this.dataset.caption)">
-            <img src="{{ extra.image }}" alt="{{ extra.caption or competition }}" loading="lazy" data-sizes="(max-width: 900px) 100vw, 340px">
+            <img src="{{ extra.image }}" alt="{{ extra.caption or competition }}" loading="lazy" data-sizes="(max-width: 900px) 100vw, 340px" style="object-fit: {{ extra.photoSize | cssFit }}; object-position: {{ pos }};{% if zoom %} --photo-zoom: {{ zoom }}; --photo-origin: {{ pos }};{% endif %}">
           </div>
           {%- endfor %}
         </div>
