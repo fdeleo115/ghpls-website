@@ -115,6 +115,36 @@ content was small, meeting content that got bigger.** When you add a new kind of
 content to an existing field, look at how the template renders it before
 assuming it just works.
 
+### 4a. The same bug again, one screen over: the About page carousel
+
+The biographies landed on the exec cards in the About page carousel too, at
+full length — and `.exec-rail` is a flex row with the default
+`align-items: stretch`. So **the single longest bio was setting the height of
+all eight cards.** One exec writing five paragraphs gave every other card that
+height, with a column of dead whitespace under the short ones.
+
+The carousel bio is now a three-line teaser that trails off, with the existing
+"View Profile" link below it as the way to read the rest — `.exec-card
+.exec-bio`, clamped in CSS.
+
+**Clamped in CSS, not cut in the template, and that is the point.** A
+`truncate` filter would throw the rest of the sentence away for everyone,
+including screen readers and search engines. `-webkit-line-clamp` is a purely
+visual cut: the whole bio is still in the markup, still read aloud, still
+indexed. It also re-clamps itself at any width, so the phone layout needed no
+separate rule.
+
+Two things not to "tidy" later: the three declarations (`display:-webkit-box`,
+`-webkit-box-orient:vertical`, `-webkit-line-clamp`) only work together —
+removing the prefixed pair silently disables the clamp — and the `min-height`
+below them is deliberate, so a short bio still occupies three lines instead of
+reintroducing the height variance the clamp just removed.
+
+Worth noting what this does NOT fix: a role that wraps to two lines ("Vice
+President of Moot Operations") still pushes its card's bio down a line, so the
+"View Profile" links are not all at the same y. That variance lives in `.role`
+and was there before this pass.
+
 ### 5. Verified against the live site, not the build
 
 Per the twelfth pass's rule. After deploying: all eight profiles return a bio

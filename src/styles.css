@@ -812,6 +812,40 @@ section { padding: 100px 0; }
 }
 .exec-bio { color: var(--text-light); font-size: 0.95rem; line-height: 1.65; }
 
+/* The carousel bio is a TEASER — three lines, then it trails off.
+
+   The full biography lives on the exec's own profile page and "View Profile"
+   right below this is how you get there. Clamping here is not only about a
+   tidy card: .exec-rail is a flex row with the default align-items:stretch,
+   so before this, the single longest bio set the height of ALL EIGHT cards.
+   One exec writing five paragraphs made every other card that tall, with a
+   column of dead whitespace under the short ones.
+
+   line-clamp needs all three of these declarations together — the box display
+   and the vertical orientation are what make the -webkit-line-clamp count
+   lines rather than do nothing. The standard `line-clamp` is listed first for
+   browsers that have it; the -webkit- pair is what actually does the work
+   almost everywhere today. Do not "clean up" the prefixed properties.
+
+   The full text stays in the markup on purpose: this is a visual truncation,
+   so a screen reader still reads the whole bio and nothing is hidden from
+   search engines. Cutting the string in the template instead would throw the
+   text away for everyone. */
+.exec-card .exec-bio {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  margin-bottom: 14px;
+  /* Reserve the full three lines even when a bio is shorter, so the bio stops
+     being a source of height variance between cards. Note this does not make
+     every "View Profile" land at exactly the same y: a role that wraps to two
+     lines (Vice President of Moot Operations) still pushes its card's bio down
+     one line. That variance is in .role, not here. */
+  min-height: calc(3 * 1.65em);
+}
+
 .exec-progress {
   position: relative; height: 4px; background: #e5e7eb; border-radius: 4px;
   margin-top: 24px; cursor: pointer;
