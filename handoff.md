@@ -14,26 +14,43 @@ line regardless of how long a role is, and **every photo in a profile or
 competition gallery can now be framed from the CMS** — focal point, crop mode,
 and zoom — which it could not be before.
 
-### 1. Aligning the card links: why `margin-top: auto` and not a `min-height`
+### 1. Levelling the exec cards: why the ROLE grows, and nothing else
 
-The fifteenth pass clamped the carousel bios to three lines, which fixed most of
-the raggedness but not all of it: the roles are different lengths, so "Vice
-President of Moot Operations" wraps to two lines where "President" takes one,
-and those cards' links sat a line lower than their neighbours'.
+Two rounds of this, and the second one matters.
 
-The obvious fix is `min-height: 2 lines` on `.role`. **Don't.** It fixes exactly
-today's eight roles and breaks the first time someone's title wraps to three —
-and titles here are long enough that this is a matter of time, not luck.
+**First attempt — `margin-top: auto` on `.exec-card-link`.** It bottom-pinned
+the link, which lined the links up. But it only fixed the links: the bios were
+still ragged, because a one-line role ("President") starts its bio a line higher
+than a two-line one ("Vice President of Communications"). Measured: bios at
+305px in two cards and 326px in the other six.
 
-`.exec-card` is now a flex column and `.exec-card-link` carries `margin-top:
-auto`, so the link absorbs whatever space is left over and pins itself to the
-bottom of the card. The rail already stretches every card to the same height, so
-bottom-aligning inside each one lines them all up. It is indifferent to how many
-lines the name, role or bio happen to take.
+**The obvious second attempt — `min-height: 2 lines` on `.role` — is wrong, and
+this was measured rather than guessed.** At a 320px viewport the card is 237px
+wide and the two longest titles ("Vice President of Marketing and Social Media",
+"Vice President of General Member Experience") genuinely wrap to **three** lines.
+Any hardcoded line count is a number that holds at the widths you happened to
+check and quietly fails at the ones you did not.
 
-Measured after the change: role heights still come in two sizes (21px and 42px,
-as they should), and the link offset within the card is **a single value across
-all eight cards** — 415px at desktop, 408px at phone width.
+**What is there now: `.exec-card .role { flex-grow: 1 }`.** The role box absorbs
+whatever vertical slack the card has. Everything below it — the bio, clamped to
+exactly three lines, and the link — is pushed to the bottom of a card whose
+height the rail has already equalised. Constant height below the role means a
+constant starting point for the bio, **at any width, for a role of any number of
+lines.** The slack appears as space between the role and the bio, which is a
+reasonable place for it.
+
+**The two mechanisms cannot coexist, which is the trap.** In flexbox an auto
+margin swallows free space *before* flex-grow gets any. Leaving
+`margin-top: auto` on the link while adding `flex-grow` to the role means the
+link eats the slack, the role never grows, and the bios stay exactly as ragged
+as before — with both rules in the file looking like they should work. The
+`margin-top: auto` was removed for this reason; there is a comment on each of
+the two rules pointing at the other.
+
+Verified at both extremes. 1280px: bio tops all 326, link tops all 415, card
+heights all 469. 320px, where roles reach three lines: bio tops all **345**,
+link tops all **434**, no horizontal overflow. One distinct value each, which is
+the whole point.
 
 ### 2. Gallery photos are framed from the CMS now
 

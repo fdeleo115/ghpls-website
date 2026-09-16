@@ -814,6 +814,27 @@ section { padding: 100px 0; }
 .exec-card .role {
   color: var(--peach-ink); font-size: 0.82rem; font-weight: 600;
   text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px;
+  /* The role absorbs the card's leftover height, and that is what levels the
+     BIOS — not just the links.
+
+     Roles are wildly different lengths ("President" vs "Vice President of
+     General Member Experience"), so a one-line role used to start its bio a
+     line higher than a two-line one. Reserving two lines here fixes the eight
+     roles we have at desktop and then fails at 320px, where the two longest
+     genuinely wrap to THREE lines — measured, not guessed.
+
+     Letting this box grow instead sidesteps the line count completely.
+     Everything below it — the bio, clamped to exactly three lines, and the
+     link — gets pushed to the bottom of a card whose height the rail has
+     already equalised. Constant height below means a constant starting point
+     for the bio, at any width, for a role of any length. The slack shows up as
+     breathing room between the role and the bio, which is a fine place for it.
+
+     Note this only works because .exec-card-link does NOT have margin-top:auto
+     any more: in flexbox an auto margin swallows free space BEFORE flex-grow
+     gets any, so the two cannot both be used — the link's auto margin would
+     win and the bios would stay ragged. */
+  flex-grow: 1;
 }
 .exec-bio { color: var(--text-light); font-size: 0.95rem; line-height: 1.65; }
 
@@ -1151,16 +1172,10 @@ section { padding: 100px 0; }
 .exec-card-link {
   display: inline-block; color: var(--peach-ink);
   font-weight: 600; font-size: 0.85rem; letter-spacing: 0.2px;
-  /* margin-top:auto, not a fixed value — this is what makes every card's link
-     sit on the same line as its neighbours'.
-
-     The bio clamp alone was not enough: the roles are different lengths, so
-     "Vice President of Moot Operations" wraps to two lines where "President"
-     takes one, and that pushed those cards' links down. Reserving two lines
-     for .role would fix today's eight roles and break on the first three-line
-     one. Absorbing the leftover space here is indifferent to how many lines
-     the name, role or bio above it happen to take. */
-  margin-top: auto;
+  /* No margin-top:auto here — see the note on .exec-card .role above. The role
+     grows to absorb the card's slack, which bottom-aligns this link AND levels
+     the bios; an auto margin here would eat that slack first and only fix the
+     link. */
   padding-top: 4px;
 }
 .exec-card-link:hover { text-decoration: underline; }
