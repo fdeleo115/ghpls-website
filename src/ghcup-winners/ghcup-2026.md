@@ -8,8 +8,16 @@ awards:
       of Waterloo
   - title: Runner-Up
     recipients: Michelle Drobnis & Amber Ardrey
-  - title: Best Oral Advocate
-    recipients: TBD
+  - title: 1st Oral Advocate
+    recipients: Khalid Al Jamal
+  - title: 2nd Oral Advocate
+    recipients: Joshua Robles
+  - title: 3rd Oral Advocate
+    recipients: Amber Ardrey
+  - title: 4th Oral Advocate
+    recipients: Bethel Lemma
+  - title: 5th Oral Advocate
+    recipients: Caleb Mann
 photo: ""
 photoPosition: center
 ---
