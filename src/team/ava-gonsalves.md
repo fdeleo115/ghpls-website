@@ -36,8 +36,9 @@ competitions:
     year: 2025
 order: 6
 photo: /assets/uploads/img_7281.jpg
-photoPosition: 52% 0%
+photoPosition: 53% 35%
 headerPhoto: /assets/uploads/ava-gonsalves-2.jpg
+headerPhotoPosition: 51% 42%
 extraPhotos:
   - image: /assets/uploads/ava-gonsalves-1.jpg
   - image: /assets/uploads/ava-gonsalves-2.jpg
