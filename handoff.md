@@ -2,10 +2,127 @@
 
 _Written: June 2026 · Updated: September 15 2026 · For whoever (human or AI) picks this up next._
 
-> **Section order:** newest first. The "fourteenth pass" below is the most
+> **Section order:** newest first. The "fifteenth pass" below is the most
 > recent work; every section after it is older. Their internal
 > cross-references ("see section 0") point within their own pass, not at
 > this one.
+
+## Fifteenth pass, Sept 15 2026 — exec profiles filled from Instagram, and the privacy policy that had to change with them
+
+Every exec's profile page now carries a biography and a short Q&A, taken from
+the "Meet our ..." introduction posts on the Society's own Instagram, plus the
+photos from those posts. Commits `e54ade5` (text) and `52df19c` (photos and
+policy), both deployed and verified against the live URL.
+
+**Read §3 before adding any photo to this site again.** It is the only part of
+this pass with a consequence that outlives the pass.
+
+### 1. Where the content came from, and how to get it again
+
+Each exec has one post, published Aug 28 2026, and each post is a carousel with
+the same shape:
+
+| slide | content | goes to |
+|---|---|---|
+| 1 | designed headshot card | nothing — the site already had headshots |
+| 2 | "GET TO KNOW <name>" card | `qanda` |
+| 3+ | personal photos | `extraPhotos` |
+| caption | the exec's own introduction | `bio` |
+
+**The captions and the carousels are readable without logging in**, which is
+worth knowing because it is not obvious: the profile grid hits a signup wall,
+but an individual `/ghpls/p/<shortcode>/` page renders the full caption in the
+DOM, and the carousel's Next button works. The route that worked was: open the
+profile, dismiss the signup modal, scroll to force the grid to lazy-load (it
+only ships six posts until you do), then read `a[href*="/p/"]` for the
+shortcodes.
+
+Two traps, both of which cost time:
+
+- **The carousel virtualises.** Clicking Next four times and *then* reading
+  `ul li img` gives you the last two slides and silently drops the rest. Extract
+  after every click, not at the end.
+- **Slide 2 is an image, not text.** The Q&A answers are baked into the graphic,
+  so they can only be read by screenshotting the slide. There is no DOM text to
+  scrape.
+
+The post shortcodes are in the git history of this pass; the images are already
+in `assets/uploads/` as `<slug>-1.jpg` … `<slug>-5.jpg`.
+
+### 2. What was deliberately NOT touched
+
+The owner's instruction was specific and a future pass should not "tidy" it:
+
+- **Francesco's and Tala's photos are untouched.** Francesco keeps his four
+  existing ones; Tala has none and that is intentional, not an oversight.
+- **Angelina's four Instagram photos were APPENDED**, not substituted, because
+  she already had four curated competition photos. She shows eight.
+- **No headshot, header photo, competition, team placement or individual
+  achievement was modified for anyone.** The only field written was
+  `extraPhotos`. `git show 52df19c` is 32 insertions and 1 deletion across 31
+  files — deliberately that boring.
+
+### 3. The privacy policy had to change, and this is the part to remember
+
+Section 2 said, in the site's own words:
+
+> We only publish photos taken at Society events or given to us for that purpose.
+
+**Most of these photos are not that.** They are personal photos the execs picked
+for their own introductions — a selfie, a trip, a night out, a family ballgame —
+and several show friends, partners and family **who are not members of the
+Society**. Those people agreed, at most, to appear in a club Instagram post.
+They did not agree to a university-linked website.
+
+Publishing them while that sentence stood would have made the privacy policy
+false, on a page Student Life had just reviewed and is about to link to from the
+University's own site. That is a worse outcome than any photo.
+
+So the policy was rewritten rather than quietly contradicted:
+
+- **Section 2** now describes both kinds of photo, says the personal ones appear
+  only on that person's own profile and only at their choosing, and says the
+  exec supplying one is asked to confirm anyone else in it is content to be
+  published here.
+- **Section 6** now states that the takedown promise reaches people who are
+  **not** members — the friends and family in those photos — and that an exec
+  can withdraw their personal photos at any time, including after they leave the
+  team.
+
+**The standing rule this leaves behind:** before adding a photo to this site,
+check it against what section 2 currently claims. If the photo does not fit the
+claim, one of the two has to change, and the honest move is to change whichever
+you are actually willing to stand behind. Do not add the photo and leave the
+sentence.
+
+And the thing that makes this sharper here than on most sites: **every photo
+also lands in a PUBLIC GitHub repository and stays in its history.** Section 6
+promised history removal on request long before this pass; that promise now has
+a great many more people it could apply to.
+
+### 4. A template bug this surfaced
+
+`member.njk` rendered the biography inside a single hard-coded `<p>`. That was
+invisible while every bio was one sentence. These captions run to three, four
+and five paragraphs, and in one `<p>` the blank lines collapse — the whole
+introduction rendered as an unbroken wall of text.
+
+It now goes through the `paragraphs` filter (escapes first, adds tags after, so
+the field stays safe to edit in the CMS), which also gives bios the same
+`[label](/path/)` link syntax the FAQ answers got in the fourteenth pass. Same
+root cause as the invisible-links bug in that pass: **a template built when the
+content was small, meeting content that got bigger.** When you add a new kind of
+content to an existing field, look at how the template renders it before
+assuming it just works.
+
+### 5. Verified against the live site, not the build
+
+Per the twelfth pass's rule. After deploying: all eight profiles return a bio
+block and four Q&A items; photo counts are Kate 5, Muhammad 4, Ashon 3, Ava 4,
+Mia 4, Angelina 8, Francesco 4 (unchanged), Tala 0 (unchanged); **158 gallery
+image URLs fetched from the live site, all 200**; the new privacy wording is
+live and the old "only publish photos taken at Society events" sentence returns
+zero occurrences.
 
 ## Fourteenth pass, Sept 15 2026 — Student Life's pre-publication review, all items actioned
 
