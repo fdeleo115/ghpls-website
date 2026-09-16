@@ -94,6 +94,20 @@ pageDescription: "The Mini Moot is our in-house moot court competition, open onl
 </section>
 {%- endif %}
 
+{%- macro finalVideos(season, fallbackTitle) %}
+{%- for video in season.videos %}
+          <div class="winner-video">
+            <h4>{{ video.data.title or "The Final" }}</h4>
+            <div class="video-embed">
+              <iframe src="https://www.youtube-nocookie.com/embed/{{ video.data.url | youtubeId }}" title="{{ video.data.title or (fallbackTitle ~ ' final') }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+            </div>
+            {%- if video.data.description %}
+            <p>{{ video.data.description }}</p>
+            {%- endif %}
+          </div>
+{%- endfor %}
+{%- endmacro %}
+
 <section class="bg-cream">
   <div class="container">
     <div class="section-header">
@@ -102,7 +116,9 @@ pageDescription: "The Mini Moot is our in-house moot court competition, open onl
       <div class="line"></div>
     </div>
     <div class="winners-timeline">
-      {%- for winner in collections.minimootWinners %}
+      {%- for season in collections.minimootWinners | withFinalVideos(collections.minimootVideos) %}
+      {%- set winner = season.winner %}
+      {%- if winner %}
       {%- set wpos = winner.data.photoPosition | cssPosition %}
       {%- set wzoom = winner.data.photoZoom | cssZoom %}
       <div class="winner-card {% if not winner.data.photo %}winner-card--no-photo{% endif %}">
@@ -123,41 +139,25 @@ pageDescription: "The Mini Moot is our in-house moot court competition, open onl
           {% if winner.data.caseTitle %}
           <div class="winner-case">Case: <em>{{ winner.data.caseTitle }}</em></div>
           {% endif %}
+          {{- finalVideos(season, winner.data.theme) }}
         </div>
       </div>
+      {%- else %}
+      <div class="winner-card winner-card--no-photo">
+        <div class="winner-info">
+          <div class="winner-year">{{ season.year }}</div>
+          <h3>Mini Moot {{ season.year }}</h3>
+          {{- finalVideos(season, "Mini Moot " ~ season.year) }}
+        </div>
+      </div>
+      {%- endif %}
       {%- endfor %}
-      {%- if collections.minimootWinners.length == 0 %}
+      {%- if collections.minimootWinners.length == 0 and collections.minimootVideos.length == 0 %}
       <p class="empty-state">Previous winners will appear here as they're added.</p>
       {%- endif %}
     </div>
   </div>
 </section>
-
-{%- if collections.minimootVideos.length > 0 %}
-<section>
-  <div class="container">
-    <div class="section-header">
-      <h2>Final Videos</h2>
-      <p>Watch the moot finals from past Mini Moot competitions.</p>
-      <div class="line"></div>
-    </div>
-    <div class="video-grid">
-      {%- for video in collections.minimootVideos %}
-      <div class="video-card">
-        <div class="video-embed">
-          <iframe src="https://www.youtube-nocookie.com/embed/{{ video.data.url | youtubeId }}" title="{{ video.data.title or video.data.year }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
-        </div>
-        <div class="video-info">
-          <div class="winner-year">{{ video.data.year }}</div>
-          <h3>{{ video.data.title or "Mini Moot Final" }}</h3>
-          {% if video.data.description %}<p>{{ video.data.description }}</p>{% endif %}
-        </div>
-      </div>
-      {%- endfor %}
-    </div>
-  </div>
-</section>
-{%- endif %}
 
 <div id="lightbox" class="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">&times;</button>

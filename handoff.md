@@ -7,6 +7,27 @@ _Written: June 2026 · Updated: September 16 2026 · For whoever (human or AI) p
 > cross-references ("see section 0") point within their own pass, not at
 > this one.
 
+## Seventeenth pass, Sept 16 2026 — final videos live inside their year's winner card
+
+The owner asked for the GH Cup and Mini Moot final videos to sit under the
+competition they belong to (e.g. inside "The GH Cup 2026"), not in a separate
+"Final Videos" section. That section is gone from both pages.
+
+- **The CMS did not change shape.** "GH Cup Final Videos" and "Mini Moot Final
+  Videos" are still their own collections (an exec had just added the 2026 GH
+  Cup final through one), and their descriptions now say the Year must match
+  the winners entry. The join happens at build time in the `withFinalVideos`
+  filter in `.eleventy.js`, keyed on `year`.
+- **A video with no winners entry for its year does not disappear.** It gets a
+  card of its own ("Mini Moot 2024" + the video). Tested with a throwaway 2024
+  entry, then removed. So a Year typo shows up as a stray extra card, not as a
+  missing video.
+- Card hover-lift is switched off for cards that hold a video (`:has()`), so the
+  player doesn't move under the pointer. The old `.video-grid` / `.video-card`
+  CSS was deleted; `.video-embed` is kept and reused.
+- Verified locally at 1024px and 375px (no horizontal overflow, player 275px
+  wide on a phone), no console errors.
+
 ## Sixteenth pass, Sept 16 2026 — gallery photos can be framed from the CMS; exec card links line up
 
 Two things: the "View Profile" links on the About page carousel now sit on one

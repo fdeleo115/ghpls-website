@@ -248,7 +248,7 @@ collections:
   - name: "ghcup-videos"
     label: "GH Cup Final Videos"
     label_singular: "Final Video"
-    description: "Add videos of past GH Cup finals. They appear on the GH Cup page."
+    description: "Add videos of past GH Cup finals. Each video appears inside that year's card under Previous Winners on the GH Cup page, so the Year must match the winners entry."
     folder: "src/ghcup-videos"
     create: true
     identifier_field: "year"
@@ -306,7 +306,7 @@ collections:
   - name: "minimoot-videos"
     label: "Mini Moot Final Videos"
     label_singular: "Final Video"
-    description: "Add videos of past Mini Moot finals. They appear on the Mini Moot page."
+    description: "Add videos of past Mini Moot finals. Each video appears inside that year's card under Previous Winners on the Mini Moot page, so the Year must match the winners entry."
     folder: "src/minimoot-videos"
     create: true
     identifier_field: "year"

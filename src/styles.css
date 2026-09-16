@@ -1237,15 +1237,18 @@ section { padding: 100px 0; }
   .winner-info { padding: 24px; }
 }
 
-/* GH CUP FINAL VIDEOS */
-.video-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; max-width: 1000px; margin: 0 auto; }
-.video-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
-.video-embed { position: relative; width: 100%; padding-top: 56.25%; background: #000; }
+/* GH CUP / MINI MOOT FINAL VIDEOS — shown inside that year's winner card */
+.winner-video { margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(26,39,68,0.1); }
+.winner-video h4 {
+  font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--navy);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
+}
+.winner-video p { color: var(--text-light); font-size: 0.95rem; margin-top: 12px; }
+.video-embed { position: relative; width: 100%; padding-top: 56.25%; background: #000; border-radius: 8px; overflow: hidden; }
 .video-embed iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-.video-info { padding: 24px 28px 28px; }
-.video-info h3 { font-size: 1.25rem; margin-bottom: 8px; }
-.video-info p { color: var(--text-light); font-size: 0.95rem; }
-@media (max-width: 768px) { .video-grid { grid-template-columns: 1fr; } }
+/* The card lifts on hover; with a player inside, that makes the video jump
+   under the pointer on the way to the play button. */
+.winner-card:has(.winner-video):hover { transform: none; }
 
 /* PHOTO GALLERY SIZES */
 .photo-wide { grid-column: span 2; }

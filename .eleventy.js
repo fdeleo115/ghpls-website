@@ -1161,6 +1161,25 @@ module.exports = function (eleventyConfig) {
   });
 
   // Pull the 11-character video ID out of any common YouTube URL form.
+  // Final videos render inside the matching year's Previous Winners card, not
+  // as a section of their own — a final belongs to the competition it ended.
+  // Videos and winners stay separate CMS collections (execs already add them
+  // that way), so they're joined here by year. A video whose year has no
+  // winners entry yet still gets a card of its own rather than vanishing.
+  eleventyConfig.addFilter("withFinalVideos", function (winners, videos) {
+    const byYear = new Map();
+    for (const w of winners || []) {
+      byYear.set(w.data.year, { year: w.data.year, winner: w, videos: [] });
+    }
+    for (const v of videos || []) {
+      if (!byYear.has(v.data.year)) {
+        byYear.set(v.data.year, { year: v.data.year, winner: null, videos: [] });
+      }
+      byYear.get(v.data.year).videos.push(v);
+    }
+    return [...byYear.values()].sort((a, b) => (b.year || 0) - (a.year || 0));
+  });
+
   eleventyConfig.addFilter("youtubeId", function (url) {
     if (!url) return "";
     const s = String(url).trim();
