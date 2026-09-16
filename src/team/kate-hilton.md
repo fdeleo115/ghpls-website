@@ -25,4 +25,10 @@ photo: /assets/uploads/img_7282.jpg
 photoPosition: 50% 56%
 headerPhoto: /assets/uploads/img_7283.jpg
 headerPhotoPosition: 51% 7%
+extraPhotos:
+  - image: /assets/uploads/kate-hilton-1.jpg
+  - image: /assets/uploads/kate-hilton-2.jpg
+  - image: /assets/uploads/kate-hilton-3.jpg
+  - image: /assets/uploads/kate-hilton-4.jpg
+  - image: /assets/uploads/kate-hilton-5.jpg
 ---

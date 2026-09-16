@@ -25,4 +25,9 @@ competitions:
     year: 2026
 order: 3
 photo: /assets/uploads/img_7279.jpg
+extraPhotos:
+  - image: /assets/uploads/muhammad-ali-1.jpg
+  - image: /assets/uploads/muhammad-ali-2.jpg
+  - image: /assets/uploads/muhammad-ali-3.jpg
+  - image: /assets/uploads/muhammad-ali-4.jpg
 ---

@@ -41,4 +41,8 @@ extraPhotos:
   - image: /assets/uploads/8d81e8e2-a5bc-41e4-892e-23292518e9f2.jpeg
   - image: /assets/uploads/img_1366.jpeg
   - image: /assets/uploads/img_5824.jpeg
+  - image: /assets/uploads/angelina-azar-el-hajj-1.jpg
+  - image: /assets/uploads/angelina-azar-el-hajj-2.jpg
+  - image: /assets/uploads/angelina-azar-el-hajj-3.jpg
+  - image: /assets/uploads/angelina-azar-el-hajj-4.jpg
 ---

@@ -33,4 +33,9 @@ competitions:
 order: 6
 photo: /assets/uploads/img_7281.jpg
 photoPosition: 52% 0%
+extraPhotos:
+  - image: /assets/uploads/ava-gonsalves-1.jpg
+  - image: /assets/uploads/ava-gonsalves-2.jpg
+  - image: /assets/uploads/ava-gonsalves-3.jpg
+  - image: /assets/uploads/ava-gonsalves-4.jpg
 ---

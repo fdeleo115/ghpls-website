@@ -22,4 +22,9 @@ competitions:
 order: 7
 photo: /assets/uploads/img_7280.jpg
 photoPosition: center
+extraPhotos:
+  - image: /assets/uploads/mia-pietrantonio-1.jpg
+  - image: /assets/uploads/mia-pietrantonio-2.jpg
+  - image: /assets/uploads/mia-pietrantonio-3.jpg
+  - image: /assets/uploads/mia-pietrantonio-4.jpg
 ---
