@@ -45,16 +45,17 @@ competitions:
 order: 2
 photo: /assets/uploads/img_5613.jpeg
 photoPosition: 30% 0%
+headerPhoto: /assets/uploads/kate-hilton-4.jpg
 extraPhotos:
-  - photoPosition: center
+  - photoPosition: 48% 53%
     photoSize: cover
     photoZoom: 1
     image: /assets/uploads/img_6982.jpeg
-  - photoPosition: center
+  - photoPosition: 37% 38%
     photoSize: cover
     photoZoom: 1
     image: /assets/uploads/img_1982.jpeg
-  - photoPosition: center
+  - photoPosition: 54% 40%
     photoSize: cover
     photoZoom: 1
     image: /assets/uploads/img_9695.jpeg
