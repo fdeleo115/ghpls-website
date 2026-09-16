@@ -3,7 +3,21 @@ name: Angelina Azar El-Hajj
 role: Vice President of General Member Experience
 previousRole: Vice President of Moot Training
 gradYear: 2027
-qanda: []
+bio: |-
+  Hey everyone. I'm Angelina and I am in my fourth year of Justice Studies. I am so excited to start my new role as VP of General Member Experience.
+
+  I joined this society two years ago and it has been nothing but fun since then! I have met amazing people through the society and have made so many memories with them. I have also been a part of the moot team for two years and have learnt so much about oral advocacy.
+
+  I can't wait to see you all in September!! It's gonna be a fun year!
+qanda:
+  - question: Favourite hobby
+    answer: Playing tennis
+  - question: Favourite TV show
+    answer: Gossip Girl
+  - question: Dream travel destination
+    answer: Greece
+  - question: Favourite pre-law memory
+    answer: Ice skating at the Rideau Canal in Ottawa after a moot competition!
 competitions:
   - competition: Erindale Cup
     year: 2026

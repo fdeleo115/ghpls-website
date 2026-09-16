@@ -30,7 +30,13 @@ layout: base.njk
       <div class="detail-main">
         {%- if bio %}
         <div class="content-block detail-desc">
-          <p>{{ bio }}</p>
+          {#- `paragraphs`, not a bare <p>: these bios come from the execs' own
+             Instagram introductions and run to three or four paragraphs. In a
+             single <p> the blank lines collapse and the whole thing renders as
+             one unbroken wall of text. The filter escapes first and adds the
+             tags after, so it stays safe for a CMS field, and it understands
+             the same [label](/path/) link syntax as the FAQ answers. #}
+          {{ bio | paragraphs | safe }}
         </div>
         {%- else %}
         <p class="exec-bio exec-bio--empty detail-desc">Biography coming soon.</p>
