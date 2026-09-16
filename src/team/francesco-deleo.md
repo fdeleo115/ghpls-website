@@ -40,6 +40,7 @@ headerPhoto: /assets/uploads/img_5370.jpeg
 headerPhotoPosition: 48% 66%
 extraPhotos:
   - image: /assets/uploads/010464da-9373-4d04-b0c6-96bc0a18894e.png
+    photoPosition: 53% 35%
   - image: /assets/uploads/dsc_7275.jpeg
   - image: /assets/uploads/img_4681.jpeg
   - image: /assets/uploads/dsc_4681.jpeg
