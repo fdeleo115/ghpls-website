@@ -26,6 +26,7 @@ order: 4
 photo: /assets/uploads/img_7276.jpg
 photoPosition: center
 headerPhoto: /assets/uploads/img_7284.jpg
+headerPhotoPosition: 68% 14%
 extraPhotos:
   - image: /assets/uploads/ashon-vaz-1.jpg
   - image: /assets/uploads/ashon-vaz-2.jpg
