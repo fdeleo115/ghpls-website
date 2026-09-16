@@ -26,7 +26,8 @@ competitions:
 order: 7
 photo: /assets/uploads/img_7280.jpg
 photoPosition: center
-headerPhoto: /assets/uploads/mia-pietrantonio-2.jpg
+headerPhoto: /assets/uploads/mia-pietrantonio-1.jpg
+headerPhotoPosition: 48% 55%
 extraPhotos:
   - image: /assets/uploads/mia-pietrantonio-1.jpg
   - image: /assets/uploads/mia-pietrantonio-2.jpg
