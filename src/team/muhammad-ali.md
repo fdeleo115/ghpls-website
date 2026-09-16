@@ -32,6 +32,7 @@ competitions:
 order: 3
 photo: /assets/uploads/img_7279.jpg
 headerPhoto: /assets/uploads/muhammad-ali-4.jpg
+headerPhotoPosition: 45% 32%
 extraPhotos:
   - image: /assets/uploads/muhammad-ali-1.jpg
   - image: /assets/uploads/muhammad-ali-2.jpg
