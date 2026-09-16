@@ -46,6 +46,7 @@ order: 2
 photo: /assets/uploads/img_5613.jpeg
 photoPosition: 30% 0%
 headerPhoto: /assets/uploads/kate-hilton-4.jpg
+headerPhotoPosition: 50% 39%
 extraPhotos:
   - photoPosition: 48% 53%
     photoSize: cover
