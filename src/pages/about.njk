@@ -49,7 +49,19 @@ pageDescription: "Meet the executive team behind the Guelph-Humber Pre-Law Socie
       <div class="line"></div>
     </div>
     <div class="exec-carousel" id="execCarousel">
-      <div class="exec-rail" tabindex="0" role="region" aria-label="Executive team — scrollable">
+      {#- Arrow buttons exist for the mouse. A trackpad and a touchscreen can
+         both scroll this rail sideways on their own; a mouse wheel cannot, so
+         without these a mouse user's only option is to drag the cards, which
+         is not discoverable. They are hidden when the rail has nothing to
+         scroll, and on touch-primary devices where swiping is the natural
+         gesture. #}
+      <button type="button" class="exec-nav exec-nav--prev" id="execPrev" aria-controls="execRail" aria-label="Previous executives" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <button type="button" class="exec-nav exec-nav--next" id="execNext" aria-controls="execRail" aria-label="More executives" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <div class="exec-rail" id="execRail" tabindex="0" role="region" aria-label="Executive team — scrollable">
         {%- for member in collections.team %}
         <div class="exec-card">
           <div class="exec-card-photo">
@@ -76,7 +88,7 @@ pageDescription: "Meet the executive team behind the Guelph-Humber Pre-Law Socie
         <div class="exec-progress-fill" id="execProgressFill"></div>
       </div>
       <div class="exec-scroll-hint" id="execScrollHint">
-        <span>Drag, scroll, or swipe to meet the rest of the team</span>
+        <span>Use the arrows, drag, or swipe to meet the rest of the team</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
       </div>
     </div>
@@ -88,14 +100,50 @@ pageDescription: "Meet the executive team behind the Guelph-Humber Pre-Law Socie
         var fill = document.getElementById('execProgressFill');
         if (!rail || !progress || !fill) return;
 
+        var prevBtn = document.getElementById('execPrev');
+        var nextBtn = document.getElementById('execNext');
+
+        function step() {
+          var card = rail.querySelector('.exec-card');
+          if (!card) return 0;
+          return card.getBoundingClientRect().width + parseFloat(getComputedStyle(rail).gap || 0);
+        }
+
+        // Arrows are shown only when there is something to scroll, and each one
+        // is disabled at its end of the rail. `hidden` rather than a CSS class
+        // so they are out of the accessibility tree too when there is nothing
+        // to page through.
+        function updateNav() {
+          if (!prevBtn || !nextBtn) return;
+          var max = rail.scrollWidth - rail.clientWidth;
+          var scrollable = max > 1;
+          prevBtn.hidden = nextBtn.hidden = !scrollable;
+          if (!scrollable) return;
+          // 1px of slack: scrollLeft can land on a fractional value at the end.
+          prevBtn.disabled = rail.scrollLeft <= 1;
+          nextBtn.disabled = rail.scrollLeft >= max - 1;
+        }
+
         function updateFill() {
           var max = rail.scrollWidth - rail.clientWidth;
           var frac = max > 0 ? rail.scrollLeft / max : 0;
           fill.style.width = (frac * 100) + '%';
+          updateNav();
         }
         rail.addEventListener('scroll', updateFill, { passive: true });
         window.addEventListener('resize', updateFill);
         updateFill();
+
+        if (prevBtn && nextBtn) {
+          prevBtn.addEventListener('click', function () {
+            markDiscovered();
+            rail.scrollBy({ left: -step(), behavior: 'smooth' });
+          });
+          nextBtn.addEventListener('click', function () {
+            markDiscovered();
+            rail.scrollBy({ left: step(), behavior: 'smooth' });
+          });
+        }
 
         // Scroll hint: visible until the visitor discovers the rail scrolls,
         // either on their own or via the one-time nudge below.

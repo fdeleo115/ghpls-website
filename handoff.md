@@ -7,6 +7,29 @@ _Written: June 2026 · Updated: September 16 2026 · For whoever (human or AI) p
 > cross-references ("see section 0") point within their own pass, not at
 > this one.
 
+## Eighteenth pass, Sept 18 2026 — the exec carousel needed arrows for mouse users
+
+Reported: the rail works well with a trackpad but not with a mouse. Correct —
+a trackpad and a touchscreen can both scroll a horizontal overflow container
+natively; a **mouse wheel cannot**. Drag-to-scroll existed but is not
+discoverable, so a mouse user effectively had no way across.
+
+- Two overlaid arrow buttons (`#execPrev` / `#execNext` in `about.njk`), each
+  scrolling by one card + gap. Hidden via the `hidden` attribute when the rail
+  has nothing to scroll (so they leave the accessibility tree too), and each
+  disabled at its end of the rail. `updateNav()` runs off the same scroll
+  handler as the progress fill, so drag, swipe, keyboard and arrows all keep
+  the states honest.
+- Hidden under `@media (hover: none) and (pointer: coarse)` — on a phone the
+  swipe is natural and the buttons would just cover a card.
+- **Deliberately NOT done: hijacking the vertical wheel** to scroll the rail
+  sideways. It reads as a clever fix and behaves badly — a visitor scrolling
+  down the page with the cursor over the carousel gets trapped until the rail
+  hits its end. Shift+wheel already does this natively for anyone who wants it.
+- The hint text now reads "Use the arrows, drag, or swipe".
+- Verified at 1024px: arrows appear, left disabled at rest, right disabled at
+  the end, one card per click, no console errors.
+
 ## Seventeenth pass, Sept 16 2026 — final videos live inside their year's winner card
 
 The owner asked for the GH Cup and Mini Moot final videos to sit under the

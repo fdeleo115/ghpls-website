@@ -872,6 +872,27 @@ section { padding: 100px 0; }
   min-height: calc(3 * 1.65em);
 }
 
+/* Arrow buttons — the mouse equivalent of a trackpad's sideways scroll.
+   Overlaid on the rail edges rather than placed below it, so they sit where
+   the content they page through is. Hidden on touch-primary devices, where
+   swiping is the natural gesture and the arrows would only cover a card. */
+.exec-carousel { position: relative; }
+.exec-nav {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+  width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(26,39,68,0.1);
+  background: var(--white); color: var(--navy); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  transition: background 0.2s, color 0.2s, opacity 0.2s, box-shadow 0.2s;
+}
+.exec-nav svg { width: 20px; height: 20px; }
+.exec-nav:hover { background: var(--navy); color: var(--peach); }
+.exec-nav:disabled { opacity: 0.35; cursor: default; box-shadow: none; }
+.exec-nav:disabled:hover { background: var(--white); color: var(--navy); }
+.exec-nav--prev { left: -8px; }
+.exec-nav--next { right: -8px; }
+@media (hover: none) and (pointer: coarse) { .exec-nav { display: none; } }
+
 .exec-progress {
   position: relative; height: 4px; background: #e5e7eb; border-radius: 4px;
   margin-top: 24px; cursor: pointer;
