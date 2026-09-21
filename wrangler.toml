@@ -35,7 +35,7 @@ binding = "ASSETS"
 # this file looks right — check a URL you KNOW matches a real asset, with
 # cache busting (Cloudflare's edge can cache a page from before a fix lands,
 # which looks identical to the fix not having worked):
-#   curl -sD- -o /dev/null "https://ghpls.fdeleo115.workers.dev/?x=$(date +%s)" \
+#   curl -sD- -o /dev/null "https://ghpls.ca/?x=$(date +%s)" \
 #     | grep -i content-security
 # If that prints nothing, the headers are off — check this key is still
 # inside [assets] before anything else.

@@ -118,6 +118,32 @@ const SECURITY_HEADERS = {
 //
 // These can be deleted once they stop being requested, but they cost nothing.
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// One address for the whole site: https://ghpls.ca
+//
+// The site used to live at ghpls.fdeleo115.workers.dev, and that address is
+// already out in the world — Student Life's link, posters, Instagram. It keeps
+// working, but only as a redirect, and so does www. Two reasons it must be a
+// redirect rather than a second copy of the site:
+//
+//   1. The CMS login. GitHub's OAuth App accepts ONE callback address, now
+//      https://ghpls.ca/api/callback. /admin/ opened on any other host would
+//      send execs through a login that GitHub refuses to complete.
+//   2. Search engines. Two hosts serving identical pages compete with each
+//      other; a 301 tells them which one is real.
+//
+// Only these exact hosts are redirected. localhost, `wrangler dev` and
+// Cloudflare's per-version preview URLs are left alone, so testing still works.
+//
+// The custom domains themselves (ghpls.ca and www.ghpls.ca) are attached in
+// the Cloudflare dashboard: Workers & Pages -> ghpls -> Settings -> Domains &
+// Routes. They are NOT declared in wrangler.toml, so a deploy does not touch
+// them. If you ever move the site to another Cloudflare account, re-add both
+// there by hand.
+// ---------------------------------------------------------------------------
+const CANONICAL_ORIGIN = "https://ghpls.ca";
+const LEGACY_HOSTS = new Set(["ghpls.fdeleo115.workers.dev", "www.ghpls.ca"]);
+
 const REDIRECTS = {
   "/team/mooting-director/": "/team/kate-hilton/",
   "/team/president/": "/team/francesco-deleo/",
@@ -138,8 +164,12 @@ export default {
     const target =
       REDIRECTS[url.pathname] ||
       (url.pathname.endsWith("/") ? null : REDIRECTS[url.pathname + "/"]);
-    if (target) {
-      return Response.redirect(new URL(target, url.origin).toString(), 301);
+    // An old host and an old path are fixed in the same hop, not two.
+    if (target || LEGACY_HOSTS.has(url.hostname)) {
+      const origin = LEGACY_HOSTS.has(url.hostname) ? CANONICAL_ORIGIN : url.origin;
+      const dest = new URL(target || url.pathname, origin);
+      dest.search = url.search;
+      return Response.redirect(dest.toString(), 301);
     }
 
     // The OAuth routes set their own headers — including no-store, which the

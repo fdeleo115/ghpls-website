@@ -7,6 +7,54 @@ _Written: June 2026 · Updated: September 16 2026 · For whoever (human or AI) p
 > cross-references ("see section 0") point within their own pass, not at
 > this one.
 
+## Nineteenth pass, Sept 22 2026 — the site moved to https://ghpls.ca
+
+**The site's address is now `https://ghpls.ca`.** The old
+`ghpls.fdeleo115.workers.dev` still works, but only as a 301 redirect, and so
+does `www.ghpls.ca`. Anything in this document that says `workers.dev` for a
+live URL is historical.
+
+### How the domain is set up — read before touching any of it
+- **Registered with Cloudflare Registrar** in the `Fdeleo115@gmail.com`
+  Cloudflare account (the same account the Worker runs in — a Worker custom
+  domain must be in the same account as its zone). Paid for by the program
+  lead; registrant organisation is "University of Guelph Humber". Auto-renew
+  is ON. **Expires Sep 21 2027** — the card on file must stay valid.
+- **Custom domains are attached in the dashboard, NOT in `wrangler.toml`:**
+  Workers & Pages → ghpls → Settings → Domains & Routes → `ghpls.ca` and
+  `www.ghpls.ca`. A `wrangler deploy` with no `routes` in config leaves them
+  alone. They were deliberately kept out of `wrangler.toml` because declaring
+  them makes every deploy need zone permissions the CI API token may not have
+  — if it doesn't, every CMS publish would silently stop going live.
+- **Handover risk:** the account is personal. Add `ghpls@uoguelph.ca` as a
+  Super Administrator (Manage Account → Members) before the owner graduates.
+
+### What changed in code
+- `src/_data/site.json` `url` → `https://ghpls.ca` (sitemap, robots.txt,
+  canonical and OG tags all follow from this one field).
+- `admin/config.yml` `backend.base_url` → `https://ghpls.ca`.
+- `worker.js`: `CANONICAL_ORIGIN` + `LEGACY_HOSTS`. Only those exact hosts are
+  redirected, so localhost, `wrangler dev` and per-version preview URLs still
+  serve normally. An old host AND an old path (the `REDIRECTS` map) are fixed
+  in one hop, e.g. `workers.dev/team/president/` → `ghpls.ca/team/francesco-deleo/`.
+  Query strings are kept.
+- **The GitHub OAuth App's callback URL must be `https://ghpls.ca/api/callback`.**
+  GitHub accepts exactly one callback host, which is the real reason the old
+  address has to redirect rather than serve a second copy: `/admin/` on any
+  other host would start a login GitHub refuses to finish. `auth.js` and
+  `callback.js` derive their origin from the request, so they needed no change.
+
+### Verified
+Unit-tested the Worker's fetch handler against 9 hosts/paths (old host, www,
+old host + old path, query strings, localhost, preview URL). Built output:
+canonical, `og:url`, sitemap and robots.txt all say `ghpls.ca`, and nothing in
+`_site/` mentions `workers.dev`.
+
+### Still to do
+- Tell Student Life the new link (the draft reply in `../reply-to-student-life.md`
+  still says the old address — it will redirect, but give them the real one).
+- Update the Instagram and LinkedIn bio links.
+
 ## Eighteenth pass, Sept 18 2026 — the exec carousel needed arrows for mouse users
 
 Reported: the rail works well with a trackpad but not with a mouse. Correct —

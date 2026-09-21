@@ -12,7 +12,7 @@ read first.**
 ## Reporting a problem
 
 If you believe you have found a security problem with this site, email the
-Society (the address on the [contact page](https://ghpls.fdeleo115.workers.dev/contact/))
+Society (the address on the [contact page](https://ghpls.ca/contact/))
 with the word **SECURITY** in the subject line. Please describe what you found
 and how to reproduce it, and give us a reasonable chance to fix it before
 sharing it publicly. We are a student club, not a company with a bug bounty —
@@ -90,7 +90,7 @@ the admin panel only and never to a public page.
 > assume:
 >
 > ```
-> curl -sD- -o /dev/null https://ghpls.fdeleo115.workers.dev/ | grep -i content-security
+> curl -sD- -o /dev/null https://ghpls.ca/ | grep -i content-security
 > ```
 >
 > If that prints nothing, the headers are off.
