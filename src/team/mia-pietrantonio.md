@@ -1,6 +1,7 @@
 ---
 name: Mia Pietrantonio
 role: Vice President of Marketing and Social Media
+gradYear: 2027
 bio: >-
   Hey everyone! My name is Mia and I'm in my fourth year of Justice Studies. I'm
   so excited to be starting my new role as Vice President of Marketing & Social
@@ -24,8 +25,8 @@ competitions:
   - competition: Osgoode Cup
     year: 2025
 order: 7
-photo: /assets/uploads/img_7280.jpg
-photoPosition: center
+photo: /assets/uploads/headshot.jpeg
+photoPosition: 55% 22%
 headerPhoto: /assets/uploads/mia-pietrantonio-1.jpg
 headerPhotoPosition: 48% 55%
 extraPhotos:
