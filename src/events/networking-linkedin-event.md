@@ -1,6 +1,6 @@
 ---
 title: Networking LinkedIn Event
-date: 2026-10-14T21:00:00.000Z
+date: 2026-09-30T21:00:00.000Z
 location: ""
 description: With ACE
 rsvp: true
