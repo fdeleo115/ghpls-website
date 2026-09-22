@@ -16,7 +16,42 @@
   <title>{{ metaTitle }} — {{ site.title }}</title>
   <meta name="description" content="{{ metaDesc | striptags | truncate(160) }}">
   <link rel="canonical" href="{{ site.url }}{{ page.url }}">
-  <link rel="icon" href="/assets/logo.jpg" type="image/jpeg">
+  {#- Icons. Google shows the favicon next to the site in search results, and
+     wants a square image in a multiple of 48px — hence the 96 and 192 PNGs
+     rather than the 260px logo JPEG this used to point at. #}
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/assets/icons/favicon-96.png" type="image/png" sizes="96x96">
+  <link rel="icon" href="/assets/icons/favicon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  {%- if page.url == "/" %}
+  {#- Structured data, homepage only. WebSite.alternateName is how Google learns
+     that "GHPLS" is this site's short name (it can show it as the site name
+     above the result); Organization gives it the logo and the official social
+     profiles. JSON-LD is a data block, not a script, so the CSP does not
+     apply to it. Values come from site.json, so they cannot drift. #}
+  <script type="application/ld+json">
+  {{ {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "name": site.title,
+        "alternateName": ["GHPLS", "Guelph Humber Pre-Law Society"],
+        "url": site.url + "/"
+      },
+      {
+        "@type": "Organization",
+        "name": site.title,
+        "alternateName": "GHPLS",
+        "url": site.url + "/",
+        "logo": site.url + "/assets/icons/favicon-192.png",
+        "email": site.email,
+        "sameAs": [site.instagram, site.linkedin]
+      }
+    ]
+  } | dump | safe }}
+  </script>
+  {%- endif %}
 
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="{{ site.title }}">

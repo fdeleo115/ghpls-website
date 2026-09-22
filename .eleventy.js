@@ -405,6 +405,14 @@ module.exports = function (eleventyConfig) {
   // down, which is exactly where assets/fonts/*.woff2 live.
   eleventyConfig.addPassthroughCopy("assets/*.*");
   eleventyConfig.addPassthroughCopy("assets/fonts");
+  // Site icons. favicon.ico and apple-touch-icon.png also go to the site ROOT:
+  // browsers, iOS and Google's favicon crawler all request those exact paths
+  // whether or not the page declares them, and both 404'd before this.
+  // The PNGs are generated from assets/logo.jpg — if the logo changes,
+  // regenerate them (square, white background; sizes are in the filenames).
+  eleventyConfig.addPassthroughCopy("assets/icons");
+  eleventyConfig.addPassthroughCopy({ "assets/icons/favicon.ico": "favicon.ico" });
+  eleventyConfig.addPassthroughCopy({ "assets/icons/apple-touch-icon.png": "apple-touch-icon.png" });
   eleventyConfig.addPassthroughCopy("admin");
   eleventyConfig.addPassthroughCopy("src/styles.css");
   eleventyConfig.addPassthroughCopy("src/robots.txt");
