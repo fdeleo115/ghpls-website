@@ -9,6 +9,9 @@ results:
     recipients: Francesco Deleo & Christabell Zalwango
   - award: Best Skeleton Arguments
     recipients: Francesco Deleo & Christabell Zalwango
+  - award: "Best Speaker "
+    recipients: "Kate Hilton "
+    type: null
 competitors:
   - name: Kate Hilton
   - name: Ava Gonsalves
