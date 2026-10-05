@@ -24,3 +24,4 @@ extraPhotos:
     photoZoom: 1
     image: /assets/uploads/d001e1b1-47ef-4dcb-90d6-1106f440eddb.jpeg
 ---
+Francesco and Christabell traveled to London Ontario and reached the Finals of the Western Cup.
