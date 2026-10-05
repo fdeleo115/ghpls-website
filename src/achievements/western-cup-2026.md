@@ -6,6 +6,9 @@ results:
   - award: Finalists
     recipients: Francesco Deleo & Christabell Zalwango
     type: placement
+competitors:
+  - name: Francesco Deleo
+  - name: Christabell Zalwango
 host: Société de l’Acadie du Nouveau-Brunswick v. Canada (Prime Minister), 2026
   SCC 22
 cardWidth: normal
