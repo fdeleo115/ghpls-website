@@ -117,6 +117,17 @@ const SECURITY_HEADERS = {
 // as two competing pages.
 //
 // These can be deleted once they stop being requested, but they cost nothing.
+//
+// A real page always wins over a redirect. Several old addresses are exactly
+// the address next year's entry will get (highland-cup-2026, humber-cup-2026),
+// and western-cup-2026 already collided: the CMS created the real 2026 page and
+// this map kept bouncing visitors to 2025. So before redirecting, the worker
+// asks the asset store whether that path now exists, and serves it if it does.
+//
+// The redirects also carry a one-day Cache-Control. A bare 301 is cached by
+// browsers indefinitely, which is what made that collision stick for anyone
+// who had clicked it once. A day keeps the redirect cheap without making a
+// mistake in this map permanent.
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 // One address for the whole site: https://ghpls.ca
@@ -152,7 +163,6 @@ const REDIRECTS = {
   "/achievements/highland-cup-2026/": "/achievements/highland-cup-2024/",
   "/achievements/gryphons-cup-2026-1/": "/achievements/gryphons-cup-2025/",
   "/achievements/humber-cup-2026/": "/achievements/humber-cup-2025/",
-  "/achievements/western-cup-2026/": "/achievements/western-cup-2025/",
 };
 
 export default {
@@ -161,15 +171,24 @@ export default {
 
     // Match with and without the trailing slash, so both forms of an old link
     // land in the right place.
-    const target =
+    let target =
       REDIRECTS[url.pathname] ||
       (url.pathname.endsWith("/") ? null : REDIRECTS[url.pathname + "/"]);
+    // A page that exists now beats an old redirect (see the note above REDIRECTS).
+    if (target) {
+      const page = new URL(url.pathname.endsWith("/") ? url.pathname : url.pathname + "/", url.origin);
+      const existing = await env.ASSETS.fetch(new Request(page, { method: "HEAD" }));
+      if (existing.ok) target = null;
+    }
     // An old host and an old path are fixed in the same hop, not two.
     if (target || LEGACY_HOSTS.has(url.hostname)) {
       const origin = LEGACY_HOSTS.has(url.hostname) ? CANONICAL_ORIGIN : url.origin;
       const dest = new URL(target || url.pathname, origin);
       dest.search = url.search;
-      return Response.redirect(dest.toString(), 301);
+      return new Response(null, {
+        status: 301,
+        headers: { Location: dest.toString(), "Cache-Control": "public, max-age=86400" },
+      });
     }
 
     // The OAuth routes set their own headers — including no-store, which the
