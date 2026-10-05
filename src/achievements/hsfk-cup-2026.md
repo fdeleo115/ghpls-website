@@ -21,7 +21,7 @@ competitors:
   - name: Oscar Dominguez
 location: North Ireland
 host: Ulster University
-cardWidth: wide
+cardWidth: normal
 photo: /assets/uploads/e5314168-debe-45e6-916d-613036406c33.jpeg
 photoSize: cover
 photoHeight: tall
