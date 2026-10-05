@@ -9,14 +9,15 @@ results:
 competitors:
   - name: Francesco Deleo
   - name: Christabell Zalwango
-host: Société de l’Acadie du Nouveau-Brunswick v. Canada (Prime Minister), 2026
-  SCC 22
+host: ""
+caseTitle: Société de l’Acadie du Nouveau-Brunswick v. Canada (Prime Minister),
+  2026 SCC 22
 cardWidth: wide
 photo: /assets/uploads/412e4cf8-dad6-4a21-993e-5efa459e6313.jpeg
 photoSize: cover
-photoHeight: medium
+photoHeight: tall
 photoZoom: 1
-photoPosition: 22% 48%
+photoPosition: 25% 52%
 extraPhotos:
   - photoPosition: center
     photoSize: cover
