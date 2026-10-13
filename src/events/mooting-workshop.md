@@ -1,7 +1,8 @@
 ---
-title: Mooting Workshop
+title: First Weekly Practice-Open to everyone
 date: 2026-10-20
-time: "5:00 PM - 7:00 PM"
+time: 5:00 PM - 7:00 PM
 location: UofGH Campus
-description: Learn the fundamentals of oral advocacy and written submissions from experienced mooters.
+description: Learn the fundamentals of oral advocacy and written submissions
+  from experienced mooters.
 ---
