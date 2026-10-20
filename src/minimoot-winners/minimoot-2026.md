@@ -6,7 +6,7 @@ awards:
   - title: Champions
     recipients: Natalie Aceto & Angelica Picado
   - title: Finalists
-    recipients: "Arun Narumathan & Lucas Lafrate "
+    recipients: "Arun Narumathan & Lucas Iafrate "
 photo: /assets/uploads/img_8313.jpeg
 photoSize: cover
 photoZoom: 1
