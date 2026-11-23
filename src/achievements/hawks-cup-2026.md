@@ -29,7 +29,7 @@ caseSummary: Do a trial judge's evidentiary and trial management powers overlap?
 cardWidth: normal
 photo: /assets/uploads/img_0016.jpeg
 photoSize: cover
-photoHeight: tall
+photoHeight: medium
 photoZoom: 1
 photoPosition: 46% 69%
 extraPhotos:
