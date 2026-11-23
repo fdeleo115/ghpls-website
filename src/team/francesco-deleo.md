@@ -34,8 +34,8 @@ competitions:
   - competition: Highland Cup
     year: 2024
 order: 5
-photo: /assets/uploads/img_6433.jpeg
-photoPosition: 37% 0%
+photo: /assets/uploads/img_0255.png
+photoPosition: 93% 20%
 headerPhoto: /assets/uploads/img_5370.jpeg
 headerPhotoPosition: 48% 66%
 extraPhotos:
