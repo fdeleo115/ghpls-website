@@ -12,7 +12,7 @@ competitors:
 host: ""
 caseTitle: Société de l’Acadie du Nouveau-Brunswick v. Canada (Prime Minister),
   2026 SCC 22
-cardWidth: wide
+cardWidth: normal
 photo: /assets/uploads/412e4cf8-dad6-4a21-993e-5efa459e6313.jpeg
 photoSize: cover
 photoHeight: tall
