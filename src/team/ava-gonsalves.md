@@ -18,7 +18,7 @@ qanda:
   - question: Favourite hobby
     answer: Reading
   - question: Favourite TV show
-    answer: The Mentalist
+    answer: Dexter & The Mentalist
   - question: Dream travel destination
     answer: Japan
   - question: Favourite pre-law memory
