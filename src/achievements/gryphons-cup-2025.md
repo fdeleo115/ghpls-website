@@ -12,6 +12,10 @@ competitors:
   - name: Christabell Zalwango
   - name: Kate Hilton
   - name: Ava Gonsalves
+  - name: Angelina Azar El-Hajj
+  - name: Ashon Vaz
+  - name: Oscar Dominguez
+  - name: Emily
 host: Guelph University
 caseTitle: R. v. Charles
 photo: /assets/uploads/1f6189da-ba5b-4dcb-b5d3-1d636253768b.jpeg
