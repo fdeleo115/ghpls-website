@@ -10,6 +10,7 @@ competitors:
   - name: Christabell Zalwango
 location: Gowling WLG Moot Court
 host: Undergraduate Mock Trial and Moot Court Society of the University of Ottawa
+caseTitle: R. v. McColman
 photo: /assets/uploads/img_5370.jpeg
 photoSize: cover
 photoHeight: tall
