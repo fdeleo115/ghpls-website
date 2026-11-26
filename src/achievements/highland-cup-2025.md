@@ -9,6 +9,7 @@ competitors:
   - name: Francesco Deleo
   - name: Christabell Zalwango
 host: UofT Scarborough
+caseTitle: R. v. Underwood
 cardWidth: normal
 photo: /assets/uploads/dd3731a4-1ccd-412b-8186-e155c1bbbd4a.jpeg
 photoSize: cover
