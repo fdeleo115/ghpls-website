@@ -19,6 +19,7 @@ competitors:
   - name: Angelina Azar El-Hajj
   - name: Tala Taha
   - name: Ava Gonzalves
+  - name: Charlie Stewart
 host: Western University
 caseTitle: R. v. Lafrance
 cardWidth: normal
