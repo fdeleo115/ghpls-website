@@ -13,6 +13,7 @@ competitors:
   - name: Oscar Dominguez
   - name: Owen Logtenberg-Warford
 host: UofT Scarborough
+caseTitle: R. v. Lozada
 photo: /assets/uploads/img_7286.jpg
 photoSize: cover
 photoHeight: tall
