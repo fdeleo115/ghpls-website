@@ -8,6 +8,10 @@ results:
 competitors:
   - name: Francesco Deleo
   - name: Christabell Zalwango
+  - name: Angelina Azar El-Hajj
+  - name: Charlie Stewart
+  - name: Julian Domladovac
+  - name: Muhammad Ali
 location: Gowling WLG Moot Court
 host: Undergraduate Mock Trial and Moot Court Society of the University of Ottawa
 caseTitle: R. v. McColman
