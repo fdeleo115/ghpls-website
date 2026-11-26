@@ -13,6 +13,12 @@ competitors:
   - name: Ashon Vaz
   - name: Oscar Dominguez
   - name: Kate Hilton
+  - name: Francesco Deleo
+  - name: Christabell Zalwango
+  - name: Maya Denis
+  - name: Angelina Azar El-Hajj
+  - name: Tala Taha
+  - name: Ava Gonzalves
 host: Western University
 caseTitle: R. v. Lafrance
 cardWidth: normal
