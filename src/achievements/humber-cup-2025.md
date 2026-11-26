@@ -12,6 +12,8 @@ results:
 competitors:
   - name: Francesco Deleo
   - name: Christabell Zalwango
+host: Humber College
+caseTitle: R. v. Burke-Whittaker
 photo: /assets/uploads/be553b90-4d56-48f5-96c1-bd3be9b3ad2c.jpeg
 photoSize: cover
 photoHeight: tall
