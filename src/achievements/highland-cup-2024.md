@@ -12,6 +12,10 @@ competitors:
   - name: Christabell Zalwango
   - name: Oscar Dominguez
   - name: Owen Logtenberg-Warford
+  - name: Ahon Vaz
+  - name: Tala Taha
+  - name: Angelina Azar El-Hajj
+  - name: Louis
 host: UofT Scarborough
 caseTitle: R. v. Lozada
 photo: /assets/uploads/img_7286.jpg
