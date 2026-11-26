@@ -12,6 +12,7 @@ competitors:
   - name: Christabell Zalwango
   - name: Oscar Dominguez
   - name: Owen Logtenberg-Warford
+host: UofT Scarborough
 photo: /assets/uploads/img_7286.jpg
 photoSize: cover
 photoHeight: tall
