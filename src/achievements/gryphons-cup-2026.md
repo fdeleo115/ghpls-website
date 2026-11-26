@@ -8,6 +8,10 @@ results:
 competitors:
   - name: Kate Hilton
   - name: Ava Gonsalves
+  - name: Tala Taha
+  - name: Maya Denis
+  - name: Natalie Aceto
+  - name: Angelica
 photo: /assets/uploads/img_7283.jpg
 photoHeight: tall
 photoPosition: 51% 10%
