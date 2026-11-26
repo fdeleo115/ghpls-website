@@ -13,6 +13,8 @@ competitors:
   - name: Ashon Vaz
   - name: Oscar Dominguez
   - name: Kate Hilton
+host: Western University
+caseTitle: R. v. Lafrance
 cardWidth: normal
 photo: /assets/uploads/img_7285.jpg
 photoHeight: tall
